@@ -6,10 +6,10 @@
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>Ofte stilte spørsmål – DocrAI</title>
-<meta name="description" content="Svar på de vanligste spørsmålene om DocrAI: ansvar og godkjenning, personvern og EØS, pris, offline-bruk og deling av rapporter." />
+<meta name="description" content="Svar på de vanligste spørsmålene om DocrAI: ansvar og godkjenning, personvern og hvor dataene behandles, pris, offline-bruk og deling av rapporter." />
 <link rel="canonical" href="/faq" />
 <meta property="og:title" content="Ofte stilte spørsmål – DocrAI" />
-<meta property="og:description" content="Svar på de vanligste spørsmålene om DocrAI: ansvar og godkjenning, personvern og EØS, pris, offline-bruk og deling av rapporter." />
+<meta property="og:description" content="Svar på de vanligste spørsmålene om DocrAI: ansvar og godkjenning, personvern og hvor dataene behandles, pris, offline-bruk og deling av rapporter." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
@@ -48,15 +48,17 @@
     <p>Alltid takstpersonen. AI-en lager et utkast med foreslått årsak og klassifisering, men
     rapporten er merket «AI-utkast – ikke godkjent» til du aktivt godkjenner den med navn og
     tidspunkt. Delingslenker kan ikke lages før stempelet er satt – det håndheves av serveren,
-    ikke bare av appen. Endrer du noe etterpå, faller godkjenningen og må settes på nytt.</p>
+    ikke bare av appen. Endrer du rapportteksten etterpå, faller godkjenningen og må settes på
+    nytt. Bevis og notater du legger til etter godkjenning er ikke dekket av stempelet – godkjenn
+    på nytt hvis de skal med i den delte rapporten.</p>
   </details>
 
   <details>
     <summary>Hvor lagres dataene, og hva med personvern?</summary>
-    <p>Prosjektdata lagres kryptert i transit og med tilgangskode per bruker. Befaringsmedia kan
-    inneholde personopplysninger, og før pilot med ekte skadesaker flyttes all AI-prosessering til
-    EU/EØS-region med databehandleravtale. Demosidene bruker ingen cookies og lagrer aldri IP –
-    se <a href="/personvern">personvernerklæringen</a>.</p>
+    <p>Prosjektdata lagres bak tilgangskode per bruker og går over HTTPS. AI-prosessering og
+    rapportdokument skjer hos Google (Gemini, Docs/Drive); databehandleravtale og EU/EØS-region
+    er ikke på plass ennå, og vi sier det som det er. Demosidene bruker ingen cookies og skriver
+    aldri IP til databasen – se <a href="/personvern">personvernerklæringen</a>.</p>
   </details>
 
   <details>
@@ -68,16 +70,16 @@
 
   <details>
     <summary>Fungerer appen uten dekning – i kjelleren?</summary>
-    <p>Ja. Alt du fanger (video, lyd, foto, notater) lagres lokalt på enheten først og
-    synkroniseres automatisk når dekningen er tilbake. Du mister aldri en befaring på grunn av
-    dårlig nett.</p>
+    <p>Ja. Alt du fanger (video, lyd, foto, notater) lagres lokalt på enheten først, og sendes
+    til serveren neste gang du åpner appen eller saken med dekning – eller trykker synk. Du
+    mister ikke en befaring på grunn av dårlig nett.</p>
   </details>
 
   <details>
     <summary>Hvordan mottar forsikringsselskapet rapporten?</summary>
     <p>Som en PIN-beskyttet lenke som åpnes uten konto. Mottakeren ser den godkjente rapporten
     med årsak, klassifisering og bevis der hvert element bærer geo, tidspunkt og
-    SHA-256-sjekksum – og kan verifisere at ingenting er endret siden fangst. Lenken har
+    SHA-256-sjekksum satt ved opplasting – og kan verifisere at ingenting er endret siden. Lenken har
     utløpsdato og kan trekkes tilbake.</p>
   </details>
 
@@ -95,11 +97,11 @@
     { "@type": "Question", "name": "Hvem står ansvarlig for rapporten – AI-en eller takstpersonen?",
       "acceptedAnswer": { "@type": "Answer", "text": "Alltid takstpersonen. AI-en lager et utkast, men rapporten må aktivt godkjennes med navn og tidspunkt før den kan deles – håndhevet av serveren." } },
     { "@type": "Question", "name": "Hvor lagres dataene, og hva med personvern?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Prosjektdata lagres med tilgangskode per bruker; før pilot flyttes AI-prosessering til EU/EØS med databehandleravtale. Demosidene bruker ingen cookies og lagrer aldri IP." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Prosjektdata lagres bak tilgangskode per bruker. AI-prosessering og rapportdokument skjer hos Google; databehandleravtale og EU/EØS-region er ikke på plass ennå. Demosidene bruker ingen cookies og skriver aldri IP til databasen." } },
     { "@type": "Question", "name": "Hva koster DocrAI?",
       "acceptedAnswer": { "@type": "Answer", "text": "Pilot: gratis i 3 måneder. Veiledende 990 kr/mnd per takstperson uten binding – endelig prising settes med pilotene." } },
     { "@type": "Question", "name": "Fungerer appen uten dekning?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Ja – alt lagres lokalt først og synkroniseres når dekningen er tilbake." } },
+      "acceptedAnswer": { "@type": "Answer", "text": "Ja – alt lagres lokalt først og sendes til serveren neste gang appen eller saken åpnes med dekning, eller ved manuell synk." } },
     { "@type": "Question", "name": "Hvordan mottar forsikringsselskapet rapporten?",
       "acceptedAnswer": { "@type": "Answer", "text": "Som PIN-beskyttet lenke uten konto, med utløpsdato, der bevisene kan verifiseres mot SHA-256-sjekksummer." } }
   ]
