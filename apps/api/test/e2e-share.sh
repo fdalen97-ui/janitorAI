@@ -222,6 +222,13 @@ INS=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1
    RETURNING prompt_version || ':' || citations_proposed || '/' || citations_verified || '/' || citations_rejected" 2>&1)
 check "report_generations: 8-column insert (prompt_version + citations)" "e2e-v0:3/2/1" "$INS"
 
+# ── Cookiefri besøkstelling: allowlistet sti telles, ukjent sti ignoreres ───
+curl -s -o /dev/null -X POST "$BASE/api/besok" -H 'Content-Type: application/json' -d '{"sti":"/kontakt","kilde":"e2e"}'
+curl -s -o /dev/null -X POST "$BASE/api/besok" -H 'Content-Type: application/json' -d '{"sti":"/finnes-ikke"}'
+BESOK=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -tA -c \
+  "SELECT sti || ':' || coalesce(kilde,'-') FROM sidevisninger ORDER BY id" 2>&1 | tr '\n' ' ')
+check "besok: /kontakt telles med kilde, ukjent sti ignoreres" "/kontakt:e2e " "$BESOK"
+
 # ── Share page shell ─────────────────────────────────────────────────────────
 PAGE=$(curl -s "$BASE/share/$SHARE_ID")
 check "share page served" "true" "$(echo "$PAGE" | grep -q 'PIN-koden' && echo true)"
