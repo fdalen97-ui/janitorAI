@@ -11,6 +11,8 @@ const { generalLimiter, heavyLimiter } = require("./middleware/rateLimiters");
 const requestLogger = require("./middleware/requestLogger");
 
 const { getPool, isDbEnabled } = require("./db");
+const { publicBase, apiBase, absolutizeSeo, sitemapXml } = require("./publicBase");
+const { signedMediaUrl } = require("./mediaSign");
 const { extractGeminiUsage, recordCost } = require("./costTracking");
 const {
   generateReport: generateReportService,
@@ -22,6 +24,54 @@ const { startReplayWorker } = require("./replayWorker");
 const app = express();
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3000;
+
+// ---------- SIKKERHETS-HEADERE (OWASP: Security Misconfiguration) ----------
+// Nøkterne, alltid-trygge headere på alt: hindrer MIME-sniffing, clickjacking
+// og referrer-lekkasje. (CSP holdes utenfor her fordi de statiske HTML-sidene
+// bruker inline-script; kan legges på per-side senere.) Montert FØRST, så
+// også CORS-preflight og 400 fra body-parseren bærer headerne.
+//
+// X-Robots-Tag (S22): konfidensielle flater — delte rapporter, API, admin,
+// interne presentasjoner — skal aldri indekseres. robots.txt disallower de
+// samme prefiksene, så dette er forsvar i dybden mot crawlere som ignorerer
+// robots.txt, ikke tilgangskontroll (PIN + visningstoken verner). Segment-
+// match: «/share» treffer /share og /share/…, ikke /share-info. Express ruter
+// case-ufølsomt, så stien lowercases før match (/ADMIN-DASHBOARD). Legg ALDRI
+// en salgsside under et av disse prefiksene.
+const NOINDEX_PREFIXES = ["/share", "/api", "/admin-dashboard", "/presentation"];
+const noindexPath = (p) => {
+  const lower = String(p || "").toLowerCase();
+  return NOINDEX_PREFIXES.some((pre) => lower === pre || lower.startsWith(pre + "/"));
+};
+
+// HSTS (S22): kun max-age, aldri preload/includeSubDomains. Trapp 300 → 86400
+// → 31536000 styres av HSTS_MAX_AGE (docs/RENDER_SETUP.md). Settes bare når
+// forespørselen kom over TLS (req.secure = X-Forwarded-Proto bak trust proxy).
+// Tak på to år (63072000): større tall gir enten avrunding (> 2^53) eller
+// «max-age=1e+21», som ikke er 1*DIGIT (RFC 6797 §6.1.1) — nettleseren
+// forkaster da hele headeren stille. Ugyldig verdi skal alltid logges.
+const HSTS_MAX_AGE_CAP = 63072000;
+function parseHstsMaxAge(raw) {
+  if (raw == null || String(raw).trim() === "") return 0;
+  const s = String(raw).trim();
+  if (!/^\d{1,10}$/.test(s) || Number(s) > HSTS_MAX_AGE_CAP) {
+    console.error(`HSTS_MAX_AGE er ugyldig (${JSON.stringify(raw)}; heltall 0–${HSTS_MAX_AGE_CAP}) — HSTS av`);
+    return 0;
+  }
+  return Number(s);
+}
+const HSTS_MAX_AGE = parseHstsMaxAge(process.env.HSTS_MAX_AGE);
+
+app.use((req, res, next) => {
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("X-Frame-Options", "SAMEORIGIN");
+  res.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  if (noindexPath(req.path)) res.set("X-Robots-Tag", "noindex, nofollow");
+  if (HSTS_MAX_AGE > 0 && req.secure) {
+    res.set("Strict-Transport-Security", `max-age=${HSTS_MAX_AGE}`);
+  }
+  next();
+});
 
 // CORS (S12): standard er åpen (auth er header-token, ikke cookies, så det er
 // ingen credentialed CSRF). Sett CORS_ORIGINS=komma,separert,liste i produksjon
@@ -49,17 +99,6 @@ app.use(
 // store befaringer med mange notater, og hindrer at en klient dytter inn
 // vilkårlig store payloads.
 app.use(express.json({ limit: "300kb" }));
-
-// ---------- SIKKERHETS-HEADERE (OWASP: Security Misconfiguration) ----------
-// Nøkterne, alltid-trygge headere på alt: hindrer MIME-sniffing, clickjacking
-// og referrer-lekkasje. (CSP holdes utenfor her fordi de statiske HTML-sidene
-// bruker inline-script; kan legges på per-side senere.)
-app.use((req, res, next) => {
-  res.set("X-Content-Type-Options", "nosniff");
-  res.set("X-Frame-Options", "SAMEORIGIN");
-  res.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  next();
-});
 
 // ---------- REQUEST LOGGER ----------
 // Minimal request logging (method, path, status, latency only)
@@ -133,12 +172,13 @@ const API_PATHS = new Set([
   "/describe-image",
 ]);
 // ---------- ADMIN DASHBOARD (public HTML shell, API calls carry the secret) --
-// Inject the server's own API_BASE_URL so the dashboard can warn when its
-// configured target differs from the URL the app itself uses.
+// Inject the server's own API base so the dashboard can warn when its
+// configured target differs from the URL the app itself uses. Via apiBase():
+// validert og normalisert (BASE_RE tillater bare [a-z0-9.:/-]), så verdien er
+// trygg inne i JS-strenglitteralen i admin-dashboard.html — rå env var det ikke.
 app.get("/admin-dashboard", (req, res) => {
   const htmlPath = path.join(__dirname, "admin-dashboard.html");
-  const appApiBase =
-    process.env.API_BASE_URL || "https://janitorai-backend.onrender.com";
+  const appApiBase = apiBase(req);
   try {
     let html = fs.readFileSync(htmlPath, "utf8");
     // Replace all occurrences of placeholder with the actual app API base URL
@@ -154,28 +194,10 @@ app.get("/presentation", (req, res) => {
   res.sendFile(path.join(__dirname, "../../../presentation/index.html"));
 });
 
-// Basis-URL for absolutte SEO-lenker: PUBLIC_BASE_URL i drift, ellers request-
-// origin (robust uansett hvilket domene som serverer).
-function publicBase(req) {
-  return process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
-}
-
-// Absolutiser SEO-URL-er kirurgisk (OG-protokollen og Googles rich-results krever
-// absolutte URL-er): kun og:image, canonical og JSON-LD item/url/logo — aldri
-// body-lenker. Injiser og:url. Mønstrene forekommer bare i <head>/ld+json.
-function absolutizeSeo(html, base, routePath) {
-  html = html
-    .replace(/(<meta property="og:image" content=")(\/[^"]*)(")/g, `$1${base}$2$3`)
-    .replace(/(<link rel="canonical" href=")(\/[^"]*)(")/g, `$1${base}$2$3`)
-    .replace(/("(?:item|url|logo)":")(\/[^"]*)(")/g, `$1${base}$2$3`);
-  if (routePath && !/property="og:url"/.test(html) && /<meta property="og:image"/.test(html)) {
-    html = html.replace(
-      /(<meta property="og:image"[^>]*>\n?)/,
-      `$1<meta property="og:url" content="${base}${routePath}" />\n`
-    );
-  }
-  return html;
-}
+// Basis-URL for absolutte SEO-lenker: publicBase() i ./publicBase.js — validert
+// env, ellers allowlistet vert, ellers fast fallback. Aldri rå Host (S20).
+// absolutizeSeo() og sitemapXml() ligger samme sted, så sink-escapingen kan
+// enhetstestes uten å starte serveren.
 
 // Server en offentlig salgsside med absolutte SEO-URL-er.
 function sendPublicPage(req, res, filename, routePath) {
@@ -262,19 +284,9 @@ app.get("/takk", (req, res) => {
 });
 app.get("/vilkar", (req, res) => sendPublicPage(req, res, "vilkar-page.html", "/vilkar"));
 app.get("/robots.txt", require("./routes/publikum").robotsHandler);
-// Sitemap (SEO): kun de offentlige, indekserbare salgssidene.
+// Sitemap (SEO): kun de offentlige, indekserbare salgssidene (publicBase.js).
 app.get("/sitemap.xml", (req, res) => {
-  const base =
-    process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
-  const paths = ["/om", "/demo", "/faq", "/personvern", "/vilkar", "/kontakt", "/kundereisen"];
-  const urls = paths
-    .map((p) => `  <url><loc>${base}${p}</loc></url>`)
-    .join("\n");
-  res
-    .type("application/xml")
-    .send(
-      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`
-    );
+  res.type("application/xml").send(sitemapXml(publicBase(req)));
 });
 app.get("/og-bilde.png", (req, res) => {
   res.sendFile(path.join(__dirname, "assets/og-bilde.png"));
@@ -301,6 +313,28 @@ function sendNotFound(req, res) {
   }
   res.status(404).json({ error: "Not found" });
 }
+
+// ---------- /.well-known (public: security.txt; resten 404, aldri 401) -----
+// Montert FØR SPA-fallbacken og merkevare-404: begge svarer på Accept:
+// text/html, og en nettleser/skanner som åpner security.txt skal få fila,
+// ikke webappen. Routeren sender aldri next(), så filer web-eksporten legger
+// under STATIC_DIR/.well-known/ (App Links: assetlinks.json,
+// apple-app-site-association) serveres eksplisitt foran den.
+const WELL_KNOWN_STATIC = path.join(STATIC_DIR, ".well-known");
+if (fs.existsSync(WELL_KNOWN_STATIC)) {
+  app.use(
+    "/.well-known",
+    express.static(WELL_KNOWN_STATIC, {
+      fallthrough: true,
+      index: false,
+      // Apple krever application/json på fila uten endelse.
+      setHeaders: (res, filePath) => {
+        if (path.basename(filePath) === "apple-app-site-association") res.type("application/json");
+      },
+    })
+  );
+}
+app.use("/.well-known", require("./routes/wellKnown"));
 
 if (fs.existsSync(STATIC_DIR)) {
   app.use(express.static(STATIC_DIR, { extensions: ["html"] }));
@@ -643,9 +677,10 @@ app.post("/report/google-doc", heavyLimiter, async (req, res) => {
     // When supplied, build a short-lived URL the AI engine can use to download
     // the video directly from this API server's media storage. A report may
     // instead be generated from notes, transcriptions, photos, and metadata.
-    const apiBaseUrl =
-      process.env.API_BASE_URL ||
-      `${req.protocol}://${req.get("host")}`;
+    // S20: aldri rå Host her — en tester kunne ellers få motoren til å hente
+    // fra vilkårlig vert med gyldig signatur. apiBase = API_BASE_URL,
+    // ellers allowlistet vert, ellers fast fallback.
+    const apiBaseUrl = apiBase(req);
     const videoUrl =
       video_filename && video_filename !== "demo"
         ? signedMediaUrl(apiBaseUrl, video_filename, REPORT_MEDIA_URL_TTL_MS)

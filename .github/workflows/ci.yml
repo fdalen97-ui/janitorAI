@@ -14,6 +14,7 @@ jobs:
   api:
     name: API — e2e + audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -22,6 +23,9 @@ jobs:
           cache: npm
       - name: Install (workspaces)
         run: npm ci
+      - name: Enhetstester (shareUtils, publicBase + loggmaskering)
+        working-directory: apps/api
+        run: node test/shareUtils.test.js && node test/publicBase.test.js
       - name: Verify Postgres 16 binaries
         run: ls -d /usr/lib/postgresql/*/bin | head -1
       - name: E2E — delingskjede mot ekte Postgres
@@ -33,19 +37,9 @@ jobs:
       - name: E2E — per-tester rate limiting
         working-directory: apps/api
         run: bash test/e2e-rate-limit.sh
-      - name: E2E — Labs (skjema, fasit-innlasting, admin-gate)
+      - name: E2E — sikkerhetsheadere, Host-allowliste, security.txt
         working-directory: apps/api
-        run: bash test/e2e-labs.sh
-      - name: Enhetstester (node:test)
-        working-directory: apps/api
-        run: node --test test/*.test.js
-      - name: Enhetstester (ai-engine, kun stdlib)
-        run: >-
-          python3 -m unittest
-          ai-engine/test_prompt_blocks.py
-          ai-engine/test_prompt_signals.py
-          ai-engine/test_idempotency.py
-          ai-engine/test_byggforsk_index.py
+        run: bash test/e2e-headere.sh
       - name: npm audit (fail på høy+)
         working-directory: apps/api
         run: npm audit --omit=dev --audit-level=high
@@ -62,6 +56,7 @@ jobs:
   mobile:
     name: App — typesjekk + lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

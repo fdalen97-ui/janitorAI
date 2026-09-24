@@ -4,6 +4,7 @@
 
 const express = require("express");
 const { getPool, requireDb } = require("../db");
+const { publicBase, stripCrlf } = require("../publicBase");
 
 const router = express.Router();
 
@@ -62,10 +63,14 @@ const ROBOTS = [
   "",
 ];
 
+// S20: aldri rå Host; CR/LF strippes så basen ikke kan bli en ekstra linje.
+// Egen funksjon så enhetstesten kan sjekke sinken uten å starte serveren.
+function robotsBody(base) {
+  return ROBOTS.concat(`Sitemap: ${stripCrlf(base)}/sitemap.xml`, "").join("\n");
+}
+
 function robotsHandler(req, res) {
-  const base =
-    process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get("host")}`;
-  res.type("text/plain").send(ROBOTS.concat(`Sitemap: ${base}/sitemap.xml`, "").join("\n"));
+  res.type("text/plain").send(robotsBody(publicBase(req)));
 }
 
 // ── Pilotinteresse (POST /api/pilot-interesse) ───────────────────────────────
@@ -101,7 +106,8 @@ router.post("/pilot-interesse", requireDb, express.urlencoded({ extended: false 
 
 // ── Cookiefri besøkstelling (POST /api/besok) ────────────────────────────────
 // Kun forhåndsgodkjente stier telles; ingen IP, ingen bruker-ID.
-const TELLBARE_STIER = new Set(["/om", "/demo", "/faq", "/personvern", "/vilkar", "/takk"]);
+// /kontakt sender beacon (kontakt-page.html) men manglet her — ble aldri telt.
+const TELLBARE_STIER = new Set(["/om", "/demo", "/faq", "/personvern", "/vilkar", "/takk", "/kontakt"]);
 
 router.post("/besok", requireDb, express.json({ limit: "1kb" }), async (req, res) => {
   if (limited(req, 120)) return res.status(204).end();
@@ -120,3 +126,4 @@ router.post("/besok", requireDb, express.json({ limit: "1kb" }), async (req, res
 
 module.exports = router;
 module.exports.robotsHandler = robotsHandler;
+module.exports.robotsBody = robotsBody;

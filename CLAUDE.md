@@ -41,8 +41,10 @@ ikke får verdi uten den — ikke på gründer-entusiasme. (Kilde: `inkorporerin
 `avklaringer-og-roller.md`.)
 
 ## Test & verifisering
-- E2E delingskjede: `cd apps/api && bash test/e2e-share.sh` (~31 sjekker).
+- E2E delingskjede: `cd apps/api && bash test/e2e-share.sh` (~47 sjekker).
 - E2E tenant-isolasjon: `cd apps/api && bash test/e2e-tenant-isolation.sh`.
+- E2E headere/Host-allowliste/security.txt (uten DB): `cd apps/api && bash test/e2e-headere.sh`.
+- Enhetstester (uten DB): `cd apps/api && node test/shareUtils.test.js && node test/publicBase.test.js`.
 - Typesjekk app: `cd apps/mobile && npx tsc --noEmit`.
 - AI-motor: `python3 -m py_compile ai-engine/main.py ai-engine/server.py`.
 - WER på feltlyd: `python3 ai-engine/wer_benchmark.py --selftest`; full kjøring
@@ -60,6 +62,9 @@ ikke får verdi uten den — ikke på gründer-entusiasme. (Kilde: `inkorporerin
    før første bruker.
 4. **Steelman konkurrentene.** Argumentér for hvorfor Befar/Wenn vinner — så svar.
 5. **Oppdater `docs/` og denne fila** når arkitektur/scope endres.
+6. **Ingen setning publiseres før den kan belegges** med en kodelinje eller en
+   signert avtale. Gjelder personvern, vilkår og salgsflater (S21: teksten lovet
+   sletting og EU-region koden ikke hadde).
 
 ## Beslutningskommandoer (`.claude/commands/`)
 Delte slash-kommandoer for de disiplinene playbooken krever — bruk dem før

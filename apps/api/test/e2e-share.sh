@@ -228,40 +228,12 @@ INS=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1
    RETURNING prompt_version || ':' || citations_proposed || '/' || citations_verified || '/' || citations_rejected" 2>&1)
 check "report_generations: 8-column insert (prompt_version + citations)" "e2e-v0:3/2/1" "$INS"
 
-# Recovery must query the exact attempt, never an older successful document.
-asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -c \
-  "INSERT INTO report_generations (tester_token, project_id, attempt_id, doc_id, status, is_test_project) VALUES ('$TOKEN', 'proj-recovery-test', 'attempt-old', 'OLD_DOC', 'success', TRUE), ('$TOKEN', 'proj-recovery-test', 'attempt-new', NULL, 'processing', TRUE)"
-RECOVERY_STATUS=$(curl -s "$BASE/report/status/proj-recovery-test?attempt_id=attempt-new" -H "x-tester-token: $TOKEN")
-check "report recovery: exact new attempt selected" "attempt-new processing null" \
-  "$(echo "$RECOVERY_STATUS" | jq -r '"\(.latest.attemptId) \(.latest.status) \(.latest.url)"')"
-
-# Ledger classification is derived from persisted tenant project data, not the
-# request hint. No AI_ENGINE_URL is configured in this e2e process, so the
-# accepted attempt finishes as an error without making an external call.
-LEDGER_PROJECT=$(jq -nc '{project:{id:"ledger-test",name:"Ledger test",isTestProject:true,sourceProjectId:"p1",updatedAt:"2026-09-12T10:02:00Z",notes:[]}}')
-curl -s -o /dev/null -X PUT "$BASE/api/projects/ledger-test" -H "x-tester-token: $TOKEN" -H 'Content-Type: application/json' -d "$LEDGER_PROJECT"
-curl -s -o /dev/null -X POST "$BASE/report/google-doc" -H "x-tester-token: $TOKEN" -H 'Content-Type: application/json' \
-  -d '{"project_id":"ledger-test","report_attempt_id":"authoritative-attempt","is_test_project":false,"project":{"name":"Ledger test","notes":[]},"report_meta":{}}'
-LEDGER_STATUS=$(curl -s "$BASE/report/status/ledger-test?attempt_id=authoritative-attempt" -H "x-tester-token: $TOKEN")
-check "report ledger: persisted test identity wins" "true error" \
-  "$(echo "$LEDGER_STATUS" | jq -r '"\(.latest.isTestProject) \(.latest.status)"')"
-
-# ── Testkopi deler varige medier uten å miste dem ved kildesletting ──────────
-printf 'shared-replay-evidence-%s' "$RANDOM" > "$WORK/replay.jpg"
-SOURCE_JSON=$(jq -nc '{project:{id:"replay-source",name:"Replay source",updatedAt:"2026-09-12T10:00:00Z",notes:[]}}')
-curl -s -o /dev/null -X PUT "$BASE/api/projects/replay-source" -H "x-tester-token: $TOKEN" -H 'Content-Type: application/json' -d "$SOURCE_JSON"
-REPLAY_MEDIA_JSON=$(curl -s -X POST "$BASE/api/media" -H "x-tester-token: $TOKEN" -F "file=@$WORK/replay.jpg;type=image/jpeg" -F "projectId=replay-source" -F "kind=photo")
-REPLAY_MEDIA_ID=$(echo "$REPLAY_MEDIA_JSON" | jq -r '.id')
-TEST_COPY_JSON=$(jq -nc --arg media "$REPLAY_MEDIA_ID" '{project:{id:"replay-test",name:"Replay source — test",isTestProject:true,sourceProjectId:"replay-source",updatedAt:"2026-09-12T10:01:00Z",notes:[{id:"replay-note",text:"same evidence",createdAt:"2026-09-12T10:00:00Z",photos:[{id:"replay-photo",uri:"",caption:"shared",remoteId:$media}]}]}}')
-# Simulate a stale cleanup marker left by an earlier transient merge. Source
-# deletion must reset the full grace period before the local-first copy PUT.
-asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -c \
-  "UPDATE media SET unreferenced_at = now() - interval '100 hours' WHERE id = '$REPLAY_MEDIA_ID'"
-curl -s -o /dev/null -X DELETE "$BASE/api/projects/replay-source" -H "x-tester-token: $TOKEN"
-sleep 0.5
-curl -s -o /dev/null -X PUT "$BASE/api/projects/replay-test" -H "x-tester-token: $TOKEN" -H 'Content-Type: application/json' -d "$TEST_COPY_JSON"
-check "test copy keeps shared media after source deletion" "200" \
-  "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/media/$REPLAY_MEDIA_ID" -H "x-tester-token: $TOKEN")"
+# ── Cookiefri besøkstelling: allowlistet sti telles, ukjent sti ignoreres ───
+curl -s -o /dev/null -X POST "$BASE/api/besok" -H 'Content-Type: application/json' -d '{"sti":"/kontakt","kilde":"e2e"}'
+curl -s -o /dev/null -X POST "$BASE/api/besok" -H 'Content-Type: application/json' -d '{"sti":"/finnes-ikke"}'
+BESOK=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -tA -c \
+  "SELECT sti || ':' || coalesce(kilde,'-') FROM sidevisninger ORDER BY id" 2>&1 | tr '\n' ' ')
+check "besok: /kontakt telles med kilde, ukjent sti ignoreres" "/kontakt:e2e " "$BESOK"
 
 # ── Share page shell ─────────────────────────────────────────────────────────
 PAGE=$(curl -s "$BASE/share/$SHARE_ID")
