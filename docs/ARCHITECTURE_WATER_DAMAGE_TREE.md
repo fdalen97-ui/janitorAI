@@ -241,21 +241,23 @@ bygges før spørretre v2 er levert og validert av eksperten, og trinn
 - `python3 -m py_compile ai-engine/main.py ai-engine/server.py` som
   eksisterende sanity-sjekk (CLAUDE.md).
 
-### Steg 4 — Nedstrøms kobling (egen, separat validert oppfølging)
+### Steg 4 — Nedstrøms kobling
 
-Kun etter at steg 3 er bestått, og som en egen endring (ikke i samme commit
-som prompt/skjema-endringen):
+Koblingen er nå implementert og har focused regression coverage:
 
-- `apps/api/src/routes/share.js:101-103` — legg nye felt til
-  `CONTENT_FIELDS`-whitelisten hvis de skal nå mottakeren.
-- `apps/mobile/src/features/projects/reportVersions.ts` —
-  `contentFromAnalysis()` må mappe de nye snake_case-feltene til camelCase.
-- `apps/mobile/src/features/projects/types.ts` — utvid `ReportContent` og
-  `REPORT_CONTENT_FIELDS`.
+- `apps/api/src/routes/share.js` — `sourceCategory` og `acuteOrGradual` er
+  med i mottakerens whitelist og felt-diff.
+- `apps/mobile/src/features/projects/reportVersions.ts` — de nye
+  snake_case-feltene mappes til camelCase og følger draft/final-versjonen.
+- `apps/mobile/src/features/projects/types.ts` — `ReportContent` og
+  `REPORT_CONTENT_FIELDS` inneholder begge feltene.
+- `ai-engine/main.py` — Google Doc-malen kan bruke
+  `{{damage.cause.source_category}}` og
+  `{{damage.cause.acute_or_gradual}}` (samt korte alias uten `.cause`).
 
-Dette er nøyaktig trinn (b) i `docs/produktdesign-aarsaksbildet.md` og bør
-følge samme regel som resten av byggerekkefølgen der: ikke bygg før forrige
-steg er validert med eksperten.
+Dette er trinn (b) i `docs/produktdesign-aarsaksbildet.md`. Det gjør feltene
+tilgjengelige for videre produktflater uten å innføre en deterministisk
+diagnosemotor eller omgå takstpersonens godkjenning.
 
 ### Steg 5 — Eksplisitt utsatt
 
@@ -267,14 +269,12 @@ steg er validert med eksperten.
 
 ## 6. Verifisering av denne endringen
 
-Dette dokumentet er isolert dokumentasjon — ingen kode er endret. Når
-Steg 0-3 over faktisk implementeres i en senere økt, gjelder disse
-sjekkene (fra CLAUDE.md):
+Følgende sjekker gjelder for den implementerte koblingen:
 
 - `python3 -m py_compile ai-engine/main.py ai-engine/server.py`
 - Full kjøring av `docs/valideringscaser.md`s 11 case, sammenlignet mot
   eksisterende score før endringen (terskel: ikke under 44/55 totalt, jf.
   dokumentets egen regel).
-- Ved eventuell endring i steg 4 (nedstrøms felt): `cd apps/mobile && npx
-  tsc --noEmit`, samt `apps/api/test/e2e-share.sh` og
-  `apps/api/test/e2e-tenant-isolation.sh` hvis delingsveien berøres.
+- Ved endring i nedstrøms felt: `cd apps/mobile && npx tsc --noEmit`, samt
+  `apps/api/test/e2e-share.sh` og `apps/api/test/e2e-tenant-isolation.sh` hvis
+  delingsveien berøres.

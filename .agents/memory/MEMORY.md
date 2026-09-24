@@ -1,3 +1,7 @@
 - [Expo SDK 54 pitfalls](expo-sdk54-pitfalls.md) — expo-file-system v19 moved documentDirectory to `expo-file-system/legacy`; media elements can't set headers so backend accepts `?token=` (must redact in logs).
 - [Sync design decisions](sync-design.md) — offline-first LWW sync: pending-delete queue prevents resurrection; strip device-local URIs from server copies; dedupe media uploads by URI.
 - [Media orphan cleanup](media-cleanup.md) — never delete unreferenced server media immediately; per-note merge can transiently drop references, so mark + grace period + atomic conditional delete.
+- [Google Doc idempotency](google-doc-idempotency.md) — claim a stable attempt in Drive before AI work; retries reconcile the same document and never rely on the API ledger alone.
+- [Replay evidence safety](replay-evidence-safety.md) — explicitly lost attachments may be omitted from replay copies; unknown device-local evidence remains a hard skip.
+- [Workspace audit lockfiles](workspace-audit-lockfiles.md) — after workspace dependency changes, verify installed and lockfile resolutions directly; npm can leave stale vulnerable entries behind.
+- [Metro workspace watcher](metro-workspace-watcher.md) — monorepo Metro watchFolders must exclude transient workspace profiles such as `.config` or startup can fail on disappearing Chromium paths.

@@ -75,6 +75,22 @@ externalPort = 80
 localPort = 5001
 externalPort = 3001
 
+[[ports]]
+localPort = 8090
+externalPort = 4200
+
+[[ports]]
+localPort = 8091
+externalPort = 5173
+
+[[ports]]
+localPort = 8095
+externalPort = 6000
+
+[[ports]]
+localPort = 8096
+externalPort = 6800
+
 [deployment]
 deploymentTarget = "static"
 run = ["bash", "-c", "PORT=5000 node apps/api/src/index.js"]

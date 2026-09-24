@@ -1,0 +1,73 @@
+{
+  "_readme": [
+    "Fasit (reference data) for Labs benchmark scoring. Ground truth lives here in",
+    "git rather than in the database so every change to it is reviewable in a diff —",
+    "silently editing a fasit would invalidate every score recorded before the edit.",
+    "",
+    "Loaded into the benchmark_cases table on boot (apps/api/src/labs/cases.js).",
+    "The table is a read cache; this file is the source of truth.",
+    "",
+    "provisional=true means the fasit was derived from repo documentation rather",
+    "than transcribed from the practitioner's own report. Scores against a",
+    "provisional case are directional, not authoritative.",
+    "",
+    "Cases can also be added without a git change, via PUT /api/admin/labs/cases/:caseId",
+    "in the admin dashboard's Labs tab. Those are stored with source='manual' and are",
+    "never touched by this file's boot-time load — a case_id can only ever be owned by",
+    "the fixture or by the dashboard, never both, so neither can silently overwrite the",
+    "other (apps/api/src/labs/cases.js#upsertManualCase). Promote a manual case into this",
+    "file (and delete the manual row) once you want it reviewable in git."
+  ],
+  "cases": [
+    {
+      "case_id": "midtgjerdinga",
+      "label": "Midtgjerdinga — eier-hypotese avkreftet av funn",
+      "project_id": null,
+      "provisional": false,
+      "source_note": "Transcribed from Sigurd Myklebust's (OCAB AS) real skaderapport, skadenummer N1439644, besiktiget 19.08.2026 (Midtgjerdinga 1, 2386 Brumunddal). Structured extraction, not the report prose — see key_evidence for the load-bearing quotes. Byggforsk references (711.401, 700.117) are NOT cited in the source report (it cites none at all); they're carried over as topically justified candidates against ai-engine/byggforsk_index.py's own titles/emneord (711.401 = \"Grunnforhold. Skader på småhus\", 700.117 = \"Undersøkelse av fuktskader i bygninger\") rather than verified against the practitioner's own citations.",
+      "reference": {
+        "expected_source_category": "NEDBØR",
+        "expected_acute_or_gradual": "GRADVIS",
+        "root_cause_keywords": [
+          "grunnmursplast",
+          "kapillær",
+          "sål",
+          "nedbør"
+        ],
+        "root_cause_keywords_min": 3,
+        "excluded_causes": [
+          {
+            "category": "TRYKKSATT_RØR",
+            "reason": "Tilførselsrøret til utekranen ble åpnet og undersøkt, satt i åpen posisjon i 3 minutter — ingen lekkasje verken lukket eller åpen. Bunnsvillen bak trefiberplatene målte null utslag. Avkreftende funn er harde bevis.",
+            "assertion_terms": [
+              "rørlekkasje",
+              "lekkasje fra rør",
+              "lekkasje fra røret",
+              "lekkasje fra tilførselsrør",
+              "rørbrudd"
+            ]
+          }
+        ],
+        "reported_hypothesis_terms": [
+          "eier",
+          "antar",
+          "rapportert",
+          "oppgir",
+          "mener",
+          "tenker"
+        ],
+        "accepted_byggforsk": ["711.401", "700.117"],
+        "empty_reference_acceptable": true,
+        "expected_is_habitable": true,
+        "key_evidence": [
+          "Grunnmursplast anlagt på såla, men ikke beskyttet på oversiden — nedbør renner fritt ned bakom den",
+          "Trefiberplater bak tapet på stuesiden av innvendig delevegg måler fuktig kun i bunn (32% FK, over fibermetning)",
+          "Bunnsvill i samme vegg måler tørt/lavt (hammerelektrode: lavere enn skadelig 18-20% FK) — avkrefter rørlekkasje som kilde til akkurat den fuktskaden",
+          "Tilførselsrør til utekran undersøkt ved åpning av vegg: ingen lekkasje verken lukket eller åpen (3 min)",
+          "Boligen har vært utleid i 9 år; ingen kjent skadedato — skaden har utviklet seg gradvis over lang tid",
+          "Sekundært, atskilt funn: fukt-/rennemerker og avflasset maling på vinduskarmer i stua er vurdert som kondens fra innvendig luftfuktighet, ikke del av samme skademekanisme som delevegg-/grunnmur-funnet — ikke kodet som egen kildekategori i skjemaet (kun NEDBØR er krysset av), så fasit her scorer kun hovedkonklusjonen"
+        ]
+      }
+    }
+  ]
+}

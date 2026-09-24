@@ -3,7 +3,7 @@ import json
 
 ENGINE_DIR = "ai-engine"
 FILES = {
-    "requirements.txt": """google-genai>=0.7.0
+    "requirements.txt": """google-genai>=1.0.0
 google-api-python-client>=2.120.0
 google-auth-httplib2>=0.2.0
 google-auth-oauthlib>=1.2.0
@@ -12,15 +12,46 @@ opencv-python-headless>=4.9.0
 python-dotenv>=1.0.1
 ipykernel""",
 
-    "models.py": """from pydantic import BaseModel, Field
+    "models.py": """from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
+
+class WaterDamageSource(str, Enum):
+    NEDBOR = "NEDBØR"
+    TRYKKSATT_ROR = "TRYKKSATT_RØR"
+    AVLOPSROR = "AVLØPSRØR"
+    KONDENS = "KONDENS"
+    UTETT_BAD = "UTETT_BAD"
+    USIKKER = "USIKKER"
+
+
+class AcuteOrGradual(str, Enum):
+    AKUTT = "AKUTT"
+    GRADVIS = "GRADVIS"
+    USIKKER = "USIKKER"
+
+
+class Evidence(BaseModel):
+    timestamp_ms: Optional[int] = None
+    caption: str
+    visual_confirmation: str
+    source_photo_index: Optional[int] = None
+    technical_reference: Optional[str] = None
+
 
 class DamageAnalysis(BaseModel):
-    area: str = Field(description="Room name in Norwegian")
-    source: str = Field(description="Failed component")
-    cause: str = Field(description="Technical reason for failure")
-    description: str = Field(description="Detailed narrative of damage")
-    evidence_timestamp_ms: int = Field(description="Timestamp in ms for the best visual evidence")
-    is_habitable: bool = Field(description="Is the home still livable?")
+    area: str
+    source: str
+    source_category: WaterDamageSource
+    cause: str
+    acute_or_gradual: AcuteOrGradual
+    description: str
+    evidence_points: List[Evidence]
+    is_habitable: bool
+    extent_description: str
+    repairs_description: str
 """,
 
     "google_api.py": """from google.oauth2 import service_account
@@ -106,6 +137,9 @@ def setup():
     
     for filename, content in FILES.items():
         path = os.path.join(ENGINE_DIR, filename)
+        if os.path.exists(path):
+            print(f"  - Preserved existing file: {filename}")
+            continue
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
         print(f"  - Created file: {filename}")

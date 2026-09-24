@@ -12,7 +12,8 @@
 //      merge can make a note (and its media reference) vanish from the server
 //      copy temporarily until the device that owns the note re-pushes it.
 //
-// Whole-project deletion still removes its media immediately (projects.js).
+// Whole-project deletion marks its media immediately, then this same guarded
+// sweep removes files only after the grace period and a live reference recheck.
 
 const fs = require("fs");
 const path = require("path");

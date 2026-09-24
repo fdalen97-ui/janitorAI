@@ -11,6 +11,13 @@ from google_api import connect_to_google_api_personal, upload_knowledge_base, sh
 from doc_engine import replace_text_in_doc, upload_and_insert_image, insert_photo_gallery
 from prompt import system_prompt, main_prompt, build_inspector_context, PROMPT_VERSION
 from template_replacement import build_replacements
+import re
+from datetime import datetime, timezone
+from report_idempotency import (
+    validate_report_attempt_id as _pure_validate_report_attempt_id,
+    reconcile_attempt as _pure_reconcile_attempt,
+    abandon_attempt as _pure_abandon_attempt,
+)
 
 TEMP_PHOTO_DIR = "./temp_photos"
 
@@ -27,6 +34,39 @@ class ReportPipelineError(Exception):
         super().__init__(message)
         self.token_usage = token_usage
         self.doc_id = doc_id
+
+
+class ReportAlreadyComplete(Exception):
+    """Raised when Drive already contains the finished document for an attempt."""
+
+    def __init__(self, doc_id):
+        super().__init__("A completed report already exists for this attempt")
+        self.doc_id = doc_id
+
+
+REPORT_ATTEMPT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+PROCESSING_RETRY_AFTER_SECONDS = 60 * 60
+
+
+def _validate_report_attempt_id(value: str) -> str:
+    return _pure_validate_report_attempt_id(value)
+
+
+def _drive_query_quote(value: str) -> str:
+    # The validator excludes quotes, but keep this defensive for future callers.
+    return value.replace("\\", "\\\\").replace("'", "\\'")
+
+
+def _find_attempt_file(drive, attempt_id: str, allow_processing: bool = False,
+                       return_state: bool = False):
+    """Return an existing completed file, or remove an abandoned processing copy."""
+    return _pure_reconcile_attempt(
+        drive, attempt_id, allow_processing=allow_processing, return_state=return_state
+    )
+
+
+def _abandon_attempt(drive, doc_id: str | None, owned_doc_id: str | None) -> bool:
+    return _pure_abandon_attempt(drive, doc_id, owned_doc_id)
 
 
 def _validate_media_url(url: str) -> None:
@@ -72,7 +112,7 @@ def _upload_inspector_photos(genai_client, project: dict) -> list:
     Returns a list of records {'file': gemini_file, 'path': local_tmp_path,
     'room': str, 'caption': str} in capture order. The local copies are KEPT
     (needed later for the report's evidence image and photo gallery) — the
-    caller is responsible for calling _cleanup_photo_files() when done.
+    caller is responsible for calling cleanup_photo_files() when done.
     """
     records = []
     notes = project.get("notes") or []
@@ -109,7 +149,7 @@ def _upload_inspector_photos(genai_client, project: dict) -> list:
                 photo_deadline = time.monotonic() + 120  # maks 2 min
                 while photo_file.state.name == "PROCESSING":
                     if time.monotonic() > photo_deadline:
-                        raise TimeoutError("Gemini foto-prosessering tok for lang tid (>2 min)")
+                        raise TimeoutError(" foto-prosessering tok for lang tid (>2 min)")
                     time.sleep(1)
                     photo_file = genai_client.files.get(name=photo_file.name)
                 if photo_file.state.name == "FAILED":
@@ -131,7 +171,7 @@ def _upload_inspector_photos(genai_client, project: dict) -> list:
     return records
 
 
-def _cleanup_photo_files(photo_records: list) -> None:
+def cleanup_photo_files(photo_records: list) -> None:
     """Deletes the local temp copies kept by _upload_inspector_photos."""
     for rec in photo_records:
         try:
@@ -159,14 +199,23 @@ def _photo_manifest(photo_records: list) -> str:
     return "\n".join(lines)
 
 
-def create_report(video_path: str | None, master_id, output_folder, gemini_key, report_meta: dict | None = None, project: dict | None = None, tester_email: str | None = None):
-    # 1. Init Connections
-    docs, drive = connect_to_google_api_personal()
-    genai_client = genai.Client(api_key=gemini_key)
+GEMINI_MODEL = "gemini-3.8-flash"
+
+
+def prepare_gemini_media(genai_client, video_path: str | None, project: dict | None):
+    """
+    Laster opp video og befaringsfoto til Gemini og returnerer
+    (video_file, photo_records). Kaller aldri Docs/Drive, så både
+    create_report() og den dokumentfrie Labs-veien kan bruke den.
+
+    Ved unntak er det kallerens ansvar å rydde: photo_records kan være delvis
+    fylt, og de lokale kopiene må gjennom cleanup_photo_files().
+    """
+    video_file = None
+    photo_records = []
 
     # 2. Gemini Analysis (multimodal). Video is useful evidence when present,
     # but reports must also work from notes, transcriptions, photos, and metadata.
-    video_file = None
     if video_path:
         print("🤖 Gemini is analyzing available video evidence...")
         video_file = genai_client.files.upload(file=video_path)
@@ -182,19 +231,42 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
             raise RuntimeError("Gemini klarte ikke å prosessere videoen")
 
     # Upload inspector photos (if any) so Gemini can analyse them with every
-    # other available inspection source. Local copies are kept for the report's
-    # evidence image + photo gallery and cleaned up at the end.
-    photo_records = []
+    # other available inspection source. Local copies are cleaned up by the caller.
     if project:
         photo_records = _upload_inspector_photos(genai_client, project)
         if photo_records:
             print(f"📸 {len(photo_records)} inspector photo(s) ready for Gemini")
+
+    return video_file, photo_records
+
+
+def analyze_damage(
+    genai_client,
+    project: dict | None,
+    report_meta: dict | None,
+    video_file=None,
+    photo_records: list | None = None,
+    enabled=None,
+):
+    """
+    Selve analysen: kunnskapsbase → kontekst → Gemini → sitatport. Rører
+    verken Docs eller Drive-kopiering, slik at den kan kjøres dokumentfritt fra
+    Labs (/api/analyze) med et vilkårlig sett promptblokker — og fra
+    create_report() med produksjonsstandarden, der `enabled=None`.
+
+    `enabled` er blokk-id-er fra prompt.BLOCKS. Returnerer
+    (analysis, token_usage, prompt_meta), der prompt_meta beskriver nøyaktig
+    den prompten som faktisk ble sendt (sha256 over system + oppdrag + kontekst).
+    """
+    photo_records = photo_records or []
+    active = resolve_enabled(enabled)
     photo_files = [rec["file"] for rec in photo_records]
 
-    # Feiler noe i analysefasen (kunnskapsopplasting, Gemini-kallet,
-    # valideringen), skal de lokale fotokopiene ikke bli liggende igjen i
-    # temp-katalogen — unntaket propagerer ellers uendret som før.
-    try:
+    # Kunnskapsbasen er en egen blokk: den krever Drive-lesetilgang og er den
+    # eneste delen av analysen som gjør det. Av = raskere/billigere, men ikke
+    # lenger sammenlignbart med produksjon.
+    knowledge_files = []
+    if "kunnskapsbase_pdf" in active:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         knowledge_path = os.path.join(current_dir, "temp_knowledge")
 
@@ -204,13 +276,16 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
         print(f"📚 Opplasting av kunnskapsbase fra: {knowledge_path}")
         knowledge_files = upload_knowledge_base(genai_client, knowledge_path)
 
-        # Build contents from every available source. No evidence type has an
-        # automatic priority; Gemini reconciles the supplied material.
-        # report_meta (building year, inspection date) feeds the deterministic
-        # case-signal block computed in build_case_signals() — see
-        # docs/ARCHITECTURE_WATER_DAMAGE_TREE.md §3.6/steg 0.
-        context_text = build_inspector_context(project or {}, report_meta)
-        context_parts = [context_text] if context_text else []
+    # Build contents from every available source. No evidence type has an
+    # automatic priority; Gemini reconciles the supplied material.
+    # report_meta (building year, inspection date) feeds the deterministic
+    # case-signal block computed in build_case_signals() — see
+    # docs/ARCHITECTURE_WATER_DAMAGE_TREE.md §3.6/steg 0.
+    # resolve_prompt() komponerer én gang, så sha256-en i prompt_meta beskriver
+    # nøyaktig den teksten som sendes — ikke en rekonstruksjon.
+    resolved = resolve_prompt(active, project or {}, report_meta or {})
+    context_parts = [resolved["context"]] if resolved["context"] else []
+    if "foto_manifest" in active:
         manifest = _photo_manifest(photo_records)
         if manifest:
             context_parts.append(manifest)
@@ -281,17 +356,107 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
     usage = getattr(gemini_response, "usage_metadata", None)
     if usage is not None:
         token_usage = {
-            "model": "gemini-2.5-flash",
+            "model": GEMINI_MODEL,
             "input_tokens": getattr(usage, "prompt_token_count", None),
             "output_tokens": getattr(usage, "candidates_token_count", None),
             "total_tokens": getattr(usage, "total_token_count", None),
         }
 
-    # Free memory after analysis - contents list can be large.
-    # photo_records beholdes: de lokale kopiene brukes til bevisbilde/galleri.
-    del contents, knowledge_files, video_file, photo_files
-    gc.collect()
-    print("🧹 Cleared analysis objects from memory")
+    prompt_meta = {
+        "prompt_version": resolved["prompt_version"],
+        "blocks_enabled": resolved["blocks_enabled"],
+        "sha256": resolved["sha256"],
+        "model": GEMINI_MODEL,
+        "system": resolved["system"],
+        "mission": resolved["mission"],
+        "context": resolved["context"],
+    }
+
+    del contents, knowledge_files, photo_files
+    return analysis, token_usage, prompt_meta
+
+
+def create_report(video_path: str | None, master_id, output_folder, gemini_key, report_meta: dict | None = None, project: dict | None = None, tester_email: str | None = None, report_attempt_id: str | None = None):
+    # 1. Init Connections
+    docs, drive = connect_to_google_api_personal()
+    if report_attempt_id is not None:
+        report_attempt_id = _validate_report_attempt_id(report_attempt_id)
+        existing_doc_id = _find_attempt_file(drive, report_attempt_id)
+        if existing_doc_id:
+            raise ReportAlreadyComplete(existing_doc_id)
+    doc_id = None
+    if report_attempt_id:
+        copy_name = f"Rapport_Skade_{int(time.time())}"
+        new_doc = drive.files().copy(
+            fileId=master_id,
+            supportsAllDrives=True,
+            body={
+                "name": copy_name,
+                "parents": [output_folder],
+                "appProperties": {
+                    "report_attempt_id": report_attempt_id,
+                    "report_state": "processing",
+                    "processing_started_at": datetime.now(timezone.utc).isoformat(),
+                },
+            },
+        ).execute()
+        doc_id = new_doc["id"]
+        # Close the list-then-copy race. The oldest attempt file is canonical;
+        # a concurrent request must not proceed to Gemini with a second copy.
+        try:
+            canonical = _find_attempt_file(
+                drive, report_attempt_id, allow_processing=True, return_state=True
+            )
+        except Exception:
+            _abandon_attempt(drive, doc_id, doc_id)
+            raise
+        if canonical and canonical["id"] != doc_id:
+            try:
+                _abandon_attempt(drive, doc_id, doc_id)
+            except Exception:
+                pass
+            if canonical["state"] == "complete":
+                raise ReportAlreadyComplete(canonical["id"])
+            raise RuntimeError("Report attempt is already processing")
+    video_file = None
+    photo_records = []
+    try:
+        genai_client = genai.Client(api_key=gemini_key)
+        video_file, photo_records = prepare_gemini_media(genai_client, video_path, project)
+    except Exception:
+        cleanup_photo_files(photo_records)
+        if doc_id:
+            _abandon_attempt(drive, doc_id, doc_id)
+        raise
+
+    # Feiler noe i analysefasen (kunnskapsopplasting, Gemini-kallet,
+    # valideringen), skal de lokale fotokopiene ikke bli liggende igjen i
+    # temp-katalogen — unntaket propagerer ellers uendret som før.
+    try:
+        analysis, token_usage, _prompt_meta = analyze_damage(
+            genai_client,
+            project,
+            report_meta,
+            video_file=video_file,
+            photo_records=photo_records,
+        )
+    except Exception:
+        cleanup_photo_files(photo_records)
+        if doc_id:
+            _abandon_attempt(drive, doc_id, doc_id)
+        raise
+
+    try:
+        # Free memory after analysis — the contents list can be large.
+        # photo_records beholdes: de lokale kopiene brukes til bevisbilde/galleri.
+        del video_file
+        gc.collect()
+        print("🧹 Cleared analysis objects from memory")
+    except Exception:
+        cleanup_photo_files(photo_records)
+        if doc_id:
+            _abandon_attempt(drive, doc_id, doc_id)
+        raise
 
     # Vakt (pilotfunn): gemini_response.parsed er None når svaret ikke lot seg
     # tolke mot DamageAnalysis-skjemaet. Uten vakten krasjet flettingen lenger
@@ -311,14 +476,16 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
     # (a) den halvferdige kopien slettes fra Drive (ellers ligger den igjen og
     # kan forveksles med en ekte rapport), og (b) token_usage følge unntaket
     # videre — analysen er fakturert selv om rapporten aldri ble ferdig.
-    doc_id = None
     try:
         # 3. Create Doc Copy
-        copy_name = f"Rapport_Skade_{int(time.time())}"
-        new_doc = drive.files().copy(fileId=master_id,
-                                     supportsAllDrives=True,
-                                     body={'name': copy_name, 'parents': [output_folder]}).execute()
-        doc_id = new_doc['id']
+        if doc_id is None:
+            copy_name = f"Rapport_Skade_{int(time.time())}"
+            new_doc = drive.files().copy(
+                fileId=master_id,
+                supportsAllDrives=True,
+                body={'name': copy_name, 'parents': [output_folder]},
+            ).execute()
+            doc_id = new_doc['id']
 
         # 4. Process Evidence Image (memory-optimized with aggressive cleanup)
         evidence_points = (analysis.evidence_points if analysis and analysis.evidence_points else [])
@@ -404,6 +571,13 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
         replacements.update({
             "{{damage.cause.area}}": analysis.area,
             "{{damage.cause.source}}": analysis.source,
+            # New structured classifications. Keep both the canonical
+            # damage.cause.* names and short aliases so older master templates
+            # can adopt the fields without changing the API response shape.
+            "{{damage.cause.source_category}}": getattr(analysis.source_category, "value", analysis.source_category),
+            "{{damage.cause.acute_or_gradual}}": getattr(analysis.acute_or_gradual, "value", analysis.acute_or_gradual),
+            "{{damage.source_category}}": getattr(analysis.source_category, "value", analysis.source_category),
+            "{{damage.acute_or_gradual}}": getattr(analysis.acute_or_gradual, "value", analysis.acute_or_gradual),
             "{{damage.cause.cause}}": analysis.cause,
             "{{damage.cause.description}}": analysis.description,
             # Checkbox logic
@@ -431,7 +605,7 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
             except Exception as exc:
                 print(f"⚠️  Kunne ikke sette inn bildegalleri: {exc}")
 
-        _cleanup_photo_files(photo_records)
+        cleanup_photo_files(photo_records)
 
         # 6. Share the document with the tester's email (if provided)
         if tester_email and tester_email.strip():
@@ -440,12 +614,23 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
             except Exception as e:
                 # Non-fatal: log and continue — report was still generated successfully
                 print(f"⚠️  Could not share doc with {tester_email}: {e}")
+        if report_attempt_id:
+            drive.files().update(
+                fileId=doc_id,
+                supportsAllDrives=True,
+                body={"appProperties": {
+                    "report_attempt_id": report_attempt_id,
+                    "report_state": "complete",
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
+                }},
+                fields="id,appProperties",
+            ).execute()
     except Exception as exc:
-        _cleanup_photo_files(photo_records)
+        cleanup_photo_files(photo_records)
         orphaned_doc_id = None
         if doc_id:
             try:
-                drive.files().delete(fileId=doc_id, supportsAllDrives=True).execute()
+                _abandon_attempt(drive, doc_id, doc_id)
                 print(f"🧹 Slettet halvferdig dokumentkopi {doc_id} etter pipelinefeil")
             except Exception as del_exc:
                 orphaned_doc_id = doc_id

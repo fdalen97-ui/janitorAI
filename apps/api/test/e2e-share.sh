@@ -44,6 +44,10 @@ fi
 asPg "$PGBIN/initdb" -D "$WORK/pg" -U docrai --auth=trust >/dev/null 2>&1 || { echo "initdb failed"; exit 1; }
 asPg "$PGBIN/pg_ctl" -D "$WORK/pg" -o "-p $PGPORT -k $WORK -h 127.0.0.1" -l "$WORK/pg.log" start >/dev/null || { echo "pg start failed"; cat "$WORK/pg.log"; exit 1; }
 asPg "$PGBIN/createdb" -h 127.0.0.1 -p "$PGPORT" -U docrai docrai_e2e >/dev/null 2>&1
+# Exercise the production upgrade path: this is the ledger schema that existed
+# before attempt correlation and test-project classification were introduced.
+asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -c \
+  "CREATE TABLE report_generations (id BIGSERIAL PRIMARY KEY, tester_token VARCHAR, project_id TEXT, doc_id TEXT, status TEXT NOT NULL DEFAULT 'success', created_at TIMESTAMPTZ NOT NULL DEFAULT now())"
 
 # ── API ───────────────────────────────────────────────────────────────────────
 cd "$API_DIR"
@@ -53,6 +57,7 @@ TESTER_TOKEN="$TOKEN" \
 PORT="$APIPORT" \
 MEDIA_DIR="$WORK/media" \
 STATIC_DIR="$WORK/no-static" \
+AI_ENGINE_URL= \
 node src/index.js >"$WORK/api.log" 2>&1 &
 API_PID=$!
 
@@ -208,9 +213,10 @@ check "transcribe accepts audioRemoteId contract" "404" "$STATUS"
 RSTATUS=$(curl -s "$BASE/report/status/proj-status-test" -H "x-tester-token: $TOKEN")
 check "report status: empty ledger" "false null" "$(echo "$RSTATUS" | jq -r '"\(.inFlight) \(.latest)"')"
 asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -c \
-  "INSERT INTO report_generations (tester_token, project_id, doc_id, status) VALUES ('$TOKEN', 'proj-status-test', 'DOC123abc', 'success')"
+  "INSERT INTO report_generations (tester_token, project_id, doc_id, status, is_test_project) VALUES ('$TOKEN', 'proj-status-test', 'DOC123abc', 'success', TRUE)"
 RSTATUS=$(curl -s "$BASE/report/status/proj-status-test" -H "x-tester-token: $TOKEN")
 check "report status: success row visible" "success" "$(echo "$RSTATUS" | jq -r '.latest.status')"
+check "report status: test run identified" "true" "$(echo "$RSTATUS" | jq -r '.latest.isTestProject')"
 check "report status: url derived from doc_id" \
   "https://docs.google.com/document/d/DOC123abc/edit" "$(echo "$RSTATUS" | jq -r '.latest.url')"
 # Skjemavakt for kvalitetskolonnene: recordReportGeneration i index.js skriver

@@ -18,7 +18,9 @@ export function contentFromAnalysis(analysis: unknown): ReportContent | null {
   const content: ReportContent = {
     area: str(a.area),
     source: str(a.source),
+    sourceCategory: str(a.source_category),
     cause: str(a.cause),
+    acuteOrGradual: str(a.acute_or_gradual),
     description: str(a.description),
     extentDescription: str(a.extent_description),
     repairsDescription: str(a.repairs_description),

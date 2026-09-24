@@ -11,14 +11,26 @@ import { Project } from '@/src/features/projects/types';
 
 export type ReportStatus = {
   inFlight: boolean;
-  latest: { status: string; createdAt: string; url: string | null } | null;
+  latest: {
+    status: string;
+    createdAt: string;
+    url: string | null;
+    isTestProject: boolean;
+    attemptId: string | null;
+  } | null;
 };
 
 /** null ved nettverksfeil/ukjent svar — kalleren beholder da lokal tilstand. */
-export async function fetchReportStatus(projectId: string): Promise<ReportStatus | null> {
+export async function fetchReportStatus(
+  projectId: string,
+  attemptId?: string,
+): Promise<ReportStatus | null> {
   try {
+    const attemptQuery = attemptId
+      ? `?attempt_id=${encodeURIComponent(attemptId)}`
+      : '';
     const response = await apiFetch(
-      `${getApiBaseUrl()}/report/status/${encodeURIComponent(projectId)}`,
+      `${getApiBaseUrl()}/report/status/${encodeURIComponent(projectId)}${attemptQuery}`,
     );
     if (!response.ok) return null;
     const data: any = await response.json();
@@ -30,6 +42,9 @@ export async function fetchReportStatus(projectId: string): Promise<ReportStatus
               status: String(data.latest.status ?? ''),
               createdAt: String(data.latest.createdAt ?? ''),
               url: typeof data.latest.url === 'string' ? data.latest.url : null,
+              isTestProject: Boolean(data.latest.isTestProject),
+              attemptId:
+                typeof data.latest.attemptId === 'string' ? data.latest.attemptId : null,
             }
           : null,
     };
@@ -59,6 +74,8 @@ export function resolveStuckReport(project: Project, status: ReportStatus): Reco
         reportUrl: status.latest.url,
         reportStatus: 'ready',
         reportError: undefined,
+        reportAttemptId: undefined,
+        reportResetAt: null,
         // Gjenfunnet dokument er et nytt AI-utkast brukeren ikke har sett —
         // aldri arv forrige godkjenning. Tomme markører (aldri undefined) så
         // finnes-vinner-flettingen ikke gjenoppliver et eldre utkast under den

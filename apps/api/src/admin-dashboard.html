@@ -284,6 +284,51 @@
 
     .section-gap { margin-top: 1.5rem; }
 
+    /* ── Replay operations ── */
+    .replay-intro { color: var(--muted); font-size: 0.88rem; line-height: 1.55; max-width: 720px; }
+    .replay-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .replay-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; margin:1.25rem 0; }
+    .replay-metric { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:.85rem 1rem; }
+    .replay-metric strong { display:block; font-size:1.35rem; color:var(--text); font-family:'Menlo','Consolas',monospace; }
+    .replay-metric span { color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; }
+    .replay-callout { border-left:3px solid var(--warn); background:rgba(245,158,11,.09); color:#fcd34d; padding:.75rem 1rem; font-size:.82rem; line-height:1.5; margin:1rem 0; }
+    .replay-progress { height:8px; background:var(--surface2); border-radius:99px; overflow:hidden; margin:.75rem 0 1.25rem; }
+    .replay-progress > div { height:100%; background:var(--accent); transition:width .2s ease; }
+    .replay-status { display:flex; justify-content:space-between; gap:1rem; align-items:center; flex-wrap:wrap; }
+    .replay-actions { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .badge-pending { background:rgba(148,163,184,.14); color:var(--muted); }
+    .badge-created,.badge-generated { background:rgba(34,197,94,.15); color:var(--success); }
+    .badge-skipped { background:rgba(245,158,11,.14); color:#fcd34d; }
+    .badge-failed { background:rgba(239,68,68,.14); color:var(--danger-h); }
+     .badge-deleted { background:rgba(148,163,184,.16); color:var(--muted); }
+    .replay-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    .replay-table th { text-align:left; color:var(--muted); font-weight:500; font-size:.76rem; padding:0 .5rem .6rem; border-bottom:1px solid var(--border); }
+    .replay-table td { padding:.65rem .5rem; border-bottom:1px solid var(--border); vertical-align:top; }
+    .replay-table tr:last-child td { border-bottom:none; }
+    .replay-table .reason { color:var(--muted); }
+    .replay-select-toolbar { display:flex; align-items:center; justify-content:space-between; gap:.75rem; flex-wrap:wrap; margin:1rem 0 .75rem; }
+    .replay-selection-count { color:var(--muted); font-size:.82rem; }
+    .replay-project-check { width:1rem; height:1rem; accent-color:var(--accent); cursor:pointer; }
+    .replay-project-name { font-weight:600; color:var(--text); }
+    .replay-project-meta { color:var(--muted); font-size:.75rem; margin-top:.2rem; line-height:1.45; }
+    .replay-evidence { display:flex; gap:.35rem; flex-wrap:wrap; margin-top:.35rem; }
+    .replay-evidence span { color:var(--muted); font-size:.72rem; background:rgba(148,163,184,.1); border-radius:999px; padding:.12rem .4rem; }
+    .replay-detail-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .replay-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; margin:1rem 0; }
+    .replay-detail-field { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:.7rem .8rem; min-width:0; }
+    .replay-detail-field strong { display:block; color:var(--muted); font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.25rem; }
+    .replay-detail-field span { word-break:break-word; font-size:.86rem; }
+    .replay-note { border:1px solid var(--border); border-radius:8px; padding:.8rem; margin-top:.65rem; background:rgba(255,255,255,.015); }
+    .replay-note p { white-space:pre-wrap; line-height:1.5; font-size:.86rem; margin-top:.35rem; }
+    .replay-media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.75rem; margin-top:.75rem; }
+    .replay-media-card { border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--surface2); }
+    .replay-media-card img,.replay-media-card video { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:#0a0f18; }
+    .replay-media-card audio { width:100%; margin-top:1.25rem; }
+    .replay-media-card .caption { padding:.5rem .6rem; color:var(--muted); font-size:.72rem; word-break:break-word; }
+    .replay-raw { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:.75rem; max-height:320px; overflow:auto; color:var(--muted); font-size:.72rem; white-space:pre-wrap; word-break:break-word; }
+    .replay-warning { color:#fcd34d; background:rgba(245,158,11,.09); border-left:3px solid var(--warn); padding:.65rem .8rem; font-size:.8rem; margin-top:.75rem; }
+    @media (max-width:600px) { .replay-summary { grid-template-columns:1fr; } .replay-table { min-width:700px; } .replay-scroll { overflow-x:auto; } .replay-detail-grid { grid-template-columns:1fr; } }
+
     /* ── Mismatch warning banner ── */
     #mismatch-banner {
       display: none;
@@ -380,6 +425,8 @@
       <button class="tab-btn active" id="tab-tokens-btn" onclick="switchTab('tokens')">Tokens</button>
       <button class="tab-btn" id="tab-logs-btn" onclick="switchTab('logs')">Logs</button>
       <button class="tab-btn" id="tab-presentation-btn" onclick="switchTab('presentation')">Presentation</button>
+      <button class="tab-btn" id="tab-replay-btn" onclick="switchTab('replay')">Replay</button>
+      <button class="tab-btn" id="tab-labs-btn" onclick="switchTab('labs')">Labs</button>
     </div>
 
     <!-- ══ TOKENS TAB ══ -->
@@ -405,6 +452,109 @@
         </div>
         <div id="tokenTableWrap">
           <div class="empty-state">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REPLAY TAB ══ -->
+    <div class="tab-panel" id="tab-replay">
+      <div class="card">
+        <div class="replay-toolbar">
+          <div>
+            <div class="card-title" style="margin-bottom:.45rem;">AI report replay</div>
+            <p class="replay-intro">Safely re-run report generation for eligible tester projects. Preview the exact scope first; no tester credentials are shown here.</p>
+          </div>
+          <button class="btn-ghost" onclick="loadReplayPreview()">Refresh preview</button>
+        </div>
+        <div id="replayPreview">
+          <div class="empty-state">Preview scope will load here.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Project inspection</div>
+        <div id="replayProjectDetail">
+          <div class="empty-state">Choose Inspect on a source project or replay result to view its evidence.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="replay-toolbar">
+          <div>
+            <div class="card-title" style="margin-bottom:.45rem;">Latest replay batch</div>
+            <p class="replay-intro">Progress refreshes automatically while a batch is active.</p>
+          </div>
+          <button class="btn-ghost" onclick="loadLatestReplay()">Refresh batch</button>
+        </div>
+        <div id="replayBatch">
+          <div class="empty-state">No replay batch loaded.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LABS TAB ══ -->
+    <div class="tab-panel" id="tab-labs">
+      <div class="card">
+        <div class="card-title">Kjør test</div>
+        <div class="replay-intro">
+          Kjører analysen uten å lage Google Doc, og uten å røre rapportstatus
+          på prosjektet. Avkryssingsboksene er promptblokkene i
+          <code>ai-engine/prompt.py</code> — kjernen (rolle, bevisregler,
+          akutt/gradvis, skjemakontrakt) kan ikke slås av.
+        </div>
+        <div id="labsForm">
+          <div class="empty-state">Laster blokker …</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Resultat</div>
+        <div id="labsResult">
+          <div class="empty-state">Ingen kjøring ennå.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="replay-toolbar">
+          <div class="card-title" style="margin:0;">Historikk</div>
+          <button class="btn-ghost" onclick="loadLabsRuns()">Oppdater</button>
+        </div>
+        <div id="labsRuns">
+          <div class="empty-state">Ingen kjøringer logget.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Referansecaser</div>
+        <div class="replay-intro">
+          Last opp en fasit uten å røre git. Caser herfra lagres med
+          <code>source: manual</code> og overlever redeploy, men kan aldri
+          overskrive en case som eies av
+          <code>apps/api/fixtures/benchmark-cases.json</code> (og omvendt) —
+          en case-id tilhører alltid enten filen eller dashbordet, aldri
+          begge. Vil du ha den versjonssatt, flytt innholdet inn i
+          fixture-filen og slett den manuelle raden.
+        </div>
+        <div id="labsCasesList">
+          <div class="empty-state">Laster …</div>
+        </div>
+        <div class="replay-detail-grid" style="margin-top:14px;">
+          <div class="replay-detail-field"><label>Case-ID (ny, eller en eksisterende manuell)<br>
+            <input id="labsCaseUploadId" type="text" placeholder="f.eks. bekkelaget-1" style="width:100%;"></label></div>
+          <div class="replay-detail-field"><label>Merkelapp<br>
+            <input id="labsCaseUploadLabel" type="text" placeholder="kort beskrivelse" style="width:100%;"></label></div>
+        </div>
+        <div class="replay-detail-field" style="margin-top:8px;"><label>Kilde/notat (valgfritt)<br>
+          <input id="labsCaseUploadNote" type="text" placeholder="hvor kommer fasiten fra?" style="width:100%;"></label></div>
+        <div class="replay-detail-field" style="margin-top:8px;">
+          <label>
+            <input type="checkbox" id="labsCaseUploadProvisional" checked>
+            Foreløpig fasit (vis som "foreløpig" i velgeren)
+          </label>
+        </div>
+        <div class="replay-detail-field" style="margin-top:8px;"><label>Fasit (JSON) — samme felter som <code>reference</code> i fixture-filen<br>
+          <textarea id="labsCaseUploadJson" rows="10" style="width:100%;font-family:monospace;font-size:12px;"
+            placeholder='{&#10;  "expected_source_category": "NEDBØR",&#10;  "expected_acute_or_gradual": "GRADVIS",&#10;  "root_cause_keywords": ["..."],&#10;  "root_cause_keywords_min": 2,&#10;  "excluded_causes": [],&#10;  "accepted_byggforsk": [],&#10;  "empty_reference_acceptable": true&#10;}'></textarea></label></div>
+        <div class="replay-actions" style="margin-top:10px;">
+          <button class="btn-primary" id="labsCaseUploadBtn" onclick="uploadLabsCase()">Lagre case</button>
         </div>
       </div>
     </div>
@@ -543,6 +693,14 @@
     document.getElementById('tab-' + name + '-btn').classList.add('active');
     document.getElementById('tab-' + name).classList.add('active');
     if (name === 'logs') loadLogs();
+    if (name === 'replay') {
+      loadReplayPreview();
+      loadLatestReplay();
+    }
+    if (name === 'labs') {
+      loadLabsForm();
+      loadLabsRuns();
+    }
   }
 
   // ── Admin API helpers ─────────────────────────────────────────────────────────
@@ -615,12 +773,930 @@
 
   // ── Status bar ────────────────────────────────────────────────────────────────
   let statusTimer = null;
+  let replayPollTimer = null;
+  let replayPreviewState = null;
+  let replaySelectionPreviewId = null;
+  let replaySelectedProjectIds = new Set();
   function showStatus(msg, type = 'info') {
     const el = document.getElementById('status');
     el.textContent = msg;
     el.className = type;
     if (statusTimer) clearTimeout(statusTimer);
     statusTimer = setTimeout(() => { el.className = ''; el.textContent = ''; }, 5000);
+  }
+
+  // ── AI report replay ─────────────────────────────────────────────────────────
+  function replayValue(obj, keys, fallback = 0) {
+    for (const key of keys) {
+      if (obj && obj[key] !== undefined && obj[key] !== null) return obj[key];
+    }
+    return fallback;
+  }
+
+  function replayStatus(batch) {
+    return String(replayValue(batch, ['status', 'state'], 'unknown')).toLowerCase();
+  }
+
+  function replayItems(batch) {
+    return Array.isArray(batch?.items) ? batch.items : [];
+  }
+
+  function replayProjects(data) {
+    const eligible = replayValue(data, ['eligibleProjects', 'eligible_projects'], []);
+    return Array.isArray(eligible) ? eligible : [];
+  }
+
+  function replayProjectId(project) {
+    return String(project?.projectId || project?.sourceProjectId || project?.project_id || '');
+  }
+
+  function ensureReplaySelection(data) {
+    const projects = replayProjects(data);
+    const previewId = String(data?.previewId || data?.preview_id || '');
+    const validIds = new Set(projects.map(replayProjectId).filter(Boolean));
+    if (previewId !== replaySelectionPreviewId) {
+      replaySelectionPreviewId = previewId;
+      replaySelectedProjectIds = validIds;
+      return;
+    }
+    replaySelectedProjectIds = new Set(
+      [...replaySelectedProjectIds].filter((id) => validIds.has(id))
+    );
+  }
+
+  function replayCounts(batch) {
+    const items = replayItems(batch);
+    const supplied = batch?.counts || batch?.progress || {};
+    const count = (names, status) => {
+      const value = replayValue(supplied, names, null);
+      if (value !== null) return Number(value) || 0;
+      return items.filter(item => String(item.status || '').toLowerCase() === status).length;
+    };
+    return {
+      created: count(['created'], 'created'),
+      generated: count(['generated', 'completed', 'complete'], 'generated'),
+      skipped: count(['skipped'], 'skipped'),
+      failed: count(['failed', 'error'], 'failed'),
+       deleted: count(['deleted'], 'deleted'),
+      pending: count(['pending', 'remaining'], 'pending'),
+      omittedLostAttachments: (() => {
+        const value = replayValue(
+          supplied,
+          ['omittedLostAttachments', 'omitted_lost_attachments', 'lostAttachments'],
+          null
+        );
+        if (value !== null) return Number(value) || 0;
+        return items.reduce(
+          (sum, item) => sum + Number(
+            item.omittedLostAttachments || item.omitted_lost_attachments || 0
+          ),
+          0
+        );
+      })(),
+    };
+  }
+
+  function renderReplayPreview(data) {
+    replayPreviewState = data || {};
+    const eligible = replayProjects(data);
+    const testers = replayValue(data, ['testerAccounts', 'tester_accounts'], []);
+    const skipped = replayValue(data, ['skipped'], []);
+    const projects = eligible;
+    const skippedItems = Array.isArray(skipped) ? skipped : [];
+    const testerCount = Number(replayValue(data, ['testerAccountCount'], Array.isArray(testers) ? testers.length : testers || 0));
+    const wrap = document.getElementById('replayPreview');
+    ensureReplaySelection(data);
+    if (!projects.length && !skippedItems.length) {
+      wrap.innerHTML = '<div class="empty-state">No eligible projects found for replay.</div>';
+      return;
+    }
+    const selectedCount = replaySelectedProjectIds.size;
+    const disabled = selectedCount === 0 ? ' disabled' : '';
+    const allSelected = projects.length > 0 && selectedCount === projects.length;
+    const projectRows = projects.map((project) => {
+      const id = replayProjectId(project);
+      const evidence = project.evidence || {};
+      const evidenceChips = [
+        `${Number(evidence.noteCount || 0)} notes`,
+        `${Number(evidence.transcriptionCount || 0)} transcriptions`,
+        `${Number(evidence.photoCount || 0)} photos`,
+        `${Number(evidence.videoCount || 0)} videos`,
+      ].map((label) => `<span>${escHtml(label)}</span>`).join('');
+      const details = [
+        project.tester || 'Unnamed tester',
+        project.inspectionDate || 'No inspection date',
+        project.inspector || 'Inspector not recorded',
+      ].join(' · ');
+      return `<tr>
+        <td><input class="replay-project-check" type="checkbox" data-project-id="${escHtml(id)}"
+          ${replaySelectedProjectIds.has(id) ? 'checked' : ''}
+          onchange="toggleReplaySelection(this.dataset.projectId, this.checked)"
+          aria-label="Select ${escHtml(project.projectName || id)}"></td>
+        <td>
+          <div class="replay-project-name">${escHtml(project.projectName || id)}</div>
+          <div class="replay-project-meta">${escHtml(details)}</div>
+          <div class="replay-evidence">${evidenceChips}</div>
+        </td>
+        <td><button class="btn-ghost" style="font-size:.76rem;padding:.3rem .65rem;" onclick="openReplayProject('${encodeURIComponent(id)}')">Inspect</button></td>
+      </tr>`;
+    }).join('');
+    wrap.innerHTML = `
+      <div class="replay-summary">
+        <div class="replay-metric"><strong>${projects.length.toLocaleString()}</strong><span>Eligible projects</span></div>
+        <div class="replay-metric"><strong>${testerCount.toLocaleString()}</strong><span>Tester accounts</span></div>
+        <div class="replay-metric"><strong>${skippedItems.length.toLocaleString()}</strong><span>Skipped in preview</span></div>
+      </div>
+      <div class="replay-callout"><strong>Before you start:</strong> each eligible project creates a new Google Doc. This can trigger paid AI work and cannot be undone.</div>
+      <div class="replay-select-toolbar">
+        <div class="replay-actions">
+          <button class="btn-ghost" onclick="setReplaySelection(true)"${allSelected ? ' disabled' : ''}>Select all</button>
+          <button class="btn-ghost" onclick="setReplaySelection(false)"${selectedCount === 0 ? ' disabled' : ''}>Clear selection</button>
+        </div>
+        <span class="replay-selection-count">${selectedCount.toLocaleString()} of ${projects.length.toLocaleString()} selected</span>
+      </div>
+      <div class="replay-actions">
+        <button class="btn-primary" onclick="startReplayBatch()"${disabled}>Start replay for ${selectedCount.toLocaleString()} project${selectedCount === 1 ? '' : 's'}</button>
+      </div>
+      <div class="replay-scroll" style="margin-top:1.25rem"><table class="replay-table">
+        <thead><tr><th style="width:2rem">Use</th><th>Eligible project</th><th></th></tr></thead>
+        <tbody>${projectRows}</tbody>
+      </table></div>
+      ${skippedItems.length ? `<div class="replay-scroll" style="margin-top:1.25rem"><table class="replay-table"><thead><tr><th>Skipped project</th><th>Reason</th></tr></thead><tbody>${skippedItems.map(replayItemRow).join('')}</tbody></table></div>` : ''}
+    `;
+  }
+
+  function toggleReplaySelection(projectId, checked) {
+    const id = String(projectId || '');
+    if (!id) return;
+    if (checked) replaySelectedProjectIds.add(id);
+    else replaySelectedProjectIds.delete(id);
+    renderReplayPreview(replayPreviewState);
+  }
+
+  function setReplaySelection(selectAll) {
+    const projects = replayProjects(replayPreviewState);
+    replaySelectedProjectIds = selectAll
+      ? new Set(projects.map(replayProjectId).filter(Boolean))
+      : new Set();
+    renderReplayPreview(replayPreviewState);
+  }
+
+  function replayItemRow(item) {
+    const name = item.projectName || item.project_name || item.name || item.projectId || item.project_id || 'Project';
+    const reason = item.reason || item.error || item.message || 'Not eligible';
+    const status = item.status ? `<span class="badge badge-${escHtml(String(item.status).toLowerCase())}">${escHtml(String(item.status))}</span>` : '';
+    return `<tr><td>${escHtml(name)} ${status}</td><td class="reason">${escHtml(reason)}</td></tr>`;
+  }
+
+  async function loadReplayPreview() {
+    const wrap = document.getElementById('replayPreview');
+    wrap.innerHTML = '<div class="empty-state">Loading replay preview…</div>';
+    try {
+      const res = await apiFetch('/api/admin/replay/preview');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
+      renderReplayPreview(data);
+    } catch (err) {
+      wrap.innerHTML = '<div class="empty-state">Unable to load replay preview. Use Refresh preview to try again.</div>';
+      showStatus('Failed to load replay preview: ' + err.message, 'error');
+    }
+  }
+
+  function safeHttpsUrl(value) {
+    if (typeof value !== 'string' || !value.trim()) return null;
+    try {
+      const url = new URL(value);
+      return url.protocol === 'https:' ? url.href : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function replayMediaCard(media) {
+    const label = media.originalName || media.id;
+    if (!media.url) {
+      return `<div class="replay-media-card"><div class="caption">Media unavailable: ${escHtml(label)}</div></div>`;
+    }
+    const mime = String(media.mimeType || '').toLowerCase();
+    let content = `<div class="caption"><a href="${escHtml(media.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-h)">Open media ↗</a></div>`;
+    if (mime.startsWith('image/')) {
+      content = `<img src="${escHtml(media.url)}" alt="${escHtml(label)}" loading="lazy"><div class="caption">${escHtml(label)}</div>`;
+    } else if (mime.startsWith('video/')) {
+      content = `<video controls preload="metadata" src="${escHtml(media.url)}"></video><div class="caption">${escHtml(label)}</div>`;
+    } else if (mime.startsWith('audio/')) {
+      content = `<audio controls preload="metadata" src="${escHtml(media.url)}"></audio><div class="caption">${escHtml(label)}</div>`;
+    }
+    return `<div class="replay-media-card">${content}</div>`;
+  }
+
+  function renderReplayProjectDetail(data) {
+    const payload = data?.project || data;
+    const wrap = document.getElementById('replayProjectDetail');
+    if (!payload || !payload.project) {
+      wrap.innerHTML = '<div class="empty-state">Project data is unavailable.</div>';
+      return;
+    }
+    const project = payload.project || {};
+    const relation = payload.replay || null;
+    const media = Array.isArray(payload.media) ? payload.media : [];
+    const notes = Array.isArray(project.notes) ? project.notes : [];
+    const rooms = Array.isArray(project.rooms) ? project.rooms : [];
+    const omittedLostAttachments = Number(
+      payload.replayOmissions?.lostAttachments ||
+      relation?.omittedLostAttachments ||
+      0
+    ) || 0;
+    const omissionText = payload.role === 'replay-copy'
+      ? 'were intentionally omitted from this replay copy'
+      : relation
+        ? 'were intentionally omitted from the replay copy'
+        : 'will be intentionally omitted if this project is replayed';
+    const omissionHtml = omittedLostAttachments > 0
+      ? `<div class="replay-warning"><strong>Evidence omitted:</strong> ${omittedLostAttachments.toLocaleString()} explicitly lost attachment${omittedLostAttachments === 1 ? '' : 's'} ${omissionText}.</div>`
+      : '';
+     const relationState = String(relation?.state || '').toLowerCase();
+     const deletable = payload.role === 'replay-copy' &&
+       relation &&
+       !relation.copyDeletedAt &&
+       ['succeeded', 'failed', 'skipped', 'cancelled'].includes(relationState);
+    const reportUrl = safeHttpsUrl(project.reportUrl);
+    const relationText = relation
+      ? `${payload.role === 'replay-copy' ? 'Replay copy of' : 'Source project'} · batch ${relation.batchId} · ${relation.state}`
+      : 'Eligible source project — no replay copy created yet';
+    const notesHtml = notes.length
+      ? notes.map((note, index) => {
+          const room = rooms.find((candidate) => String(candidate?.id) === String(note?.roomId));
+          const photos = Array.isArray(note?.photos)
+            ? note.photos.map((photo) => {
+                const found = media.find((entry) => String(entry.id) === String(photo?.remoteId));
+                return found
+                  ? `<span>${escHtml(photo.caption || found.originalName || found.id)}</span>`
+                  : `<span>Missing photo ${escHtml(photo?.remoteId || 'reference')}</span>`;
+              }).join('')
+            : '';
+          return `<div class="replay-note">
+            <strong>Note ${index + 1}${room?.name ? ` · ${escHtml(room.name)}` : ''}</strong>
+            ${note?.text ? `<p>${escHtml(note.text)}</p>` : ''}
+            ${note?.transcription ? `<p><strong>Transcription:</strong> ${escHtml(note.transcription)}</p>` : ''}
+            ${photos ? `<div class="replay-evidence">${photos}</div>` : ''}
+          </div>`;
+        }).join('')
+      : '<div class="empty-state">No notes recorded.</div>';
+    const roomHtml = rooms.length
+      ? rooms.map((room) => `<span class="badge badge-pending">${escHtml(room?.name || room?.id || 'Room')}</span>`).join(' ')
+      : '<span style="color:var(--muted)">No rooms recorded.</span>';
+    const reportMetaHtml = project.reportMeta && typeof project.reportMeta === 'object'
+      ? `<details style="margin-top:1rem;">
+          <summary style="cursor:pointer;color:var(--muted);font-size:.82rem;">Report metadata</summary>
+          <pre class="replay-raw">${escHtml(JSON.stringify(project.reportMeta, null, 2))}</pre>
+        </details>`
+      : '';
+    const mediaHtml = media.length
+      ? `<div class="replay-media-grid">${media.map(replayMediaCard).join('')}</div>`
+      : '<div class="empty-state">No durable media references found.</div>';
+    const missingHtml = Array.isArray(payload.missingMediaIds) && payload.missingMediaIds.length
+      ? `<div class="replay-warning">Some referenced media is unavailable on the server: ${payload.missingMediaIds.map(escHtml).join(', ')}</div>`
+      : '';
+    const rawProject = escHtml(JSON.stringify(project, null, 2));
+     const deleteAction = deletable
+       ? `<button class="btn-danger" onclick="deleteReplayProject('${encodeURIComponent(payload.projectId)}')">Delete replay copy</button>`
+       : payload.role === 'replay-copy' && relation && !relation.copyDeletedAt
+         ? '<span class="replay-warning" style="margin:0;">Deletion unavailable while replay is active.</span>'
+         : '';
+
+    wrap.innerHTML = `
+      <div class="replay-detail-header">
+        <div>
+          <div style="font-size:1.1rem;font-weight:700;">${escHtml(project.name || payload.projectId)}</div>
+          <div style="color:var(--muted);font-size:.8rem;margin-top:.25rem;">${escHtml(relationText)}</div>
+        </div>
+        <div class="replay-actions">
+          ${reportUrl ? `<a class="btn-ghost" href="${escHtml(reportUrl)}" target="_blank" rel="noopener noreferrer">Open Google Doc ↗</a>` : ''}
+           ${deleteAction}
+          <button class="btn-ghost" onclick="closeReplayProject()">Close</button>
+        </div>
+      </div>
+      <div class="replay-detail-grid">
+        <div class="replay-detail-field"><strong>Project ID</strong><span>${escHtml(payload.projectId)}</span></div>
+        <div class="replay-detail-field"><strong>Tester</strong><span>${escHtml(payload.tester || 'Unnamed tester')}</span></div>
+        <div class="replay-detail-field"><strong>Inspection date</strong><span>${escHtml(project.inspectionDate || 'Not recorded')}</span></div>
+        <div class="replay-detail-field"><strong>Inspector</strong><span>${escHtml(project.inspector || 'Not recorded')}</span></div>
+        <div class="replay-detail-field"><strong>Report status</strong><span>${escHtml(project.reportStatus || 'Not generated')}</span></div>
+        <div class="replay-detail-field"><strong>Last updated</strong><span>${escHtml(fmtTime(payload.updatedAt))}</span></div>
+      </div>
+      ${project.projectDescriptionText || project.projectDescriptionTranscription ? `
+        <div class="replay-detail-field">
+          <strong>Project description</strong>
+          ${project.projectDescriptionText ? `<p style="white-space:pre-wrap;line-height:1.5;font-size:.86rem;">${escHtml(project.projectDescriptionText)}</p>` : ''}
+          ${project.projectDescriptionTranscription ? `<p style="white-space:pre-wrap;line-height:1.5;font-size:.86rem;margin-top:.45rem;"><strong>Transcription:</strong> ${escHtml(project.projectDescriptionTranscription)}</p>` : ''}
+        </div>` : ''}
+      <div style="margin-top:1rem;"><strong>Rooms</strong><div class="replay-evidence" style="margin-top:.5rem;">${roomHtml}</div></div>
+      <div style="margin-top:1rem;"><strong>Notes and transcriptions</strong>${notesHtml}</div>
+      <div style="margin-top:1rem;"><strong>Durable media</strong>${mediaHtml}${missingHtml}</div>
+       ${omissionHtml}
+      ${reportMetaHtml}
+      ${project.reportError ? `<div class="replay-warning"><strong>Report error:</strong> ${escHtml(project.reportError)}</div>` : ''}
+      <details style="margin-top:1rem;">
+        <summary style="cursor:pointer;color:var(--muted);font-size:.82rem;">Show raw project data</summary>
+        <pre class="replay-raw">${rawProject}</pre>
+      </details>
+    `;
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function openReplayProject(encodedProjectId) {
+    const projectId = decodeURIComponent(String(encodedProjectId || ''));
+    if (!projectId) return;
+    const wrap = document.getElementById('replayProjectDetail');
+    wrap.innerHTML = '<div class="empty-state">Loading project evidence…</div>';
+    try {
+      const res = await apiFetch(`/api/admin/replay/projects/${encodeURIComponent(projectId)}`);
+      const data = await res.json();
+      if (res.status === 404) {
+        wrap.innerHTML = '<div class="empty-state">This project or replay copy no longer exists.</div>';
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
+      renderReplayProjectDetail(data);
+    } catch (err) {
+      wrap.innerHTML = '<div class="empty-state">Unable to load project evidence.</div>';
+      showStatus('Failed to load project: ' + err.message, 'error');
+    }
+  }
+
+  function closeReplayProject() {
+    document.getElementById('replayProjectDetail').innerHTML =
+      '<div class="empty-state">Choose Inspect on a source project or replay result to view its evidence.</div>';
+  }
+
+  async function deleteReplayProject(encodedProjectId) {
+    const projectId = decodeURIComponent(String(encodedProjectId || ''));
+    if (!projectId) return;
+    if (!confirm('Delete this generated replay copy?\n\nThe original source project will be kept. Shared photos, video, and audio will not be removed immediately.')) return;
+    try {
+      const res = await apiFetch(`/api/admin/replay/projects/${encodeURIComponent(projectId)}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ confirmed: true }),
+      });
+      const data = await res.json();
+      if (res.status === 404) {
+        closeReplayProject();
+        showStatus('This replay copy is already gone.', 'info');
+        await loadLatestReplay();
+        return;
+      }
+      if (res.status === 409) throw new Error(data.error || 'This replay copy cannot be deleted yet.');
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
+      closeReplayProject();
+      showStatus('Replay copy deleted. The source project and shared media were kept.', 'success');
+      await loadLatestReplay();
+    } catch (err) {
+      showStatus('Could not delete replay copy: ' + err.message, 'error');
+    }
+  }
+
+  async function startReplayBatch() {
+    const projects = replayProjects(replayPreviewState);
+    const selectedIds = [...replaySelectedProjectIds];
+    const count = selectedIds.length;
+    if (!count) return;
+    const confirmed = confirm(`Start AI replay for ${count} eligible project${count === 1 ? '' : 's'}?\n\nEach eligible project creates a new Google Doc. This may incur AI processing costs and cannot be undone.`);
+    if (!confirmed) return;
+    try {
+      const res = await apiFetch('/api/admin/replay/batches', {
+        method: 'POST',
+        body: JSON.stringify({
+          confirmed: true,
+          previewId: replayPreviewState?.previewId,
+          projectIds: selectedIds,
+        }),
+      });
+      const data = await res.json();
+      if (res.status === 409) {
+        throw new Error('Replay preview is stale. Refresh the preview and confirm again.');
+      }
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
+      showStatus('Replay batch started. Progress will update automatically.', 'success');
+      renderReplayBatch(data);
+      beginReplayPolling(data.batch || data);
+    } catch (err) {
+      showStatus('Could not start replay: ' + err.message, 'error');
+    }
+  }
+
+  function renderReplayBatch(data) {
+    const batch = data?.batch ? { ...data.batch } : { ...(data || {}) };
+    if (data?.counts && !batch.counts) batch.counts = data.counts;
+    if (data?.progress && !batch.progress) batch.progress = data.progress;
+    if (data?.total != null && batch.total == null) batch.total = data.total;
+     const items = data?.items || batch.items || [];
+    if (items.length) batch.items = items;
+    const counts = replayCounts(batch);
+    const total = Math.max(
+      Number(replayValue(batch, ['total', 'total_items', 'project_count'], 0)),
+      items.length,
+    );
+     const cancelled = items.filter(item =>
+      ['cancelled', 'canceled'].includes(String(item.status || '').toLowerCase())
+    ).length;
+     const done = counts.generated + counts.skipped + counts.failed + counts.deleted + cancelled;
+    const percent = total ? Math.min(100, Math.round(done / total * 100)) : 0;
+    const status = replayStatus(batch);
+    const active = ['queued','pending','running','active','processing','in_progress'].includes(status);
+    const resumable = ['paused','failed','cancelled','canceled'].includes(status);
+    const cancellable = active;
+    const batchId = batch.id || batch.batch_id;
+    const actionButtons = batchId ? `
+      ${resumable ? `<button class="btn-primary" onclick="resumeReplay('${encodeURIComponent(batchId)}')">Resume replay</button>` : ''}
+      ${cancellable ? `<button class="btn-danger" onclick="cancelReplay('${encodeURIComponent(batchId)}')">Cancel batch</button>` : ''}` : '';
+     const omittedLostAttachments = counts.omittedLostAttachments;
+     const omissionWarning = omittedLostAttachments > 0
+       ? `<div class="replay-warning"><strong>Evidence omitted from replay:</strong> ${omittedLostAttachments.toLocaleString()} explicitly lost attachment${omittedLostAttachments === 1 ? '' : 's'} were intentionally left out of the replay copies. Unknown local URIs and unowned media remain skipped as errors.</div>`
+       : '';
+    const rows = replayItems(batch).map(item => {
+      const itemStatus = String(item.status || 'pending').toLowerCase();
+      const label = itemStatus.replace(/_/g, ' ');
+      const sourceId = item.sourceProjectId || item.source_project_id || item.projectId || item.project_id || '';
+       const copyId = item.copyProjectId || item.copy_project_id || '';
+       const copyDeletedAt = item.copyDeletedAt || item.copy_deleted_at || null;
+      const name = item.projectName || item.project_name || item.name || sourceId || 'Project';
+      const reason = item.reason || item.error || item.message || '—';
+       const itemDeletable = copyId && !copyDeletedAt &&
+         ['generated', 'succeeded', 'failed', 'skipped', 'cancelled'].includes(itemStatus);
+       const copyAction = copyId
+         ? copyDeletedAt
+           ? '<span class="badge badge-deleted">Replay copy deleted</span>'
+           : itemDeletable
+             ? `<button class="btn-danger" style="font-size:.7rem;padding:.25rem .5rem;" onclick="deleteReplayProject('${encodeURIComponent(copyId)}')">Delete copy</button>`
+             : ''
+         : '';
+       const inspect = sourceId || copyId || copyAction
+        ? `<div class="replay-actions" style="margin-top:.35rem;">
+            ${sourceId ? `<button class="btn-ghost" style="font-size:.7rem;padding:.25rem .5rem;" onclick="openReplayProject('${encodeURIComponent(sourceId)}')">Source</button>` : ''}
+             ${copyId && !copyDeletedAt ? `<button class="btn-ghost" style="font-size:.7rem;padding:.25rem .5rem;" onclick="openReplayProject('${encodeURIComponent(copyId)}')">Replay copy</button>` : ''}
+             ${copyAction}
+           </div>`
+        : '';
+       const badgeStatus = copyDeletedAt ? 'deleted' : itemStatus;
+       const badgeLabel = copyDeletedAt ? 'deleted' : label;
+       return `<tr><td><div class="replay-project-name">${escHtml(name)}</div>${inspect}</td><td><span class="badge badge-${escHtml(badgeStatus)}">${escHtml(badgeLabel)}</span></td><td class="reason">${escHtml(reason)}</td></tr>`;
+    }).join('');
+    document.getElementById('replayBatch').innerHTML = `
+      <div class="replay-status"><div><strong>Batch ${escHtml(String(batchId || '—'))}</strong><div style="color:var(--muted);font-size:.8rem;margin-top:.25rem;">Status: ${escHtml(status)}</div></div><div class="replay-actions">${actionButtons}</div></div>
+      <div class="replay-progress" aria-label="${percent}% complete"><div style="width:${percent}%"></div></div>
+      <div class="replay-summary">
+        <div class="replay-metric"><strong>${counts.created}</strong><span>Created</span></div>
+        <div class="replay-metric"><strong>${counts.generated}</strong><span>Generated</span></div>
+        <div class="replay-metric"><strong>${counts.skipped}</strong><span>Skipped</span></div>
+         <div class="replay-metric"><strong>${counts.failed}</strong><span>Failed</span></div>
+         <div class="replay-metric"><strong>${counts.deleted}</strong><span>Deleted</span></div>
+        <div class="replay-metric"><strong>${counts.pending}</strong><span>Pending</span></div>
+         <div class="replay-metric"><strong>${omittedLostAttachments}</strong><span>Lost attachments omitted</span></div>
+      </div>
+       ${omissionWarning}
+       ${rows ? `<div class="replay-scroll"><table class="replay-table"><thead><tr><th>Project</th><th>Status</th><th>Reason</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="empty-state">No replay items returned for this batch.</div>'}
+    `;
+  }
+
+  async function loadReplayBatch(id) {
+    try {
+      const res = await apiFetch(id ? `/api/admin/replay/batches/${encodeURIComponent(id)}` : '/api/admin/replay/batches/latest');
+      const data = await res.json();
+      if (res.status === 404) {
+        document.getElementById('replayBatch').innerHTML = '<div class="empty-state">No replay batches yet.</div>';
+        return;
+      }
+      if (!res.ok) throw new Error(data.error || 'Unknown error');
+      renderReplayBatch(data);
+      beginReplayPolling(data.batch || data);
+    } catch (err) {
+      document.getElementById('replayBatch').innerHTML = '<div class="empty-state">Unable to load replay batch. Use Refresh batch to try again.</div>';
+      showStatus('Failed to load replay batch: ' + err.message, 'error');
+    }
+  }
+
+  function loadLatestReplay() { return loadReplayBatch(); }
+
+  function beginReplayPolling(batch) {
+    if (replayPollTimer) clearTimeout(replayPollTimer);
+    if (!['queued','pending','running','active','processing','in_progress'].includes(replayStatus(batch))) return;
+    replayPollTimer = setTimeout(async () => {
+      await loadReplayBatch(batch.id || batch.batch_id);
+    }, 2500);
+  }
+
+  async function resumeReplay(id) {
+    if (!confirm('Resume this replay batch? Pending eligible projects will be processed and each creates a new Google Doc.')) return;
+    try {
+      const res = await apiFetch(`/api/admin/replay/batches/${id}/resume`, { method:'POST', body: JSON.stringify({confirmed:true}) });
+      const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Unknown error');
+      renderReplayBatch(data); beginReplayPolling(data.batch || data); showStatus('Replay batch resumed.', 'success');
+    } catch (err) { showStatus('Could not resume replay: ' + err.message, 'error'); }
+  }
+
+  async function cancelReplay(id) {
+    if (!confirm('Cancel this replay batch? Pending projects will not be processed.')) return;
+    try {
+      const res = await apiFetch(`/api/admin/replay/batches/${id}/cancel`, { method:'POST', body: JSON.stringify({}) });
+      const data = await res.json(); if (!res.ok) throw new Error(data.error || 'Unknown error');
+      renderReplayBatch(data); showStatus('Replay batch cancelled.', 'success');
+    } catch (err) { showStatus('Could not cancel replay: ' + err.message, 'error'); }
+  }
+
+  // ── Labs: prompt iteration ───────────────────────────────────────────────────
+  // Doc-free test runs. The block checkboxes are generated from the engine's
+  // registry (GET /labs/blocks), never hardcoded here, so the UI cannot drift
+  // from ai-engine/prompt.py.
+  let labsBlocks = [];
+  let labsCases = [];
+  let labsProjects = [];
+  let labsLastRun = null;
+
+  function labsEnabledIds() {
+    return labsBlocks
+      .filter(b => {
+        const el = document.getElementById('labs-block-' + b.id);
+        return el && el.checked;
+      })
+      .map(b => b.id);
+  }
+
+  // Mirrors resolve_enabled() in prompt.py: a block whose dependencies are not
+  // met is inert, so show it as such instead of letting it look active.
+  function labsUnmetDeps(block, enabled) {
+    const missing = (block.requires || []).filter(dep => !enabled.includes(dep));
+    const anyOk = !(block.requiresAny || []).length ||
+      (block.requiresAny || []).some(dep => enabled.includes(dep));
+    if (!anyOk) missing.push((block.requiresAny || []).join(' eller '));
+    return missing;
+  }
+
+  function labsRefreshDependencyHints() {
+    const enabled = labsEnabledIds();
+    labsBlocks.forEach(b => {
+      const hint = document.getElementById('labs-dep-' + b.id);
+      if (!hint) return;
+      const missing = labsUnmetDeps(b, enabled);
+      const inert = enabled.includes(b.id) && missing.length;
+      hint.textContent = inert ? 'Inaktiv — krever ' + missing.join(', ') : '';
+      hint.style.display = inert ? 'block' : 'none';
+    });
+  }
+
+  async function loadLabsForm() {
+    const wrap = document.getElementById('labsForm');
+    wrap.innerHTML = '<div class="empty-state">Laster blokker …</div>';
+    try {
+      const [blocksRes, casesRes] = await Promise.all([
+        apiFetch('/api/admin/labs/blocks'),
+        apiFetch('/api/admin/labs/cases'),
+      ]);
+      const blocksData = await blocksRes.json();
+      if (!blocksRes.ok) throw new Error(blocksData.error || 'Kunne ikke hente blokker');
+      const casesData = await casesRes.json();
+      if (!casesRes.ok) throw new Error(casesData.error || 'Kunne ikke hente caser');
+
+      labsBlocks = blocksData.blocks || [];
+      labsCases = casesData.cases || [];
+      labsProjects = casesData.projects || [];
+      renderLabsForm(blocksData.prompt_version);
+      renderLabsCasesList();
+    } catch (err) {
+      wrap.innerHTML = '<div class="empty-state">Kunne ikke laste Labs: ' + escHtml(err.message) + '</div>';
+    }
+  }
+
+  function renderLabsCasesList() {
+    const wrap = document.getElementById('labsCasesList');
+    if (!wrap) return;
+    if (!labsCases.length) {
+      wrap.innerHTML = '<div class="empty-state">Ingen referansecaser ennå.</div>';
+      return;
+    }
+    wrap.innerHTML = labsCases.map(c => {
+      const manual = c.source === 'manual';
+      return (
+        '<div class="replay-project-check" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+          '<div>' +
+            '<span class="replay-project-name">' + escHtml(c.label || c.caseId) + '</span> ' +
+            '<span class="replay-project-meta">' + escHtml(c.caseId) + '</span> ' +
+            '<span class="badge ' + (manual ? 'badge-skipped' : 'badge-active') + '">' + (manual ? 'manuell' : 'fixture') + '</span> ' +
+            (c.provisional ? '<span class="badge badge-skipped">foreløpig</span>' : '') +
+          '</div>' +
+          (manual
+            ? '<div>' +
+                '<button class="btn-ghost" onclick="editLabsCase(' + JSON.stringify(c.caseId) + ')">Rediger</button> ' +
+                '<button class="btn-ghost" onclick="deleteLabsCase(' + JSON.stringify(c.caseId) + ')">Slett</button>' +
+              '</div>'
+            : '<span class="replay-project-meta">rediger i fixture-filen</span>')
+        + '</div>'
+      );
+    }).join('');
+  }
+
+  function editLabsCase(caseId) {
+    const c = labsCases.find(x => x.caseId === caseId);
+    if (!c || c.source !== 'manual') return;
+    document.getElementById('labsCaseUploadId').value = c.caseId;
+    document.getElementById('labsCaseUploadLabel').value = c.label || '';
+    document.getElementById('labsCaseUploadNote').value = c.sourceNote || '';
+    document.getElementById('labsCaseUploadProvisional').checked = c.provisional !== false;
+    document.getElementById('labsCaseUploadJson').value = JSON.stringify(c.reference, null, 2);
+    document.getElementById('labsCaseUploadJson').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function uploadLabsCase() {
+    const caseId = ((document.getElementById('labsCaseUploadId') || {}).value || '').trim();
+    if (!caseId) { showStatus('Case-ID er påkrevd.', 'error'); return; }
+    const label = ((document.getElementById('labsCaseUploadLabel') || {}).value || '').trim();
+    const sourceNote = ((document.getElementById('labsCaseUploadNote') || {}).value || '').trim();
+    const provisional = !!(document.getElementById('labsCaseUploadProvisional') || {}).checked;
+    const rawJson = ((document.getElementById('labsCaseUploadJson') || {}).value || '').trim();
+    let reference;
+    try {
+      reference = JSON.parse(rawJson);
+    } catch (err) {
+      showStatus('Fasit-JSON er ikke gyldig: ' + err.message, 'error');
+      return;
+    }
+    const btn = document.getElementById('labsCaseUploadBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Lagrer …'; }
+    try {
+      const res = await apiFetch('/api/admin/labs/cases/' + encodeURIComponent(caseId), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label, sourceNote, provisional, reference }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      showStatus('Case lagret.', 'success');
+      await loadLabsForm();
+    } catch (err) {
+      showStatus('Kunne ikke lagre case: ' + err.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Lagre case'; }
+    }
+  }
+
+  async function deleteLabsCase(caseId) {
+    if (!confirm('Slette manuell case "' + caseId + '"? Kan ikke angres.')) return;
+    try {
+      const res = await apiFetch('/api/admin/labs/cases/' + encodeURIComponent(caseId), { method: 'DELETE' });
+      if (!res.ok && res.status !== 204) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || ('HTTP ' + res.status));
+      }
+      showStatus('Case slettet.', 'success');
+      await loadLabsForm();
+    } catch (err) {
+      showStatus('Kunne ikke slette case: ' + err.message, 'error');
+    }
+  }
+
+  function renderLabsForm(promptVersion) {
+    const projectOptions = labsProjects.map(p =>
+      '<option value="' + escHtml(p.projectId) + '">' +
+        escHtml(p.projectName || p.projectId) +
+        (p.isTestProject ? ' (replay-kopi)' : '') +
+        (p.tester ? ' — ' + escHtml(p.tester) : '') +
+      '</option>'
+    ).join('');
+
+    const caseOptions = ['<option value="">Ingen fasit (kjør uten skåring)</option>'].concat(
+      labsCases.map(c =>
+        '<option value="' + escHtml(c.caseId) + '">' +
+          escHtml(c.label || c.caseId) +
+          (c.provisional ? ' — foreløpig fasit' : '') +
+        '</option>'
+      )
+    ).join('');
+
+    const blockRows = labsBlocks.map(b =>
+      '<label class="replay-project-check" style="display:block;margin-bottom:6px;">' +
+        '<input type="checkbox" id="labs-block-' + escHtml(b.id) + '"' +
+          (b.default ? ' checked' : '') +
+          ' onchange="labsRefreshDependencyHints()"> ' +
+        '<span class="replay-project-name">' + escHtml(b.label) + '</span> ' +
+        '<span class="replay-project-meta">' + escHtml(b.kind) + '</span>' +
+        (b.note ? '<div class="replay-project-meta">' + escHtml(b.note) + '</div>' : '') +
+        '<div class="replay-warning" id="labs-dep-' + escHtml(b.id) + '" style="display:none;"></div>' +
+      '</label>'
+    ).join('');
+
+    document.getElementById('labsForm').innerHTML =
+      '<div class="replay-detail-grid">' +
+        '<div class="replay-detail-field"><label>Prosjekt<br>' +
+          '<select id="labsProject" style="width:100%;">' + projectOptions + '</select></label></div>' +
+        '<div class="replay-detail-field"><label>Fasit<br>' +
+          '<select id="labsCase" style="width:100%;">' + caseOptions + '</select></label></div>' +
+        '<div class="replay-detail-field"><label>Variantnavn (valgfritt)<br>' +
+          '<input id="labsVariant" type="text" placeholder="f.eks. uten-femkilder" style="width:100%;"></label></div>' +
+      '</div>' +
+      '<div style="margin:14px 0 6px;"><strong>Promptblokker</strong> ' +
+        '<span class="replay-project-meta">prompt_version ' + escHtml(promptVersion || '?') + '</span></div>' +
+      blockRows +
+      '<div class="replay-detail-field" style="margin-top:12px;"><label>Notat (valgfritt)<br>' +
+        '<input id="labsNote" type="text" placeholder="hva tester du?" style="width:100%;"></label></div>' +
+      '<div class="replay-actions" style="margin-top:14px;">' +
+        '<button class="btn-primary" id="labsRunBtn" onclick="startLabsRun()">Kjør test</button> ' +
+        '<button class="btn-ghost" onclick="labsSetAllBlocks(true)">Alle på</button> ' +
+        '<button class="btn-ghost" onclick="labsSetAllBlocks(false)">Alle av</button>' +
+      '</div>';
+    labsRefreshDependencyHints();
+  }
+
+  function labsSetAllBlocks(on) {
+    labsBlocks.forEach(b => {
+      const el = document.getElementById('labs-block-' + b.id);
+      if (el) el.checked = on;
+    });
+    labsRefreshDependencyHints();
+  }
+
+  async function startLabsRun() {
+    const projectId = (document.getElementById('labsProject') || {}).value;
+    if (!projectId) { showStatus('Velg et prosjekt først.', 'error'); return; }
+    const caseId = (document.getElementById('labsCase') || {}).value || null;
+    const variant = ((document.getElementById('labsVariant') || {}).value || '').trim();
+    const note = ((document.getElementById('labsNote') || {}).value || '').trim();
+    const enabled = labsEnabledIds();
+
+    const btn = document.getElementById('labsRunBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Kjører …'; }
+    document.getElementById('labsResult').innerHTML =
+      '<div class="empty-state">Kjører analyse — dette tar like lang tid som en vanlig rapport.</div>';
+
+    try {
+      const res = await apiFetch('/api/admin/labs/runs', {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId: projectId,
+          caseId: caseId,
+          blocks: enabled,
+          variantId: variant || null,
+          variantLabel: variant || null,
+          note: note || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ukjent feil');
+      labsLastRun = data.run;
+      renderLabsResult(data.run);
+      loadLabsRuns();
+      showStatus(data.run.status === 'ok' ? 'Kjøring fullført.' : 'Kjøringen feilet — se resultat.',
+        data.run.status === 'ok' ? 'success' : 'error');
+    } catch (err) {
+      document.getElementById('labsResult').innerHTML =
+        '<div class="empty-state">Kjøringen feilet: ' + escHtml(err.message) + '</div>';
+      showStatus('Kjøringen feilet: ' + err.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Kjør test'; }
+    }
+  }
+
+  function labsScoreChip(dim) {
+    const cls = dim.points ? 'badge-generated' : 'badge-failed';
+    const basis = dim.basis === 'auto' ? '' :
+      dim.basis === 'manual' ? ' ✎' : ' ?';
+    return '<span class="badge ' + cls + '" title="' + escHtml(dim.reason || '') + '">' +
+      escHtml(dim.dimension) + basis + '</span> ';
+  }
+
+  function renderLabsResult(run) {
+    if (!run) return;
+    const a = run.analysis || {};
+    const parts = [];
+
+    if (run.status !== 'ok') {
+      parts.push('<div class="replay-warning">Feil: ' + escHtml(run.error || 'ukjent') + '</div>');
+    }
+
+    if (run.score) {
+      const heur = run.score.detail.filter(d => d.basis === 'heuristic').length;
+      parts.push('<div class="replay-summary"><div class="replay-metric"><strong>' +
+        run.score.total + ' / ' + run.score.max + '</strong><span>skår</span></div></div>');
+      parts.push('<div style="margin:8px 0;">' + run.score.detail.map(labsScoreChip).join('') + '</div>');
+      if (heur) {
+        parts.push('<div class="replay-callout">' + heur + ' av ' + run.score.detail.length +
+          ' dimensjoner er heuristiske (merket ?) — de tilnærmer en faglig vurdering og bør ' +
+          'etterses, ikke leses som fasit.</div>');
+      }
+      if (run.score.provisionalReference) {
+        parts.push('<div class="replay-warning">Fasiten er foreløpig (utledet fra repo-dokumentasjon, ' +
+          'ikke transkribert fra fagpersonens egen rapport). Skåren er retningsgivende.</div>');
+      }
+      parts.push('<ul class="replay-note">' + run.score.detail.map(d =>
+        '<li><strong>' + escHtml(d.dimension) + '</strong> (' + d.points + '/1, ' +
+        escHtml(d.basis) + '): ' + escHtml(d.reason || '') + '</li>').join('') + '</ul>');
+    }
+
+    parts.push('<div class="replay-detail-grid">' +
+      ['area','source_category','acute_or_gradual','is_habitable'].map(k =>
+        '<div class="replay-detail-field"><span class="replay-project-meta">' + escHtml(k) +
+        '</span><br>' + escHtml(String(a[k] == null ? '—' : a[k])) + '</div>').join('') +
+      '</div>');
+
+    ['source','cause','description','extent_description','repairs_description'].forEach(k => {
+      if (a[k]) parts.push('<div class="replay-detail-field"><span class="replay-project-meta">' +
+        escHtml(k) + '</span><br>' + escHtml(a[k]) + '</div>');
+    });
+
+    const points = a.evidence_points || [];
+    if (points.length) {
+      parts.push('<div style="margin-top:10px;"><strong>Bevispunkter</strong></div>' +
+        '<ul class="replay-note">' + points.map(p =>
+          '<li>' + escHtml(p.caption || '') + ' — ' + escHtml(p.visual_confirmation || '') +
+          (p.technical_reference ? ' <em>' + escHtml(p.technical_reference) + '</em>' : '') +
+          (p.source_photo_index != null ? ' [foto ' + escHtml(String(p.source_photo_index)) + ']' : '') +
+          '</li>').join('') + '</ul>');
+    }
+
+    const meta = [
+      'prompt_version ' + (run.promptVersion || '?'),
+      'sha ' + String(run.promptSha256 || '').slice(0, 12),
+      run.model || '?',
+      (run.durationMs != null ? Math.round(run.durationMs / 1000) + ' s' : ''),
+      (run.tokenUsage ? (run.tokenUsage.total_tokens || '?') + ' tokens' : ''),
+    ].filter(Boolean).join(' · ');
+    parts.push('<div class="replay-project-meta" style="margin-top:10px;">' + escHtml(meta) + '</div>');
+
+    if (run.blocksEnabled) {
+      parts.push('<div style="margin-top:6px;">' + (run.blocksEnabled || []).map(b =>
+        '<span class="badge badge-created">' + escHtml(b) + '</span> ').join('') + '</div>');
+    }
+
+    if (run.resolvedPrompt) {
+      parts.push('<details style="margin-top:10px;"><summary>Løst prompt</summary>' +
+        '<pre class="replay-raw">' + escHtml(
+          '===== SYSTEM =====\n' + (run.resolvedPrompt.system || '') +
+          '\n\n===== OPPDRAG =====\n' + (run.resolvedPrompt.mission || '') +
+          '\n\n===== KONTEKST =====\n' + (run.resolvedPrompt.context || '')
+        ) + '</pre></details>');
+    }
+
+    document.getElementById('labsResult').innerHTML = parts.join('');
+  }
+
+  async function loadLabsRuns() {
+    const wrap = document.getElementById('labsRuns');
+    try {
+      const res = await apiFetch('/api/admin/labs/runs?limit=50');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ukjent feil');
+      renderLabsRuns(data.runs || []);
+    } catch (err) {
+      wrap.innerHTML = '<div class="empty-state">Kunne ikke hente historikk: ' + escHtml(err.message) + '</div>';
+    }
+  }
+
+  function renderLabsRuns(runs) {
+    const wrap = document.getElementById('labsRuns');
+    if (!runs.length) {
+      wrap.innerHTML = '<div class="empty-state">Ingen kjøringer logget.</div>';
+      return;
+    }
+    const rows = runs.map(r => {
+      const score = r.scoreTotal == null ? '—' : r.scoreTotal + '/' + r.scoreMax;
+      const blocks = (r.blocksEnabled || []).length;
+      return '<tr onclick="openLabsRun(' + r.id + ')" style="cursor:pointer;">' +
+        '<td>' + escHtml(fmtTime(r.createdAt)) + '</td>' +
+        '<td>' + escHtml(r.variantLabel || r.variantId || '—') + '</td>' +
+        '<td>' + escHtml(r.caseId || '—') + '</td>' +
+        '<td>' + escHtml(score) + '</td>' +
+        '<td>' + blocks + ' blokker</td>' +
+        '<td>' + escHtml(r.promptVersion || '—') + '</td>' +
+        '<td>' + escHtml(String(r.promptSha256 || '').slice(0, 8)) + '</td>' +
+        '<td><span class="badge ' + (r.status === 'ok' ? 'badge-generated' : 'badge-failed') + '">' +
+          escHtml(r.status) + '</span></td>' +
+      '</tr>';
+    }).join('');
+    wrap.innerHTML = '<div class="replay-scroll"><table class="replay-table">' +
+      '<thead><tr><th>Tid</th><th>Variant</th><th>Fasit</th><th>Skår</th><th>Blokker</th>' +
+      '<th>Promptversjon</th><th>sha</th><th>Status</th></tr></thead><tbody>' +
+      rows + '</tbody></table></div>';
+  }
+
+  async function openLabsRun(id) {
+    try {
+      const res = await apiFetch('/api/admin/labs/runs/' + encodeURIComponent(id));
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ukjent feil');
+      const run = data.run;
+      // The stored row keeps score fields flat; the renderer wants the nested
+      // shape a fresh run returns.
+      if (run.scoreDetail) {
+        run.score = {
+          total: run.scoreTotal,
+          max: run.scoreMax,
+          detail: run.scoreDetail,
+          provisionalReference: false,
+        };
+      }
+      renderLabsResult(run);
+      document.getElementById('labsResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+      showStatus('Kunne ikke hente kjøring: ' + err.message, 'error');
+    }
   }
 
   // ── Load & render token list ──────────────────────────────────────────────────
@@ -862,6 +1938,7 @@
           return res.json().then(data => {
             document.getElementById('overlay').classList.add('hidden');
             renderTokenList(data);
+            loadLatestReplay();
           });
         })
         .catch(() => { /* leave overlay visible */ });

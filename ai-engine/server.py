@@ -7,8 +7,16 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import Optional
-from main import create_report, ReportPipelineError
-from prompt import PROMPT_VERSION
+from google import genai
+from main import (
+    analyze_damage,
+    create_report,
+    prepare_gemini_media,
+    ReportPipelineError,
+    ReportAlreadyComplete,
+    cleanup_photo_files,
+)
+from prompt import PROMPT_VERSION, blocks_manifest, resolve_enabled
 from google_api import connect_to_google_api_personal, download_knowledge_from_drive, export_doc_as_pdf, export_doc_as_docx
 
 # Google Docs/Drive-klientene (httplib2) har ellers ingen timeout: én hengende
@@ -30,6 +38,22 @@ class ReportRequest(BaseModel):
     report_meta: dict = {}    # Per-project metadata for template replacements
     project: dict = {}        # Full project context: description, notes (text/transcription/photos)
     tester_email: str = ""    # Email address to share the finished doc with (optional)
+    report_attempt_id: Optional[str] = None
+
+
+class AnalyzeRequest(BaseModel):
+    """
+    Dokumentfri testkjøring (Labs). Samme materiale som /api/report, men uten
+    Google Doc: ingen malkopi, ingen fletting, ingen deling.
+    """
+    video_url: Optional[str] = None
+    report_meta: dict = {}
+    project: dict = {}
+    # None = produksjonsstandard. Ellers blokk-id-ene fra /api/prompt/blocks.
+    blocks: Optional[list] = None
+    # Tar med den løste promptteksten i svaret (default på: den er poenget
+    # med å feilsøke en variant).
+    include_prompt: bool = True
 
 TEMP_KNOWLEDGE_DIR = "./temp_knowledge"
 TEMP_VIDEO_DIR = "./videos"
@@ -179,6 +203,108 @@ def export_document(doc_id: str, format: str, fastapi_req: Request):
     )
 
 
+@app.get("/api/prompt/blocks")
+def prompt_blocks(fastapi_req: Request):
+    """
+    Blokkregisteret — kilden admin-dashbordet genererer avkryssingsboksene fra,
+    slik at UI-et ikke kan drifte fra prompt.BLOCKS.
+    """
+    client_token = fastapi_req.headers.get("x-tester-token")
+    if client_token != os.getenv("TESTER_TOKEN"):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return {"prompt_version": PROMPT_VERSION, "blocks": blocks_manifest()}
+
+
+@app.post("/api/analyze")
+def run_doc_free_analysis(fastapi_req: Request, request: AnalyzeRequest):
+    """
+    Testkjøring uten Google Doc: kjører samme analyse som /api/report og
+    returnerer den strukturerte DamageAnalysis direkte. Ingen malkopi, ingen
+    fletting, ingen deling — og ingen Google-kontakt i det hele tatt med mindre
+    kunnskapsbase-blokken er på.
+    """
+    client_token = fastapi_req.headers.get("x-tester-token")
+    if client_token != os.getenv("TESTER_TOKEN"):
+        print("🚫 Rejected /api/analyze: wrong token")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    request_id = fastapi_req.headers.get("x-request-id")
+    if request_id:
+        print(f"🔗 Request-id fra API: {request_id}")
+
+    active = resolve_enabled(request.blocks)
+
+    # Drive trengs KUN for kunnskapsbasen. Er blokken av, rører denne veien
+    # ingen Google-tjeneste — det er hele poenget med den dokumentfrie stien.
+    if "kunnskapsbase_pdf" in active:
+        knowledge_id = os.getenv("KNOWLEDGE_FOLDER")
+        if knowledge_id:
+            try:
+                _docs, drive_service = connect_to_google_api_personal()
+            except EnvironmentError as e:
+                raise HTTPException(status_code=503, detail=str(e))
+            except Exception as e:
+                raise HTTPException(status_code=503, detail=f"Failed to connect to Google API: {str(e)}")
+            download_knowledge_from_drive(drive_service, knowledge_id, TEMP_KNOWLEDGE_DIR)
+
+    video_path = None
+    if request.video_url:
+        try:
+            video_path = download_video_from_url(request.video_url, TEMP_VIDEO_DIR)
+        except (ValueError, FileNotFoundError, PermissionError) as e:
+            return {"status": "error", "message": str(e), "prompt_version": PROMPT_VERSION}
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Failed to download video: {str(e)}",
+                "prompt_version": PROMPT_VERSION,
+            }
+
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_key:
+        raise HTTPException(status_code=503, detail="GEMINI_API_KEY is not configured")
+
+    photo_records = []
+    try:
+        genai_client = genai.Client(api_key=gemini_key)
+        video_file, photo_records = prepare_gemini_media(
+            genai_client, video_path, request.project
+        )
+        analysis, token_usage, prompt_meta = analyze_damage(
+            genai_client,
+            request.project,
+            request.report_meta,
+            video_file=video_file,
+            photo_records=photo_records,
+            enabled=active,
+        )
+    except Exception as e:
+        print(f"❌ Error during doc-free analysis: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": str(e), "prompt_version": PROMPT_VERSION}
+    finally:
+        # Ingen Doc å rydde her — kun de lokale fotokopiene.
+        cleanup_photo_files(photo_records)
+
+    payload = {
+        "status": "success",
+        "analysis": analysis.model_dump() if analysis is not None else None,
+        "token_usage": token_usage,
+        "prompt_version": prompt_meta["prompt_version"],
+        "prompt_sha256": prompt_meta["sha256"],
+        "blocks_enabled": prompt_meta["blocks_enabled"],
+        "model": prompt_meta["model"],
+    }
+    if request.include_prompt:
+        payload["resolved_prompt"] = {
+            "system": prompt_meta["system"],
+            "mission": prompt_meta["mission"],
+            "context": prompt_meta["context"],
+        }
+    return payload
+
+
 @app.post("/api/report")
 def run_analysis(fastapi_req: Request, request: ReportRequest):
     client_token = fastapi_req.headers.get("x-tester-token")
@@ -226,6 +352,7 @@ def run_analysis(fastapi_req: Request, request: ReportRequest):
             report_meta=request.report_meta,
             project=request.project,
             tester_email=request.tester_email or None,
+            report_attempt_id=request.report_attempt_id,
         )
         report_url = f"https://docs.google.com/document/d/{doc_id}"
         # A5: den strukturerte analysen følger med som eget felt, slik at
@@ -255,6 +382,17 @@ def run_analysis(fastapi_req: Request, request: ReportRequest):
         if e.doc_id:
             payload["doc_id"] = e.doc_id
         return payload
+    except ReportAlreadyComplete as e:
+        # A retried API request must discover the original document rather than
+        # charging Gemini or creating a second Drive copy.
+        return {
+            "status": "success",
+            "url": f"https://docs.google.com/document/d/{e.doc_id}",
+            "analysis": None,
+            "token_usage": None,
+            "idempotent": True,
+            "prompt_version": PROMPT_VERSION,
+        }
     except Exception as e:
         print(f"❌ Error during analysis: {str(e)}")
         import traceback

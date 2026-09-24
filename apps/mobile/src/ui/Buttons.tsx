@@ -97,7 +97,7 @@ export const PrimaryButton = ({ children, style, loading, disabled, icon, width,
   );
 };
 
-export const SecondaryButton = ({ children, style, disabled, icon, width, ...props }: ButtonProps) => {
+export const SecondaryButton = ({ children, style, loading, disabled, icon, width, ...props }: ButtonProps) => {
   const theme = useAppTheme();
   const baseStyle: ViewStyle = {
     backgroundColor: theme.colors.surfaceSecondary,
@@ -117,13 +117,19 @@ export const SecondaryButton = ({ children, style, disabled, icon, width, ...pro
   return (
     <PressableScale
       {...props}
-      disabled={disabled}
+      disabled={disabled || loading}
       style={[baseStyle, style as StyleProp<ViewStyle>]}
       backgroundColor={theme.colors.surfaceSecondary}
       foreground={theme.colors.foreground}
     >
-      {icon}
-      <Body style={{ color: theme.colors.foreground, fontWeight: '600' }} numberOfLines={1}>{children}</Body>
+      {loading ? (
+        <ActivityIndicator color={theme.colors.foreground} />
+      ) : (
+        <>
+          {icon}
+          <Body style={{ color: theme.colors.foreground, fontWeight: '600' }} numberOfLines={1}>{children}</Body>
+        </>
+      )}
     </PressableScale>
   );
 };

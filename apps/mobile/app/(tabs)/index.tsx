@@ -25,6 +25,10 @@ import { fetchReportStatus, resolveStuckReport } from '@/src/sync/reportRecovery
 import { newId } from '@/src/lib/ids';
 import { CaseFile, NO_DATE_SET, Project, UNKNOWN_INSPECTOR } from '@/src/features/projects/types';
 import { formatMinutes, minutesToApproved } from '@/src/features/projects/metrics';
+import {
+  createTestProjectCopy,
+  hasPendingProjectMedia,
+} from '@/src/features/projects/testProject';
 
 // Treff fra Kartverkets adresse-API, via /api/underlag/adresse.
 type AddressHit = {
@@ -52,6 +56,7 @@ import {
 import {
   deleteProjectRemote,
   pullAndMerge,
+  pushProject,
   schedulePush,
   syncNow,
   touchProject,
@@ -120,6 +125,7 @@ export default function Index() {
   // Projects
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [duplicatingProjectId, setDuplicatingProjectId] = useState<string | null>(null);
 
   // Filter & search (ephemeral — resets on navigation)
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
@@ -254,7 +260,7 @@ export default function Index() {
                 resolved.push(p);
                 continue;
               }
-              const status = await fetchReportStatus(p.id);
+              const status = await fetchReportStatus(p.id, p.reportAttemptId);
               // Uten svar (offline/eldre server): dagens oppførsel — avbrutt.
               const outcome = status
                 ? resolveStuckReport(p, status)
@@ -270,6 +276,7 @@ export default function Index() {
                   ...p,
                   reportStatus: 'failed' as const,
                   reportError: nb.report.interrupted,
+                  reportAttemptId: undefined,
                 });
                 resolved.push(reset);
                 changed.push(reset);
@@ -439,6 +446,39 @@ export default function Index() {
     // Ikke overskriv lagringsfeil-toasten med en suksessmelding (én toast vises om gangen).
     if (saved) {
       toast.show({ message: nb.projects.created, variant: 'success' });
+    }
+  };
+
+  const duplicateAsTestProject = async (source: Project) => {
+    if (duplicatingProjectId) return;
+    setDuplicatingProjectId(source.id);
+    try {
+      // Finish source uploads first. pushProject persists successful remote IDs
+      // into local storage even when the later project PUT cannot complete.
+      await pushProject(source);
+      const refreshed = await loadProjects();
+      const durableSource = refreshed.find((project) => project.id === source.id);
+      if (!durableSource || hasPendingProjectMedia(durableSource)) {
+        toast.show({ message: nb.projects.testCopyNeedsUpload, variant: 'info' });
+        return;
+      }
+
+      const testProject = createTestProjectCopy(
+        durableSource,
+        refreshed,
+        newId(),
+      );
+      const saved = await saveProjectsToStorage(
+        [testProject, ...refreshed],
+        testProject,
+      );
+      if (saved) {
+        toast.show({ message: nb.projects.testCopyCreated, variant: 'success' });
+      }
+    } catch {
+      toast.show({ message: nb.projects.testCopyFailed, variant: 'error' });
+    } finally {
+      setDuplicatingProjectId(null);
     }
   };
 
@@ -909,7 +949,45 @@ export default function Index() {
             {/* Name + meta + menu */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: theme.spacing.sm }}>
               <View style={{ flex: 1, gap: theme.spacing.xs }}>
-                <Title numberOfLines={1}>{item.name}</Title>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs, flexWrap: 'wrap' }}>
+                  <Title numberOfLines={1} style={{ flexShrink: 1 }}>{item.name}</Title>
+                  {item.isTestProject ? (
+                    <View
+                      style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        borderRadius: theme.radii.pill,
+                        backgroundColor: `${theme.colors.accent}1A`,
+                        borderWidth: 1,
+                        borderColor: theme.colors.accent,
+                      }}
+                    >
+                      <Caption style={{ color: theme.colors.accent, fontWeight: '700' }}>
+                        {nb.projects.testProject}
+                      </Caption>
+                    </View>
+                  ) : null}
+                  {item.hasSuccessfulDocument ? (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 4,
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        borderRadius: theme.radii.pill,
+                        backgroundColor: `${theme.colors.accent}1A`,
+                        borderWidth: 1,
+                        borderColor: theme.colors.accent,
+                      }}
+                    >
+                      <Ionicons name="checkmark-circle" size={13} color={theme.colors.accent} />
+                      <Caption style={{ color: theme.colors.accent, fontWeight: '700' }}>
+                        {nb.projects.documentCreated}
+                      </Caption>
+                    </View>
+                  ) : null}
+                </View>
                 <Caption muted>{metaText}</Caption>
               </View>
               <IconButton
@@ -928,6 +1006,36 @@ export default function Index() {
                 {`${noteCount} ${nb.projects.notesCount} · ${photoCount} ${nb.projects.photosCount} · ${audioCount} ${nb.projects.audioCount}`}
               </Caption>
             </View>
+
+            {!item.isTestProject ? (
+              <TouchableOpacity
+                testID={`duplicate-test-project-${item.id}`}
+                accessibilityRole="button"
+                accessibilityLabel={`${nb.projects.createTestCopy}: ${item.name}`}
+                disabled={duplicatingProjectId !== null}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  void duplicateAsTestProject(item);
+                }}
+                style={{
+                  alignSelf: 'flex-start',
+                  minHeight: 40,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  paddingHorizontal: theme.spacing.sm,
+                  borderRadius: theme.radii.pill,
+                  backgroundColor: theme.colors.surfaceSecondary,
+                }}
+              >
+                <Ionicons name="copy-outline" size={15} color={theme.colors.accent} />
+                <Caption style={{ color: theme.colors.accent, fontWeight: '600' }}>
+                  {duplicatingProjectId === item.id
+                    ? nb.projects.preparingTestCopy
+                    : nb.projects.createTestCopy}
+                </Caption>
+              </TouchableOpacity>
+            ) : null}
 
             {/* Tid til godkjent rapport — pilotmetrikken (A3). Kobber = nøkkeltall. */}
             {approvedMinutes !== null && (

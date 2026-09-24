@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
+const { randomUUID } = require("crypto");
 const requireTesterToken = require("./middleware/requireTesterToken");
 const { generalLimiter, heavyLimiter } = require("./middleware/rateLimiters");
 const requestLogger = require("./middleware/requestLogger");
@@ -13,6 +14,12 @@ const { getPool, isDbEnabled } = require("./db");
 const { publicBase, apiBase, absolutizeSeo, sitemapXml } = require("./publicBase");
 const { signedMediaUrl } = require("./mediaSign");
 const { extractGeminiUsage, recordCost } = require("./costTracking");
+const {
+  generateReport: generateReportService,
+  inFlight: reportGenerationsInFlight,
+  REPORT_INFLIGHT_TTL_MS,
+} = require("./reportService");
+const { startReplayWorker } = require("./replayWorker");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -646,31 +653,9 @@ function recordReportGeneration({ testerToken, projectId, docId, status, promptV
 }
 
 app.post("/report/google-doc", heavyLimiter, async (req, res) => {
-  const aiEngineUrl = process.env.AI_ENGINE_URL;
-  if (!aiEngineUrl) {
-    return res.status(503).json({ error: "AI engine not configured" });
-  }
-
-  const { report_meta, video_filename, project, project_id } = req.body;
-  const projectId = project_id ? String(project_id) : null;
-  // Nøkkelen navnromsdeles på tester-token: project_id er klientoppgitt og
-  // eierskapsuverifisert, så uten navnrom kunne tester B blokkere tester A
-  // sin generering (409-DoS) ved å sende A sin prosjekt-id.
-  const inflightKey = `${req.testerToken}:${projectId || ""}`;
-
-  const existing = reportGenerationsInFlight.get(inflightKey);
-  if (existing && Date.now() - existing.startedAt < REPORT_INFLIGHT_TTL_MS) {
-    return res.status(409).json({
-      error: "Report generation already in progress for this project",
-      code: "REPORT_IN_PROGRESS",
-    });
-  }
-  // Egen entry-referanse (ikke bare timestamp): etter en TTL-overtakelse skal
-  // den GAMLE kjøringens finally ikke slette den NYE kjøringens vakt.
-  const inflightEntry = { startedAt: Date.now() };
-  reportGenerationsInFlight.set(inflightKey, inflightEntry);
-  let engineCallStarted = false;
-
+  // HTTP and replay share this tenant-authoritative service, including the
+  // in-flight guard, ledger lifecycle, and media ownership checks.
+  const body = req.body || {};
   try {
     // Use the token already validated and set by the requireTesterToken middleware.
     // Reading the raw header again would miss Authorization: Bearer tokens.
@@ -854,24 +839,18 @@ app.post("/report/google-doc", heavyLimiter, async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    console.error("Backend /report/google-doc error:", sanitizeError(err));
-    // Hovedbok også ved timeout/nettverksfeil ETTER at motorkallet startet:
-    // motoren kan ha fullført (og fakturert) selv om svaret gikk tapt —
-    // raden gjør forsøket avstembart mot Drive-mappen.
-    if (engineCallStarted) {
-      recordReportGeneration({
-        testerToken: req.testerToken,
-        projectId,
-        docId: null,
-        status: "error",
-      });
+    if (err && ["TEST_PROJECT_NOT_SYNCED", "REPORT_ATTEMPT_EXISTS", "REPORT_IN_PROGRESS"].includes(err.code)) {
+      return res.status(409).json({ error: err.message, code: err.code });
     }
-    res.status(500).json({ error: "Server error" });
-  } finally {
-    if (reportGenerationsInFlight.get(inflightKey) === inflightEntry) {
-      reportGenerationsInFlight.delete(inflightKey);
-    }
+    if (err && err.code === "PROJECT_NOT_FOUND") return res.status(404).json({ error: err.message });
+    if (err && err.code === "MEDIA_NOT_OWNED") return res.status(404).json({ status: "error", message: err.message });
+    if (err && err.code === "AI_ENGINE_ERROR") return res.status(502).json({ error: "AI engine error" });
+    if (err && err.code === "AI_ENGINE_NOT_CONFIGURED") return res.status(503).json({ error: err.message });
+    if (err && err.code === "PERSISTENCE_NOT_CONFIGURED") return res.status(503).json({ error: err.message });
+    console.error("Backend /report/google-doc service error:", sanitizeError(err));
+    return res.status(500).json({ error: "Server error" });
   }
+
 });
 
 // ---------- REPORT STATUS (hovedbok-lesing) ----------
@@ -884,23 +863,44 @@ app.post("/report/google-doc", heavyLimiter, async (req, res) => {
 // én instans (in-flight-vakten har samme forutsetning).
 app.get("/report/status/:projectId", async (req, res) => {
   const projectId = String(req.params.projectId);
+  const attemptId =
+    typeof req.query.attempt_id === "string" && req.query.attempt_id
+      ? req.query.attempt_id
+      : null;
   const entry = reportGenerationsInFlight.get(`${req.testerToken}:${projectId}`);
   const inFlight = Boolean(
-    entry && Date.now() - entry.startedAt < REPORT_INFLIGHT_TTL_MS
+    entry &&
+      (!attemptId || entry.attemptId === attemptId) &&
+      Date.now() - entry.startedAt < REPORT_INFLIGHT_TTL_MS
   );
 
   if (!isDbEnabled()) return res.json({ inFlight, latest: null });
   try {
-    const row = await getPool().query(
-      `SELECT doc_id, status, created_at FROM report_generations
-       WHERE tester_token = $1 AND project_id = $2
-       ORDER BY created_at DESC LIMIT 1`,
-      [req.testerToken, projectId]
-    );
+    const row = attemptId
+      ? await getPool().query(
+          `SELECT rg.attempt_id, rg.doc_id, rg.status, rg.is_test_project, rg.created_at
+           FROM report_generations rg
+           LEFT JOIN projects p ON p.id = rg.project_id AND p.tester_token = rg.tester_token
+           WHERE rg.tester_token = $1 AND rg.project_id = $2 AND rg.attempt_id = $3
+             AND (p.id IS NULL OR p.report_reset_at IS NULL OR rg.created_at > p.report_reset_at)
+           LIMIT 1`,
+          [req.testerToken, projectId, attemptId]
+        )
+      : await getPool().query(
+          `SELECT rg.attempt_id, rg.doc_id, rg.status, rg.is_test_project, rg.created_at
+           FROM report_generations rg
+           LEFT JOIN projects p ON p.id = rg.project_id AND p.tester_token = rg.tester_token
+           WHERE rg.tester_token = $1 AND rg.project_id = $2
+             AND (p.id IS NULL OR p.report_reset_at IS NULL OR rg.created_at > p.report_reset_at)
+           ORDER BY rg.created_at DESC LIMIT 1`,
+          [req.testerToken, projectId]
+        );
     const latest = row.rows[0]
       ? {
           status: row.rows[0].status,
           createdAt: row.rows[0].created_at,
+          isTestProject: Boolean(row.rows[0].is_test_project),
+          attemptId: row.rows[0].attempt_id || null,
           url: row.rows[0].doc_id
             ? `https://docs.google.com/document/d/${row.rows[0].doc_id}/edit`
             : null,
@@ -1028,13 +1028,48 @@ const { startMediaSweepScheduler } = require("./mediaCleanup");
 startMediaSweepScheduler();
 
 // ---------- START SERVER ----------
-app.listen(PORT, () => {
+let stopReplayWorker = () => {};
+const httpServer = app.listen(PORT, () => {
   console.log(`Backend listening on port ${PORT}`);
   // Opprett skjemaet ved oppstart (idempotent) i stedet for kun lazy via
   // requireDb, så alle tabeller — inkl. cost_events — finnes umiddelbart.
   if (isDbEnabled()) {
     require("./db")
       .initDb()
+      .then(() => {
+        stopReplayWorker = startReplayWorker({
+          pool: getPool(),
+          generateReport: ({ testerToken, projectId, attemptId }) =>
+            generateReportService({
+              testerToken,
+              projectId,
+              attemptId,
+              isTestProjectHint: true,
+              resumeExistingAttempt: true,
+              apiBaseUrl: process.env.API_BASE_URL || `http://127.0.0.1:${PORT}`,
+            }),
+        });
+
+        // Reference data for Labs scoring lives in a committed fixture; the
+        // table is a read cache, so refresh it from the file every boot. A
+        // broken fixture must not take the API down — Labs scoring degrades,
+        // nothing else does.
+        require("./labs/cases")
+          .loadBenchmarkCases(getPool())
+          .then((count) => console.log(`📐 Benchmark-fasit lastet: ${count} case(r)`))
+          .catch((err) =>
+            console.error("loadBenchmarkCases at boot failed:", err && err.message)
+          );
+      })
       .catch((err) => console.error("initDb at boot failed:", err && err.message));
   }
 });
+
+function shutdown(signal) {
+  console.log(`Backend shutting down (${signal})`);
+  stopReplayWorker();
+  httpServer.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 10000).unref();
+}
+process.once("SIGTERM", () => shutdown("SIGTERM"));
+process.once("SIGINT", () => shutdown("SIGINT"));
