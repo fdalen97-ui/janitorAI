@@ -618,44 +618,24 @@ app.post("/describe-image", heavyLimiter, upload.single("file"), async (req, res
 // (c) en server-side hovedbok (report_generations) så doc_id aldri kun
 // finnes i klientens hender.
 const REPORT_PROXY_TIMEOUT_MS = 10 * 60 * 1000;
-const REPORT_INFLIGHT_TTL_MS = 15 * 60 * 1000;
+// REPORT_INFLIGHT_TTL_MS and the in-flight map itself are owned by
+// reportService.js (imported above as reportGenerationsInFlight) — that's
+// where the idempotency guard actually reads and writes them.
 // Signerte medie-URL-er til motoren må overleve hele kjøringen: med standard-
 // TTL (15 min) kunne foto utløpe midt i en lang analyse og droppes stille.
 const REPORT_MEDIA_URL_TTL_MS = 60 * 60 * 1000;
-const reportGenerationsInFlight = new Map(); // key -> startedAt (epoch ms)
-
-function recordReportGeneration({ testerToken, projectId, docId, status, promptVersion, citations }) {
-  if (!isDbEnabled()) return;
-  // Sitatportens telling kommer fra motoren; ikke-heltall (manglende felt,
-  // eldre motorversjon) lagres som NULL framfor å feile innsettingen.
-  const c = citations && typeof citations === "object" ? citations : {};
-  const int = (v) => (Number.isInteger(v) ? v : null);
-  getPool()
-    .query(
-      `INSERT INTO report_generations
-         (tester_token, project_id, doc_id, status,
-          prompt_version, citations_proposed, citations_verified, citations_rejected)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        testerToken || null,
-        projectId || null,
-        docId || null,
-        status,
-        promptVersion ? String(promptVersion).slice(0, 64) : null,
-        int(c.proposed),
-        int(c.verified),
-        int(c.rejected),
-      ]
-    )
-    .catch((err) =>
-      console.error("report_generations insert error:", sanitizeError(err))
-    );
-}
 
 app.post("/report/google-doc", heavyLimiter, async (req, res) => {
   // HTTP and replay share this tenant-authoritative service, including the
   // in-flight guard, ledger lifecycle, and media ownership checks.
   const body = req.body || {};
+  const projectId = body.project_id ? String(body.project_id) : null;
+  const attemptId =
+    typeof body.report_attempt_id === "string" &&
+    body.report_attempt_id.length > 0 &&
+    body.report_attempt_id.length <= 128
+      ? body.report_attempt_id
+      : undefined;
   try {
     // Use the token already validated and set by the requireTesterToken middleware.
     // Reading the raw header again would miss Authorization: Bearer tokens.

@@ -311,6 +311,15 @@
     .replay-project-check { width:1rem; height:1rem; accent-color:var(--accent); cursor:pointer; }
     .replay-project-name { font-weight:600; color:var(--text); }
     .replay-project-meta { color:var(--muted); font-size:.75rem; margin-top:.2rem; line-height:1.45; }
+    /* Row wrapper for a checkbox/label pair — distinct from .replay-project-check,
+       which sizes the checkbox <input> itself to 1rem. Applying that class to a
+       wrapping element instead squeezes all its content into a 1rem box. */
+    .labs-row { display:flex; align-items:flex-start; gap:.6rem; padding:.6rem .1rem; border-bottom:1px solid var(--border); cursor:pointer; }
+    .labs-row:last-child { border-bottom:none; }
+    .labs-row input[type="checkbox"] { margin-top:.2rem; flex:none; }
+    .labs-row-text { min-width:0; flex:1; }
+    .labs-case-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:.6rem .1rem; border-bottom:1px solid var(--border); }
+    .labs-case-row:last-child { border-bottom:none; }
     .replay-evidence { display:flex; gap:.35rem; flex-wrap:wrap; margin-top:.35rem; }
     .replay-evidence span { color:var(--muted); font-size:.72rem; background:rgba(148,163,184,.1); border-radius:999px; padding:.12rem .4rem; }
     .replay-detail-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
@@ -1376,8 +1385,8 @@
     wrap.innerHTML = labsCases.map(c => {
       const manual = c.source === 'manual';
       return (
-        '<div class="replay-project-check" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
-          '<div>' +
+        '<div class="labs-case-row">' +
+          '<div class="labs-row-text">' +
             '<span class="replay-project-name">' + escHtml(c.label || c.caseId) + '</span> ' +
             '<span class="replay-project-meta">' + escHtml(c.caseId) + '</span> ' +
             '<span class="badge ' + (manual ? 'badge-skipped' : 'badge-active') + '">' + (manual ? 'manuell' : 'fixture') + '</span> ' +
@@ -1472,14 +1481,16 @@
     ).join('');
 
     const blockRows = labsBlocks.map(b =>
-      '<label class="replay-project-check" style="display:block;margin-bottom:6px;">' +
-        '<input type="checkbox" id="labs-block-' + escHtml(b.id) + '"' +
+      '<label class="labs-row">' +
+        '<input class="replay-project-check" type="checkbox" id="labs-block-' + escHtml(b.id) + '"' +
           (b.default ? ' checked' : '') +
-          ' onchange="labsRefreshDependencyHints()"> ' +
-        '<span class="replay-project-name">' + escHtml(b.label) + '</span> ' +
-        '<span class="replay-project-meta">' + escHtml(b.kind) + '</span>' +
-        (b.note ? '<div class="replay-project-meta">' + escHtml(b.note) + '</div>' : '') +
-        '<div class="replay-warning" id="labs-dep-' + escHtml(b.id) + '" style="display:none;"></div>' +
+          ' onchange="labsRefreshDependencyHints()">' +
+        '<span class="labs-row-text">' +
+          '<span class="replay-project-name">' + escHtml(b.label) + '</span> ' +
+          '<span class="replay-project-meta">' + escHtml(b.kind) + '</span>' +
+          (b.note ? '<div class="replay-project-meta">' + escHtml(b.note) + '</div>' : '') +
+          '<div class="replay-warning" id="labs-dep-' + escHtml(b.id) + '" style="display:none;"></div>' +
+        '</span>' +
       '</label>'
     ).join('');
 
