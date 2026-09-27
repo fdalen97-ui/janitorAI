@@ -162,16 +162,16 @@
   <div class="stat-row">
     <div class="stat"><b>2 t → 15 min</b><span>målet per rapport – og appen måler tiden på hver sak</span></div>
     <div class="stat"><b>7 datalag</b><span>saksunderlag hentet automatisk fra åpne kilder før avreise</span></div>
-    <div class="stat"><b>SHA-256</b><span>hvert bevis forsegles med geo, tid og sjekksum ved fangst</span></div>
+    <div class="stat"><b>SHA-256</b><span>hvert bevis får geo og tid ved fangst, og sjekksum ved opplasting</span></div>
   </div>
 
   <section>
     <h2>Fem grunner til at takstpersoner velger DocrAI</h2>
     <ol class="reasons">
       <li><b>Saken er klar før bilen starter.</b> Skriv inn adressen – kart, matrikkel, bygningstype, terreng og vær hentes automatisk fra Kartverket og MET. Ingen avtaler, ingen oppslag i sju systemer.</li>
-      <li><b>Snakk – ikke tast.</b> Store knapper laget for våte hansker, og transkripsjon trent på norsk fagspråk: klemring, svill, diffusjonssperre. Talen din blir strukturen i rapporten.</li>
+      <li><b>Snakk – ikke tast.</b> Store knapper laget for våte hansker, og transkripsjon styrt mot norsk fagspråk: klemring, svill, diffusjonssperre. Talen din blir strukturen i rapporten.</li>
       <li><b>AI-en skriver utkastet. Du eier konklusjonen.</b> Årsak og akutt/gradvis foreslås – aldri fastslås. Du redigerer direkte i den ferdige rapportvisningen og stempler med navn og tidspunkt.</li>
-      <li><b>Bevis som holder i oppgjøret.</b> Geo, klokkeslett og kryptografisk sjekksum settes i fangstøyeblikket. Mottakeren åpner en PIN-beskyttet rapport – uten konto – og kan verifisere at ingenting er endret.</li>
+      <li><b>Bevis som holder i oppgjøret.</b> Geo og klokkeslett settes i fangstøyeblikket; SHA-256-sjekksummen settes av serveren ved opplasting. Mottakeren åpner en PIN-beskyttet rapport – uten konto – og kan verifisere at ingenting er endret siden opplasting.</li>
       <li><b>Leverer inn i flyten forsikringen krever.</b> Uavhengig av forsikringsselskapene – men bygget for å levere strukturert rett inn i saksflyten deres. Gjør befaringen i DocrAI, lever som før.</li>
     </ol>
   </section>
@@ -181,7 +181,7 @@
     <div class="steps">
       <div class="step"><span class="n">1 · Før</span><h3>Adressen inn</h3><p>Ett søk gir saksunderlaget: kart, gnr/bnr, bygningstype, terreng og vær – ferdig utfylt sak før avreise.</p></div>
       <div class="step"><span class="n">2 · I felt</span><h3>Fang og snakk</h3><p>Video, foto og lydnotater rom for rom. Alt lagres lokalt først – appen virker uten dekning i kjelleren.</p></div>
-      <div class="step"><span class="n">3 · Etter</span><h3>Godkjenn og del</h3><p>AI-utkastet er klart når du setter deg i bilen. Kontrollér, stemple – og del PIN-beskyttet med forsikringen.</p></div>
+      <div class="step"><span class="n">3 · Etter</span><h3>Godkjenn og del</h3><p>Ett trykk, så skrives AI-utkastet mens du kjører. Kontrollér, stemple – og del PIN-beskyttet med forsikringen.</p></div>
     </div>
   </section>
 
@@ -191,8 +191,8 @@
       <p><b>AI foreslår. Du avgjør. Det er systemet – ikke et forbehold.</b></p>
       <p>Rapporten er merket som utkast til du aktivt godkjenner den, og delingslenker kan ikke
         lages før stempelet er satt – det håndheves av serveren, ikke bare av appen. Byggforsk-
-        henvisninger vises kun med verifisert punktnummer. All databehandling flyttes til EU/EØS
-        før pilot, med databehandleravtale.</p>
+        henvisninger vises kun med verifisert bladnummer. AI-prosesseringen skjer hos Google;
+        databehandleravtale og EU/EØS-region er ikke på plass ennå – vi sier det som det er.</p>
     </div>
   </section>
 

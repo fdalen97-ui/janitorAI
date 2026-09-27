@@ -6,10 +6,10 @@
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>Personvern – DocrAI</title>
-<meta name="description" content="Slik behandler DocrAI personopplysninger: cookiefrie nettsider, lokal lagring i appen, planlagt EU/EØS-prosessering og dine rettigheter." />
+<meta name="description" content="Slik behandler DocrAI personopplysninger i dag: cookiefrie nettsider, lokal lagring i appen, AI-behandling hos Google uten EU/EØS-avtale ennå, og dine rettigheter." />
 <link rel="canonical" href="/personvern" />
 <meta property="og:title" content="Personvern – DocrAI" />
-<meta property="og:description" content="Slik behandler DocrAI personopplysninger: cookiefrie nettsider, lokal lagring i appen, planlagt EU/EØS-prosessering og dine rettigheter." />
+<meta property="og:description" content="Slik behandler DocrAI personopplysninger i dag: cookiefrie nettsider, lokal lagring i appen, AI-behandling hos Google uten EU/EØS-avtale ennå, og dine rettigheter." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
@@ -45,41 +45,68 @@
   <nav class="crumb" aria-label="Brødsmulesti"><a href="/om">DocrAI</a> <span aria-hidden="true">›</span> Personvern</nav>
   <div class="brand"><span class="sq">D</span><b>DocrAI</b></div>
   <h1>Personvernerklæring</h1>
-  <p class="datestamp">Sist oppdatert: august 2026. DocrAI er i utviklingsfase mot pilot – denne
-  erklæringen beskriver dagens faktiske behandling og oppdateres før pilot med ekte skadesaker.</p>
+  <p class="datestamp">Sist oppdatert: september 2026. DocrAI er i pilotfase med ekte skadesaker – denne
+  erklæringen beskriver dagens faktiske behandling, ikke en planlagt.</p>
 
   <div class="card">
     <h2 style="margin:0;">Kort versjon</h2>
     <ul>
       <li><b>Nettsidene bruker ingen cookies</b> og har ingen tredjeparts sporing – derfor ser du heller ikke noe samtykkebanner.</li>
-      <li><b>Vi lagrer aldri IP-adressen din</b> på de offentlige sidene. Besøkstelling registrerer kun hvilken side som ble åpnet.</li>
+      <li><b>IP-adressen din skrives aldri til vår database.</b> Den holdes kortvarig i serverens minne for misbruksvern (typisk 15–30 minutter, senest til neste omstart), og finnes i driftsleverandørens tekniske tilgangslogger. Besøkstelling registrerer kun hvilken side som ble åpnet, tidspunkt og eventuell kampanjekode i lenken du klikket.</li>
       <li><b>Appdata tilhører takstpersonen.</b> Befaringsmedia lagres lokalt på enheten først og synkroniseres bak personlig tilgangskode.</li>
-      <li><b>Før pilot med ekte skadesaker</b> flyttes all AI-prosessering til EU/EØS-region med databehandleravtale.</li>
+      <li><b>AI-prosessering og rapportdokument skjer hos Google</b> (Gemini og Google Docs/Drive). Databehandleravtale og EU/EØS-region er ikke på plass ennå – vi påstår ikke noe annet, og oppdaterer denne siden når det er gjort.</li>
     </ul>
   </div>
 
   <h2>Hva vi behandler på nettsidene</h2>
   <p><b>Besøksstatistikk uten cookies:</b> når du åpner en av de offentlige sidene, registrerer vi
-  kun stien (f.eks. «/om») og eventuelt hvilken kampanjelenke du kom fra. Ingen IP-adresse, ingen
-  enhetsidentifikator, ingen fingeravtrykk – tallene kan ikke knyttes til deg. Dette er et bevisst
-  valg i stedet for Google Analytics.</p>
+  kun stien (f.eks. «/om») og eventuelt kampanjekoden fra lenken du klikket, slik den står i
+  lenken. Ingen IP-adresse i statistikken, ingen enhetsidentifikator, ingen fingeravtrykk –
+  tallene kan ikke knyttes til deg. Dette er et bevisst valg i stedet for Google Analytics.</p>
   <p><b>Demoen (/demo):</b> adressen du søker på sendes til åpne offentlige kilder (Kartverket/
-  Geonorge og Meteorologisk institutt) for å hente kart- og bygningsdata. Søket lagres ikke
-  sammen med noen identitet, og misbruksbegrensningen som teller antall oppslag holder tellingen
-  i minnet – den skrives aldri til disk.</p>
-  <p><b>Pilotinteresse-skjemaet:</b> sender du inn navn og e-post, lagrer vi det for å kontakte deg
-  om piloten – det er hele formålet. Grunnlaget er ditt samtykke (GDPR art. 6 nr. 1 a), og du kan
-  når som helst be oss slette det med en e-post.</p>
+  Geonorge og Meteorologisk institutt) for å hente kart- og bygningsdata. Søket lagres ikke i
+  vår database og maskeres i vår tekniske serverlogg; misbruksbegrensningen som teller antall
+  oppslag holder tellingen i minnet – den skrives aldri til disk.</p>
+  <p><b>Pilotinteresse-skjemaet:</b> sender du inn navn, e-post og eventuell melding, lagrer vi
+  det for å kontakte deg om piloten – det er hele formålet. Grunnlaget er ditt samtykke (GDPR
+  art. 6 nr. 1 a), og du kan når som helst be oss slette det med en e-post (slettingen gjøres
+  manuelt).</p>
 
   <h2>Hva appen behandler (for testere i dag)</h2>
   <p>Video, lyd, foto og notater fra befaringer lagres lokalt på enheten først, og synkroniseres
-  til vår server bak en personlig tilgangskode per bruker. All transport er kryptert (TLS), og
-  hvert bevis forsegles med SHA-256-sjekksum ved fangst. Feillogger fra appen kan inneholde
-  teknisk enhetsinformasjon (modell, OS-versjon) for feilretting – aldri befaringsinnhold.</p>
-  <p>I dagens testfase brukes Googles AI-tjenester til transkripsjon og rapportutkast. Testere
-  instrueres derfor om å ikke bruke reelle personopplysninger i testsaker. <b>Før pilot med ekte
-  skadesaker</b> flyttes prosesseringen til EU/EØS-region med signert databehandleravtale, og
-  denne erklæringen oppdateres med fullstendig behandlingsoversikt og DPIA.</p>
+  til vår server bak en personlig tilgangskode per bruker. Tillater du det, lagres også
+  GPS-posisjon og tidspunkt på hvert bevis som del av prosjektet. Trafikken mellom
+  app/nettleser og våre servere går over HTTPS hos driftsleverandøren, og hvert bevis får en
+  SHA-256-sjekksum når det lastes opp til serveren (media som ikke er synkronisert har ingen).
+  Feillogger fra appen kan inneholde feilmeldingen, filnavn og filstier på enheten, en
+  nettleser-/app-identifikator (user agent), en tilfeldig, stabil enhets-ID som appen lager
+  selv, og tilgangskoden din – loggen kan altså knyttes til deg som tester, men aldri til
+  video, lyd eller foto. Appen sender også en handlingslogg (hvilken handling, hvor lang tid
+  den tok, samme enhets-ID og tilgangskode). Begge brukes bare til feilretting og til å se hva
+  som er tregt. Adresse og posisjon i API-kall maskeres i vår tekniske serverlogg.</p>
+  <p>Googles AI-tjenester (Gemini) brukes til transkripsjon, bildebeskrivelse og rapportutkast,
+  og rapporten opprettes i Google Docs (se under). Pilotpartneren kjører reelle skadesaker.
+  Takstpersonen avgjør hva som legges inn og bør unngå personopplysninger som ikke trengs i
+  rapporten – for eksempel navn i tale eller personer på bilder. Databehandleravtale, behandling
+  i EU/EØS og DPIA er ikke på plass ennå; denne erklæringen oppdateres når det skjer.</p>
+
+  <h2>Hvor rapporten blir liggende</h2>
+  <p>Rapportutkastet opprettes som et Google-dokument i en Google Docs/Drive-konto som
+  DocrAIs gründer kontrollerer (personlig konto i pilotfasen), og deles som lesetilgang med
+  e-postadressen takstpersonen er registrert med – Google sender da et varsel til den adressen.
+  Dokumentet inneholder det rapportmalen fylles med, blant annet adresse, kundenavn,
+  saksnummer, forsikringsselskap og -kontakt, takstpersonens og bidragsyteres navn og
+  kontaktinfo, skade- og befaringsdato, byggopplysninger (type, størrelse, byggeår), skadet
+  areal og anslått verdi, beboelighet, skadebeskrivelse og årsaksvurdering, samt bildene som er
+  tatt inn i rapporten og et stillbilde hentet fra befaringsvideoen. Selve videoen og lyden
+  legges ikke i dokumentet, men video og foto sendes til Googles Gemini-tjeneste for analyse
+  (ifølge Googles dokumentasjon slettes opplastede filer der etter 48 timer – vi sletter dem
+  ikke aktivt selv), og AI-motoren beholder en midlertidig kopi av videoen som ikke ryddes
+  automatisk ennå. Bildene lastes opp som egne filer i samme Drive-mappe og er i dag
+  tilgjengelige for alle som har den direkte lenken (lenken er ikke gjettbar, men dette er en
+  kjent svakhet på utbedringslisten). Verken dokumentet eller bildefilene slettes automatisk i
+  dag – heller ikke når prosjektet slettes i appen. Send en e-post, så sletter vi manuelt inntil
+  automatisk sletting er bygget.</p>
 
   <h2>Dine rettigheter</h2>
   <p>Du har rett til innsyn, retting, sletting og dataportabilitet, og til å trekke samtykke
@@ -90,8 +117,8 @@
   <h2>Lagringstid</h2>
   <ul>
     <li>Pilotinteresse: slettes når piloten er fulltegnet eller på forespørsel.</li>
-    <li>Besøksstatistikk: aggregerte tall uten persontilknytning, ryddes løpende.</li>
-    <li>Befaringsdata: styres av takstpersonen – sletting i appen sletter også på serveren.</li>
+    <li>Besøksstatistikk: kun sti og kampanjekilde, uten persontilknytning. Ryddes ikke automatisk i pilotfasen; slettes manuelt når tallene er oppsummert.</li>
+    <li>Befaringsdata: styres av takstpersonen. Sletting i appen sletter prosjektet og all media (video, lyd, foto) på serveren, og delingslenker slutter å virke så snart slettingen har nådd serveren. Selve delingsraden, loggen over rapportgenereringer, feil-/handlingsloggen, kostnadsbokføringen per rapport og Google-dokumentet med bilder slettes ikke automatisk ennå – de slettes på forespørsel inntil slettekaskaden er bygget.</li>
   </ul>
 
   <footer>

@@ -11,8 +11,11 @@ er tettet og hva som bevisst er utsatt.
 - **Ingen kritiske hull.** Grunnmodellen var solid: all SQL er parametrisert,
   delings-PIN hashes med scrypt+salt, share-IDer/PIN er kryptografisk tilfeldige,
   ingen hemmeligheter i frontend eller git.
-- **9 bekreftede funn tettet** (alle middels alvor), pluss 10 herdingspunkter.
-- **Alt verifisert:** 31 e2e-sjekker, tenant-skoping, MIME-whitelist, signerte
+- **11 bekreftede funn tettet** (alle middels alvor), pluss 11 herdingspunkter.
+  S20–S23 kom til i september 2026 fra gjennomgangen av docrai.io
+  (`/agent-readiness`); S23 står åpent.
+- **Alt verifisert:** e2e-sjekker (47 deling + 16 tenant + 65 headere/Host +
+  rate-limit) og enhetstester, tenant-skoping, MIME-whitelist, signerte
   URL-er, ren TypeScript, web-eksport bygger.
 
 ## Tettet — bekreftede funn
@@ -27,9 +30,27 @@ er tettet og hva som bevisst er utsatt.
 | S17 | Stacktrace kunne lekke uten `NODE_ENV=production` | Global feilhåndterer fanger JSON-parse-/multer-feil, generisk svar uansett miljø | `index.js` |
 | S18 | 3 høye sårbarheter i api-treet | `multer`→2.2.0, ubrukt `form-data` fjernet → **0 sårbarheter**; ikke-brytende `npm audit fix` i appen | `package.json` |
 | S1 | `.env` matchet aldri i `.gitignore` (kommentar på mønsterlinjen); testvideo innsjekket | `.env` matcher nå på alle nivåer; `media-uploads/` ignorert; videoen fjernet | `.gitignore` |
+| S20 | Rå `Host` reflektert i canonical/og:url/JSON-LD, sitemap og robots uten escaping (verifisert HTML-injeksjon med `PUBLIC_BASE_URL` usatt) — og i de signerte medie-URL-ene til AI-motoren (SSRF-aktig: motoren henter «video» fra vert angriperen velger, med gyldig signatur) | Én kilde (`publicBase.js`): validert env → allowlistet vert → fast fallback; rå Host aldri i output; HTML/XML-escape ved sink; CR/LF strippet i robots; `apiBase(req)` for medie-URL-er. Dekket av `test/e2e-headere.sh` | `publicBase.js`, `index.js`, `routes/publikum.js` |
+| S21 | Personvern/vilkår/salgssider lovet mer enn koden: «sletting i appen sletter også på serveren» (Drive-dokument, `shares`, `report_generations`, feil-/handlingslogg slettes aldri), «aldri IP» (holdes i minne for takst + hos driftsleverandør), «flyttes til EU/EØS før pilot» (ikke gjort, piloten kjører — sto også på `/faq`, `/kontakt`, `/om`), «SHA-256 ved fangst» (settes på serveren ved opplasting), feillogg uten nevnt enhets-ID og handlingslogg, rapportdokumentets innhold (kundenavn, saksnummer, forsikringsdata, stillbilde fra video) | Teksten rettet til faktisk atferd på alle fem sidene, setning for setning belagt mot kode (46 setninger gjennomgått); ny seksjon «Hvor rapporten blir liggende»; regel i CLAUDE.md: ingen setning uten kodelinje bak | `personvern-page.html`, `vilkar-page.html`, `faq-page.html`, `kontakt-page.html`, `om-page.html` |
 
 ## Tettet — herding (lav alvor)
 
+- **S22** `X-Robots-Tag: noindex, nofollow` på `/share`, `/api`, `/admin-dashboard`,
+  `/presentation` (segmentmatch, case-ufølsom som Express-rutingen; forsvar i
+  dybden — robots.txt disallower det samme); headerne settes før CORS og body-
+  parser så også preflight/400 bærer dem; `Cache-Control: no-store` på alle
+  delings-svar; `/.well-known/*` montert før SPA-fallback og token-vakt (404,
+  ikke 401 — og ikke webappen for nettlesere); `security.txt` (RFC 9116) fra
+  `SECURITY_CONTACT`, fail-closed; HSTS-trapp via `HSTS_MAX_AGE`, kun `max-age`;
+  request-loggen maskerer query-verdier med allowliste (kun `exp`/`days`/`date`
+  i klartekst — `token`, `vt`, `sig`, `adresse`, `sok`, `lat`, `lon` og
+  alle fremtidige parametre blir `[redacted]`), med dekodet nøkkel (`%74oken`
+  maskeres som `token`); `STATIC_DIR/.well-known/` (App Links) serveres foran
+  security.txt-routeren; admin-dashbordet får en
+  validert og normalisert API-base, ikke rå env. Dekket av `test/e2e-headere.sh`
+  (tre servere: fallback, env, ugyldig env i produksjon; SSRF-sjekk mot
+  motor-stub) og `test/publicBase.test.js` (escaping og BASE_RE-avvisning, som
+  e2e ikke kan se fordi basen etter S20 aldri inneholder farlige tegn).
 - **S5** media-opplasting bak `heavyLimiter`; publikum-telleren prunes så den ikke vokser.
 - **S8** admin-dashboardets `escHtml` escaper også apostrof (lukker selv-XSS i `onclick`).
 - **S11** admin-hemmelighet sammenlignes timing-sikkert (`timingSafeEqual`).
@@ -54,6 +75,15 @@ webhooks i arkitekturen), S19 (6-sifret server-PIN, 5 forsøk/15 min + utløp).
   omstart). Akseptabelt nå; persister på `shares`-raden hvis piloten skalerer.
 - **S13 e-postverifisering:** tester-e-post (som gir Google-Doc-lesetilgang)
   bør bekreftes før `share_doc_with_email`. Tas med i onboarding-flyten.
+- **S21-rest (slettekaskade):** sletting av prosjekt sletter media, men ikke
+  `shares`-raden, `report_generations` eller Google-dokumentet i Drive
+  (`ai-engine/main.py` sletter kopien bare i feilbanen). Teksten sier det nå
+  ærlig; kaskaden bygges som egen endring (P2).
+- **S23 (ÅPENT — prioriteres rett etter Dag 0):** `ai-engine/doc_engine.py`
+  (`upload_image_to_drive`) gir hvert rapportbilde Drive-tillatelsen
+  `anyone`/`reader`: befaringsfoto er tilgjengelige for alle med lenken og
+  slettes aldri. Fiks: del per e-post som dokumentet, eller bygg bildene inn
+  uten offentlig lenke. Personvernteksten opplyser om svakheten inntil da.
 
 ## Troverdighet (W-lista)
 

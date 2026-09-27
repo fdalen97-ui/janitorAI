@@ -35,6 +35,16 @@ const {
 
 const router = express.Router();
 
+// S22: alle delings-svar er per-mottaker (PIN / visningstoken) og skal aldri
+// caches av nettleser eller mellomledd. Settes FØR requireDb så også 503
+// bærer headeren. Media-strømmen (GET /:id/media/:mediaId lenger ned) over-
+// styrer bevisst med «private, max-age=3600» — res.set erstatter. Ikke flytt
+// den linja.
+router.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 router.use(requireDb);
 
 const DEFAULT_EXPIRY_DAYS = 30;
