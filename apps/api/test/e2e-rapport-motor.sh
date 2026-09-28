@@ -12,14 +12,17 @@
 #   - hovedboken lagrer prompt_version og sitatportens telling per kjøring
 #   - video som testeren ikke eier gir 404
 # Porter kan overstyres (PGPORT/PORT_A/PORT_B/PORT_STUB) for parallelle kjøringer.
+# Standardportene ligger under Linux' dynamiske portområde (32768–60999), så en
+# utgående tilkobling fra et tidligere CI-steg ikke kan ha tatt dem (CI-feil
+# «could not bind … Address already in use» på 55442).
 set -u
 
 API_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 WORK="$(mktemp -d)"
-PGPORT="${PGPORT:-55442}"
-PORT_A="${PORT_A:-8190}"
-PORT_B="${PORT_B:-8191}"
-PORT_STUB="${PORT_STUB:-8199}"
+PGPORT="${PGPORT:-25442}"
+PORT_A="${PORT_A:-18190}"
+PORT_B="${PORT_B:-18191}"
+PORT_STUB="${PORT_STUB:-18199}"
 TOKEN="e2e-rapport-token"
 A="http://127.0.0.1:${PORT_A}"
 B="http://127.0.0.1:${PORT_B}"
@@ -59,7 +62,14 @@ if [ "$(id -u)" = "0" ]; then
   chown -R pguser "$WORK"
 fi
 asPg "$PGBIN/initdb" -D "$WORK/pg" -U docrai --auth=trust >/dev/null 2>&1 || { echo "initdb failed"; exit 1; }
-asPg "$PGBIN/pg_ctl" -D "$WORK/pg" -o "-p $PGPORT -k $WORK -h 127.0.0.1" -l "$WORK/pg.log" start >/dev/null || { echo "pg start failed"; cat "$WORK/pg.log"; exit 1; }
+# Er porten likevel opptatt, prøv de neste i stedet for å feile på en tilfeldighet.
+PG_STARTED=""
+for try_port in "$PGPORT" $((PGPORT + 1)) $((PGPORT + 2)); do
+  if asPg "$PGBIN/pg_ctl" -D "$WORK/pg" -o "-p $try_port -k $WORK -h 127.0.0.1" -l "$WORK/pg.log" start >/dev/null; then
+    PGPORT="$try_port"; PG_STARTED=1; break
+  fi
+done
+[ -n "$PG_STARTED" ] || { echo "pg start failed"; cat "$WORK/pg.log"; exit 1; }
 asPg "$PGBIN/createdb" -h 127.0.0.1 -p "$PGPORT" -U docrai docrai_e2e >/dev/null 2>&1
 psqlq() {
   PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -tA -c "$1" 2>&1
