@@ -118,6 +118,30 @@ appen ikke har (CLAUDE.md, regel 6).
 og ber om SEQ (1–7, «hvor lett var dette?») og fritekst. Svarene lagres bare på
 enheten; knappen «Kopier resultatet» lager én linje testeren sender til oss.
 
+**Eksempeldata og ferdig rapport (lagt til 28.09 etter innspill fra Fredrik).**
+Den som tar øvingen ved skrivebordet har verken bilder eller målinger. Derfor:
+- **Befaringsmappe** (knapp øverst i appen): fire illustrerte bilder (B1–B4),
+  talenotatet og et måleskjema fra fuktmåleren — tydelig merket som
+  eksempeldata. Tallene er oppdiktet, men fysisk konsistente: 18 % ved 5 cm,
+  avtagende til 9 % ved rørgjennomføringen på 1 m, referanse 8 %, bunnsvill 11 %,
+  trykktest 6 bar i 10 min uten trykkfall.
+- **Fuktmåler-registrering:** brukeren taster verdiene per målepunkt selv, fordi
+  det er det de gjør i felt. Feil verdi gir konkret svar («Sjekk P2 mot
+  måleskjemaet»); «fyll inn for meg» finnes, men koster en stjerne. Etter lagring
+  vises en **fuktprofil** etter høyde som viser mønsteret: fukt nedenfra, ikke fra
+  røret. Trykktesten registreres på samme måte.
+- **Målet først:** fra brett 1 kan man åpne den ferdige eksempelrapporten
+  («Se målet først») — spilldesignets «vis målet før brettet».
+- **Ferdig rapport til slutt:** bygget av brukerens egne registreringer —
+  observasjoner med kildemerker, måletabell og fuktprofil, bildene som ble valgt,
+  årsaken og bevisene brukeren koblet, tiltak og godkjenningsstempel med navnet.
+  Faglig grunnlag står som «Henvisning til Byggforskserien settes inn og
+  kontrolleres av sitatporten i ekte rapporter» — ingen oppdiktede bladnummer.
+
+Befaringsmappe, fuktmåler-registrering per målepunkt og trykktest som egen
+registrering er *nye idéer som testes*; den ferdige rapporten finnes i appen i dag
+som Google Doc.
+
 ## 4. Fire måter å prototype på — forklart og brukt på DocrAI
 
 | Form | Hva det er | Når det passer for oss | Hva vi gjør |
@@ -192,7 +216,8 @@ den andre gruppen.
 **Hvordan:** åpne lenken på egen mobil, gjør øvingssaken uten hjelp, tenk høyt.
 Vi ser på, noterer, og hjelper ikke (Valve-metoden).
 **Vi måler:** tid til fullført · om feilen ble funnet på første forsøk · hint
-brukt · SEQ 1–7 · «hva var uklart?» · hvor de stoppet opp.
+brukt · målinger tastet riktig første gang · SEQ 1–7 · «hva var uklart?» · hvor
+de stoppet opp.
 
 **Beslutningsregel:**
 - **Bygg øvingssaken inn i appen** hvis minst 2 av 3 fullfører på under 12
