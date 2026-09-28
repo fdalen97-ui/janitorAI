@@ -43,6 +43,7 @@ ikke får verdi uten den — ikke på gründer-entusiasme. (Kilde: `inkorporerin
 ## Test & verifisering
 - E2E delingskjede: `cd apps/api && bash test/e2e-share.sh` (~47 sjekker).
 - E2E tenant-isolasjon: `cd apps/api && bash test/e2e-tenant-isolation.sh`.
+- E2E rapportgenerering (S20 medie-URL, hovedbok): `cd apps/api && bash test/e2e-rapport-motor.sh`.
 - E2E headere/Host-allowliste/security.txt (uten DB): `cd apps/api && bash test/e2e-headere.sh`.
 - Enhetstester (uten DB): `cd apps/api && node test/shareUtils.test.js && node test/publicBase.test.js`.
 - Typesjekk app: `cd apps/mobile && npx tsc --noEmit`.

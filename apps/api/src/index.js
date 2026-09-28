@@ -639,184 +639,20 @@ app.post("/report/google-doc", heavyLimiter, async (req, res) => {
   try {
     // Use the token already validated and set by the requireTesterToken middleware.
     // Reading the raw header again would miss Authorization: Bearer tokens.
-    const token = req.testerToken;
-
-    // Video is optional. When supplied, verify that it belongs to this tester
-    // before allowing the AI engine to fetch it.
-    if (video_filename && video_filename !== "demo" && isDbEnabled()) {
-      const pool = getPool();
-      const ownsVideo = await pool.query(
-        "SELECT 1 FROM media WHERE id = $1 AND tester_token = $2",
-        [String(video_filename), token]
-      );
-      if (ownsVideo.rows.length === 0) {
-        return res.status(404).json({ status: "error", message: "Video not found for this tester." });
-      }
-    }
-
-    // When supplied, build a short-lived URL the AI engine can use to download
-    // the video directly from this API server's media storage. A report may
-    // instead be generated from notes, transcriptions, photos, and metadata.
-    // S20: aldri rå Host her — en tester kunne ellers få motoren til å hente
-    // fra vilkårlig vert med gyldig signatur. apiBase = API_BASE_URL,
-    // ellers allowlistet vert, ellers fast fallback.
-    const apiBaseUrl = apiBase(req);
-    const videoUrl =
-      video_filename && video_filename !== "demo"
-        ? signedMediaUrl(apiBaseUrl, video_filename, REPORT_MEDIA_URL_TTL_MS)
-        : null;
-
-    // Resolve photo URIs to absolute URLs and strip empty fields so the AI
-    // engine receives a clean, self-contained context object.
-    // A1: romnavnet følger notatet — rommet er konteksten som skiller
-    // «fukt ved sluk på badet» fra «fukt i boden», og styrer hvilket
-    // Byggforsk-delsett som er relevant.
-    const roomsById = new Map(
-      (Array.isArray(project?.rooms) ? project.rooms : [])
-        .filter((r) => r && r.id && r.name)
-        .map((r) => [String(r.id), String(r.name)])
-    );
-
-    // S3/S10: bare foto denne testeren faktisk eier skal signeres og sendes til
-    // AI-motoren. Videoen eierskapssjekkes over; her verifiseres alle foto-
-    // remoteId-er i én spørring, og ikke-eide utelates (kan ellers omgå tenant-
-    // skopingen fordi signert media-GET slår opp på id alene).
-    const requestedPhotoIds = [
-      ...new Set(
-        (Array.isArray(project?.notes) ? project.notes : [])
-          .flatMap((n) => (Array.isArray(n.photos) ? n.photos : []))
-          .map((p) => (p && p.remoteId ? String(p.remoteId) : null))
-          .filter(Boolean)
-      ),
-    ];
-    let ownedPhotoIds = new Set();
-    if (isDbEnabled() && requestedPhotoIds.length > 0) {
-      const owned = await getPool().query(
-        "SELECT id FROM media WHERE id = ANY($1) AND tester_token = $2",
-        [requestedPhotoIds, token]
-      );
-      ownedPhotoIds = new Set(owned.rows.map((r) => String(r.id)));
-    }
-
-    const enrichedNotes = (Array.isArray(project?.notes) ? project.notes : [])
-      .map((note) => {
-        const enrichedPhotos = (Array.isArray(note.photos) ? note.photos : [])
-          .filter((p) => p && (p.uri || p.remoteId))
-          .map((p) => {
-            // Signer bare eide foto; lokale uri-er (ikke synket ennå) sendes som
-            // de er; ikke-eide remoteId-er droppes.
-            let uri;
-            if (p.remoteId) {
-              if (!ownedPhotoIds.has(String(p.remoteId))) return null;
-              uri = signedMediaUrl(apiBaseUrl, p.remoteId, REPORT_MEDIA_URL_TTL_MS);
-            } else {
-              uri = String(p.uri);
-            }
-            return {
-              uri,
-              ...(p.caption ? { caption: p.caption } : {}),
-            };
-          })
-          .filter(Boolean);
-
-        const enriched = {};
-        if (note.text) enriched.text = note.text;
-        if (note.transcription) enriched.transcription = note.transcription;
-        if (note.roomId && roomsById.has(String(note.roomId))) {
-          enriched.room = roomsById.get(String(note.roomId));
-        }
-        if (enrichedPhotos.length > 0) enriched.photos = enrichedPhotos;
-        return enriched;
-      })
-      .filter((n) => Object.keys(n).length > 0);
-
-    const projectContext = {};
-    if (project?.name) projectContext.name = project.name;
-    if (project?.inspectionDate) projectContext.inspectionDate = project.inspectionDate;
-    if (project?.inspector) projectContext.inspector = project.inspector;
-    if (project?.projectDescriptionText) projectContext.projectDescriptionText = project.projectDescriptionText;
-    if (project?.projectDescriptionTranscription) projectContext.projectDescriptionTranscription = project.projectDescriptionTranscription;
-    if (enrichedNotes.length > 0) projectContext.notes = enrichedNotes;
-
-    // Use the dedicated service-to-service secret for the AI engine call.
-    // This is separate from the user's tester token (which is validated against
-    // the DB) — the AI engine authenticates against its own TESTER_TOKEN env var,
-    // so the backend needs AI_ENGINE_TOKEN set to that same value.
-    const aiToken = process.env.AI_ENGINE_TOKEN || "";
-    const startedAt = Date.now();
-    engineCallStarted = true;
-    const response = await fetchWithTimeout(
-      `${aiEngineUrl}/api/report`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-tester-token": aiToken,
-          ...(req.requestId ? { "X-Request-Id": req.requestId } : {}),
-        },
-        body: JSON.stringify({
-          ...(videoUrl ? { video_url: videoUrl } : {}),
-          report_meta: report_meta || {},
-          project: projectContext,
-          tester_email: req.testerEmail || "",
-        }),
-      },
-      REPORT_PROXY_TIMEOUT_MS
-    );
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error("AI engine /api/report error:", { status: response.status });
-      return res.status(502).json({ error: "AI engine error" });
-    }
-
-    // COGS: AI-motoren returnerer token_usage fra Gemini-analysen (den store
-    // kostnadsdriveren) — også ved pipelinefeil ETTER analysen, som ellers var
-    // fakturert men usynlig i kostnadsmålingen. Fire-and-forget.
-    const failed = data && data.status === "error";
-    const tu = data && data.token_usage;
-    if (tu) {
-      recordCost({
-        testerToken: req.testerToken,
-        operation: failed ? "report_failed" : "report",
-        model: tu.model || "gemini-2.5-flash",
-        usage: {
-          input: tu.input_tokens || 0,
-          output: tu.output_tokens || 0,
-          total: tu.total_tokens || (tu.input_tokens || 0) + (tu.output_tokens || 0),
-        },
-        durationMs: Date.now() - startedAt,
-      }).catch(() => {});
-    }
-
-    if (failed) {
-      // Motoren svarer 200 med {status:'error'} — uten denne loggen passerte
-      // pipelinefeil backend helt sporløst (kun klientens logError så dem).
-      console.error("AI engine reported pipeline error:", {
-        requestId: req.requestId || null,
-        projectId,
-        message: data.message ? String(data.message).slice(0, 300) : null,
-        orphanedDocId: data.doc_id || null,
-      });
-      recordReportGeneration({
-        testerToken: req.testerToken,
-        projectId,
-        docId: data.doc_id || null,
-        status: "error",
-        promptVersion: data.prompt_version || null,
-      });
-    } else {
-      const docMatch = String(data.url || "").match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
-      recordReportGeneration({
-        testerToken: req.testerToken,
-        projectId,
-        docId: docMatch ? docMatch[1] : null,
-        status: "success",
-        promptVersion: data.prompt_version || null,
-        citations: data.citation_stats || null,
-      });
-    }
-
+    const data = await generateReportService({
+      testerToken: req.testerToken,
+      projectId,
+      ...(attemptId ? { attemptId } : {}),
+      isTestProjectHint: body.is_test_project === true,
+      reportMeta: body.report_meta || {},
+      videoFilename: body.video_filename || null,
+      // S20: aldri rå Host her — en tester kunne ellers få motoren til å hente
+      // fra vilkårlig vert med gyldig signatur. apiBase = API_BASE_URL,
+      // ellers allowlistet vert, ellers fast fallback.
+      apiBaseUrl: apiBase(req),
+      requestId: req.requestId || null,
+      projectOverride: body.project,
+    });
     res.json(data);
   } catch (err) {
     if (err && ["TEST_PROJECT_NOT_SYNCED", "REPORT_ATTEMPT_EXISTS", "REPORT_IN_PROGRESS"].includes(err.code)) {
@@ -830,7 +666,6 @@ app.post("/report/google-doc", heavyLimiter, async (req, res) => {
     console.error("Backend /report/google-doc service error:", sanitizeError(err));
     return res.status(500).json({ error: "Server error" });
   }
-
 });
 
 // ---------- REPORT STATUS (hovedbok-lesing) ----------
