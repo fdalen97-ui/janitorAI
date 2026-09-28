@@ -148,11 +148,27 @@ async function begin(pool, testerToken, projectId, attemptId, testHint, resumeEx
   }
 }
 
-async function finish(pool, testerToken, projectId, attemptId, docId, status) {
+// Sitatportens telling og prompt-versjonen kommer fra motoren og bokføres per
+// kjøring (docs/taleteknologi-laerdommer.md). Ikke-heltall (manglende felt,
+// eldre motorversjon) lagres som NULL framfor å feile oppdateringen.
+function ledgerMeta(data) {
+  const c = data && data.citation_stats && typeof data.citation_stats === "object"
+    ? data.citation_stats : {};
+  const int = (v) => (Number.isInteger(v) ? v : null);
+  return {
+    promptVersion: data && data.prompt_version ? String(data.prompt_version).slice(0, 64) : null,
+    proposed: int(c.proposed), verified: int(c.verified), rejected: int(c.rejected),
+  };
+}
+
+async function finish(pool, testerToken, projectId, attemptId, docId, status, data) {
+  const m = ledgerMeta(data);
   const result = await pool.query(
-    `UPDATE report_generations SET doc_id=$4,status=$5,updated_at=now()
+    `UPDATE report_generations SET doc_id=$4,status=$5,updated_at=now(),
+        prompt_version=$6,citations_proposed=$7,citations_verified=$8,citations_rejected=$9
       WHERE tester_token=$1 AND project_id=$2 AND attempt_id=$3`,
-    [testerToken, projectId, attemptId, docId || null, status]
+    [testerToken, projectId, attemptId, docId || null, status,
+      m.promptVersion, m.proposed, m.verified, m.rejected]
   );
   if (result.rowCount !== 1) throw new Error("Report generation ledger row was not updated");
 }
@@ -207,9 +223,9 @@ async function generateReport({
   const pool = getPool();
   let started = false;
   let source;
-  const record = async (docId, status) => {
+  const record = async (docId, status, data) => {
     if (!started) return;
-    await finish(pool, testerToken, projectId, attemptId, docId, status);
+    await finish(pool, testerToken, projectId, attemptId, docId, status, data);
     started = false;
   };
   try {
@@ -288,7 +304,7 @@ async function generateReport({
       }).catch(() => {});
     }
     if (failed) {
-      await record(data?.doc_id || null, "error");
+      await record(data?.doc_id || null, "error", data);
       await pool.query(
         `UPDATE projects SET data=data || $3::jsonb,updated_at=now()
           ,report_reset_at = NULL
@@ -305,7 +321,7 @@ async function generateReport({
       throw err;
     }
     const docId = docIdFromUrl(data.url);
-    await record(docId, "success");
+    await record(docId, "success", data);
     const update = {
       reportUrl: data.url, reportStatus: "ready", reportError: null,
       reportAttemptId: attemptId,

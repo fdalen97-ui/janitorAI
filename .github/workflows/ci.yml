@@ -34,6 +34,9 @@ jobs:
       - name: E2E — tenant-isolasjon (kryss-konto angrepstest)
         working-directory: apps/api
         run: bash test/e2e-tenant-isolation.sh
+      - name: E2E — rapportgenerering mot stub-motor (S20 medie-URL, hovedbok)
+        working-directory: apps/api
+        run: bash test/e2e-rapport-motor.sh
       - name: E2E — per-tester rate limiting
         working-directory: apps/api
         run: bash test/e2e-rate-limit.sh

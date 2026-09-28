@@ -207,21 +207,11 @@ check "prod: ond Host → fast fallback" "$FALLBACK/om" "$($CURL -H "Host: $EVIL
 check "prod: ugyldig SECURITY_CONTACT → security.txt 404" "404" "$(status "$C/.well-known/security.txt")"
 check "prod: ugyldig HSTS_MAX_AGE → ingen HSTS (200, tom)" "200|" "$(status_header strict-transport-security -H 'X-Forwarded-Proto: https' "$C/health")"
 
-# ── (ix) S20 kjerne: signert medie-URL til AI-motoren bruker aldri rå Host ──
-rm -f "$WORK/engine-body.json"
-curl -s -m 20 -o /dev/null -X POST "$A/report/google-doc" -H "x-tester-token: $TOKEN" \
-  -H 'Content-Type: application/json' -H "Host: $EVIL_HOST" \
-  -d '{"video_filename":"v1","project":{},"project_id":"p1"}'
-VIDEO_URL="$(jq -r '.video_url // empty' "$WORK/engine-body.json" 2>/dev/null)"
-check "S20 medie-URL til AI-motor: fast vert, aldri rå Host" "$FALLBACK/api/media/v1" "$(printf '%s' "$VIDEO_URL" | sed 's/?.*//')"
-check "S20 medie-URL er signert (sig= og exp=)" "yes" "$(printf '%s' "$VIDEO_URL" | grep -q 'sig=' && printf '%s' "$VIDEO_URL" | grep -q 'exp=' && echo yes || echo no)"
-# apiBase ≠ publicBase: på B skal medie-URL og admin-base følge API_BASE_URL,
-# mens canonical følger PUBLIC_BASE_URL (to-tjeneste-kontrakten i RENDER_SETUP).
-rm -f "$WORK/engine-body.json"
-curl -s -m 20 -o /dev/null -X POST "$B/report/google-doc" -H "x-tester-token: $TOKEN" \
-  -H 'Content-Type: application/json' -d '{"video_filename":"v2","project":{},"project_id":"p2"}'
-check "apiBase: medie-URL til motor følger API_BASE_URL, ikke PUBLIC_BASE_URL" "https://api-b.test/api/media/v2" \
-  "$(jq -r '.video_url // empty' "$WORK/engine-body.json" 2>/dev/null | sed 's/?.*//')"
+# ── (ix) apiBase ≠ publicBase ───────────────────────────────────────────────
+# S20-kjernen (signert medie-URL til AI-motoren bruker aldri rå Host, og følger
+# API_BASE_URL) er flyttet til test/e2e-rapport-motor.sh: rapporttjenesten
+# krever database for hovedbok og eierskapssjekk, og denne testen kjører uten.
+# Her står bare det som ikke trenger DB: admin-base og canonical på B.
 check "apiBase: admin-dashboard følger API_BASE_URL" "1" "$($CURL "$B/admin-dashboard" | grep -c "const APP_API_BASE = 'https://api-b.test';")"
 check "publicBase: canonical på B følger fortsatt PUBLIC_BASE_URL" "https://example.test/om" "$($CURL "$B/om" | canonical)"
 
