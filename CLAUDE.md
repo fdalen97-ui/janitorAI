@@ -16,8 +16,12 @@ Språk: produkt/salgsflater på norsk (bokmål); pitch-deck på engelsk.
   (legg til `--clear` kun ved config-endring). Designsystem i `src/ui/theme.tsx`.
 - **apps/api** — Express + Postgres (JSONB-prosjekter per `tester_token`). Skjema
   i `src/db.js` (idempotent `CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS`).
-  Offentlige salgssider (`/om /demo /faq /personvern /vilkar /kontakt /kundereisen`)
-  serveres herfra. `/kontakt`-bookinglenken styres av `BOOKING_URL` (e-post-fallback).
+  Offentlige salgssider (`/om /demo /eksempelrapport /faq /personvern /vilkar /kontakt
+  /kundereisen`) serveres herfra med `Cache-Control: public, max-age=300`.
+  `/kontakt`-bookinglenken styres av `BOOKING_URL` (e-post-fallback). `LANDING_ROOT=/om`
+  sender `/` til salgssiden på tjenesten docrai.io peker på (se `docs/DEPLOYMENT.md`).
+  **docrai.io serverer i dag `explainer/index.html` (Cloudflare Pages), ikke disse
+  sidene** — status og byttet er beskrevet i `docs/nettside-masterplan.md` §0.
 - **ai-engine** — Python/FastAPI; Gemini-analyse → strukturert `DamageAnalysis` +
   Google Doc. Returnerer `(doc_id, analysis, token_usage, citation_stats)`;
   sitatportens telling + `prompt_version` bokføres per kjøring i

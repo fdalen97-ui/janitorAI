@@ -107,7 +107,7 @@ router.post("/pilot-interesse", requireDb, express.urlencoded({ extended: false 
 // ── Cookiefri besøkstelling (POST /api/besok) ────────────────────────────────
 // Kun forhåndsgodkjente stier telles; ingen IP, ingen bruker-ID.
 // /kontakt sender beacon (kontakt-page.html) men manglet her — ble aldri telt.
-const TELLBARE_STIER = new Set(["/om", "/demo", "/faq", "/personvern", "/vilkar", "/takk", "/kontakt"]);
+const TELLBARE_STIER = new Set(["/om", "/demo", "/eksempelrapport", "/faq", "/personvern", "/vilkar", "/takk", "/kontakt", "/kundereisen"]);
 
 router.post("/besok", requireDb, express.json({ limit: "1kb" }), async (req, res) => {
   if (limited(req, 120)) return res.status(204).end();

@@ -139,7 +139,7 @@
 </style>
 </head>
 <body>
-<div class="page">
+<main class="page">
 
   <div class="brand"><span class="sq">D</span><b>DocrAI</b><a href="/demo">Prøv demoen →</a></div>
 
@@ -154,6 +154,7 @@
     </p>
     <div class="cta-row">
       <a class="btn primary" href="/demo">Se din egen adresse på 2 sekunder</a>
+      <a class="btn ghost" href="/eksempelrapport">Se en ferdig rapport</a>
       <a class="btn ghost" href="#pilot">Bli pilotdeltaker</a>
       <a class="btn ghost" href="/kontakt">Book et 15-min møte</a>
     </div>
@@ -198,12 +199,14 @@
 
   <section>
     <h2>Pris – enkel og uten binding</h2>
-    <!-- Ærlig prisankring (kontrasteffekten): referansepunktet er kostnaden
-         ved dagens manuelle rapportskriving — ikke et kunstig «før-pris»-tall. -->
+    <!-- Regel 6 (CLAUDE.md): bare tall og løfter med kodelinje bak seg. Tidsbruk
+         måles per sak i appen (metrics.ts); mottakerens felt-telling rendres på
+         delingssiden; «ingenting faktureres» er sant fordi det ikke finnes
+         fakturagrunnlag (db.js). Baseline-tall kommer når de er målt. -->
     <div class="stat-row" style="margin-bottom:14px">
-      <div class="stat"><b>2–3 timer</b><span>tar en manuell skaderapport å skrive i dag</span></div>
-      <div class="stat"><b>2 400–4 500 kr</b><span>koster det i timeverk per rapport (typisk timepris 1 200–1 500 kr)</span></div>
-      <div class="stat"><b>990 kr/mnd</b><span>DocrAI — mindre enn én manuell rapport, ubegrensede saker</span></div>
+      <div class="stat"><b>Tid per sak</b><span>appen måler tiden fra første bevis til godkjent rapport – sak for sak</span></div>
+      <div class="stat"><b>Utkast → godkjent</b><span>korrigerer du AI-utkastet, ser mottakeren hvor mange felt som ble endret</span></div>
+      <div class="stat"><b>Ingen bindingstid</b><span>ingenting faktureres i pilotfasen</span></div>
     </div>
     <div class="tiers">
       <div class="tier">
@@ -218,11 +221,11 @@
       </div>
       <div class="tier hot">
         <h3>Takstperson</h3>
-        <div class="price">990 kr <span>/mnd eks. mva., veiledende</span></div>
+        <div class="price">Settes i pilotfasen <span>· ingen bindingstid</span></div>
         <ul>
-          <li>Ubegrensede saker og rapporter</li>
-          <li>Saksunderlag, AI-utkast, godkjenning, PIN-deling</li>
-          <li>Én rapport sparer inn måneden</li>
+          <li>Saksunderlag, AI-utkast, godkjenning og PIN-deling inkludert</li>
+          <li>Prisnivået bekreftes mot målt kostnad per rapport før det publiseres</li>
+          <li>Pilotdeltakere: 50 % rabatt første år</li>
         </ul>
       </div>
       <div class="tier">
@@ -235,7 +238,7 @@
         </ul>
       </div>
     </div>
-    <p class="fineprint">Veiledende priser i pilotfasen – endelig prising settes sammen med pilotdeltakerne. Ingen bindingstid.</p>
+    <p class="fineprint">Prisen settes i pilotfasen sammen med pilotdeltakerne, etter at kostnaden per rapport er målt på ekte saker. Ingen bindingstid.</p>
   </section>
 
   <section>
@@ -275,11 +278,11 @@
 
   <footer>
     <span>Kontakt: <a href="/kontakt">book et møte</a> eller <a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a> · vi svarer innen én virkedag.</span>
-    <span><a href="/demo">Demo</a> · <a href="/kontakt">Snakk med oss</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a> · <a href="/kundereisen">Kundereisen</a></span>
+    <span><a href="/demo">Demo</a> · <a href="/eksempelrapport">Eksempelrapport</a> · <a href="/kontakt">Snakk med oss</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a> · <a href="/kundereisen">Kundereisen</a></span>
     <span>DocrAI er under utvikling mot pilot. Kilder i demoen: Kartverket, åpen matrikkel (Geonorge) og Meteorologisk institutt.</span>
   </footer>
 
-</div>
+</main>
 
 <nav class="sticky-cta" aria-label="Hurtigvalg">
   <a class="p" href="/demo">Prøv demoen</a>
@@ -294,8 +297,7 @@
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "iOS, Android, Web",
   "description": "Gjør befaringsvideo og tale om til forsikringsklar skaderapport med årsak, akutt/gradvis-vurdering og Byggforsk-henvisninger. Takstpersonen kontrollerer og godkjenner.",
-  "inLanguage": "nb",
-  "offers": { "@type": "Offer", "price": "990", "priceCurrency": "NOK", "description": "Veiledende månedspris per takstperson i pilotfasen, uten bindingstid." }
+  "inLanguage": "nb"
 }
 </script>
 <script>

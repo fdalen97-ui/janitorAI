@@ -105,13 +105,13 @@ env -u NODE_ENV \
   TESTER_TOKEN="$TOKEN" PORT="$PORT_B" MEDIA_DIR="$WORK/media-b" STATIC_DIR="$WORK/static" \
   PUBLIC_BASE_URL="https://example.test/" API_BASE_URL="https://api-b.test" \
   AI_ENGINE_URL="http://127.0.0.1:${PORT_STUB}" AI_ENGINE_TOKEN="stub" \
-  SECURITY_CONTACT="mailto:sikkerhet@example.test" HSTS_MAX_AGE=300 \
+  SECURITY_CONTACT="mailto:sikkerhet@example.test" HSTS_MAX_AGE=300 LANDING_ROOT=/om \
   node src/index.js >"$WORK/b.log" 2>&1 &
 B_PID=$!
 env TESTER_TOKEN="$TOKEN" PORT="$PORT_C" MEDIA_DIR="$WORK/media-c" STATIC_DIR="$WORK/no-static" \
   NODE_ENV=production \
   PUBLIC_BASE_URL="http://example.test" API_BASE_URL='https://evil.test/x"><script>' \
-  SECURITY_CONTACT="fredrik@privat" HSTS_MAX_AGE=99999999999999999999 \
+  SECURITY_CONTACT="fredrik@privat" HSTS_MAX_AGE=99999999999999999999 LANDING_ROOT="https://evil.test/" \
   node src/index.js >"$WORK/c.log" 2>&1 &
 C_PID=$!
 
@@ -137,8 +137,8 @@ check "S20 /om: og:url på fast vert" "1" "$(printf '%s' "$OM_EVIL" | grep -c "<
 check "S20 /om: JSON-LD url på fast vert" "yes" "$([ "$(printf '%s' "$OM_EVIL" | grep -c "\"url\":\"$FALLBACK/om\"")" -ge 1 ] && echo yes || echo no)"
 SM="$($CURL -H "Host: $EVIL_HOST" "$A/sitemap.xml")"
 check "S20 sitemap: ingen script" "0" "$(printf '%s' "$SM" | grep -c '<script')"
-check "S20 sitemap: 7 loc" "7" "$(printf '%s' "$SM" | grep -c '<loc>')"
-check "S20 sitemap: alle loc på fast vert" "7" "$(printf '%s' "$SM" | grep -c "<loc>$FALLBACK/")"
+check "S20 sitemap: 8 loc" "8" "$(printf '%s' "$SM" | grep -c '<loc>')"
+check "S20 sitemap: alle loc på fast vert" "8" "$(printf '%s' "$SM" | grep -c "<loc>$FALLBACK/")"
 RB="$($CURL -H "Host: $EVIL_HOST" "$A/robots.txt")"
 check "S20 robots: én Sitemap-linje" "1" "$(printf '%s\n' "$RB" | grep -c '^Sitemap:')"
 check "S20 robots: Sitemap på fast vert" "Sitemap: $FALLBACK/sitemap.xml" "$(printf '%s\n' "$RB" | grep '^Sitemap:')"
@@ -206,6 +206,32 @@ check "prod: ugyldig base → fast fallback i canonical, loopback ikke allowlist
 check "prod: ond Host → fast fallback" "$FALLBACK/om" "$($CURL -H "Host: $EVIL_HOST" "$C/om" | canonical)"
 check "prod: ugyldig SECURITY_CONTACT → security.txt 404" "404" "$(status "$C/.well-known/security.txt")"
 check "prod: ugyldig HSTS_MAX_AGE → ingen HSTS (200, tom)" "200|" "$(status_header strict-transport-security -H 'X-Forwarded-Proto: https' "$C/health")"
+check "prod: LANDING_ROOT som URL avvises (logg)" "1" "$(grep -c 'LANDING_ROOT er ugyldig' "$WORK/c.log")"
+check "prod: ugyldig LANDING_ROOT → roten redirecter ikke (ingen åpen redirect)" "404|" "$(status_header location -H 'Accept: text/html' "$C/")"
+
+# ── (viii-b) LANDING_ROOT: roten → salgssiden, relativ sti, aldri URL ────────
+check "LANDING_ROOT på B: / → 301 /om (også foran SPA-fallbacken)" "301|/om" "$(status_header location -H 'Accept: text/html' "$B/")"
+check "LANDING_ROOT på B: redirect er relativ (ingen vert fra Host)" "301|/om" "$(status_header location -H "Host: $EVIL_HOST" "$B/")"
+check "uten LANDING_ROOT (A): / → merkevare-404 som før" "404|" "$(status_header location -H 'Accept: text/html' "$A/")"
+
+# ── (viii-c) Cache-Control på salgssidene, ingen X-Powered-By, UU-grunnmur ──
+for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk /kundereisen; do
+  check "cache: $p → public, max-age=300" "200|public, max-age=300" "$(status_header cache-control "$A$p")"
+done
+check "cache: ikoner får max-age (7 dager)" "public, max-age=604800" "$(header cache-control "$A/favicon.png")"
+check "cache: /share/:id får ikke fem minutters cache (sendFile-standard max-age=0)" "0" "$(header cache-control "$A/share/abc" | grep -c 'max-age=300')"
+check "ingen X-Powered-By" "200|" "$(status_header x-powered-by "$A/om")"
+for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk; do
+  PAGE="$($CURL "$A$p")"
+  check "UU $p: lang=nb, <main>, h1" "1|1|yes" "$(printf '%s' "$PAGE" | grep -c '<html lang="nb">')|$(printf '%s' "$PAGE" | grep -c '<main')|$([ "$(printf '%s' "$PAGE" | grep -c '<h1')" -ge 1 ] && echo yes || echo no)"
+done
+check "UU /demo: adressefeltet har label" "1" "$($CURL "$A/demo" | grep -c '<label for="adr"')"
+check "UU /kundereisen: h1 og fokusstil" "1|1" "$($CURL "$A/kundereisen" | grep -c '<h1 class="sr-only"')|$($CURL "$A/kundereisen" | grep -c 'focus-visible')"
+EKS="$($CURL "$A/eksempelrapport")"
+check "eksempelrapport: indekserbar, ingen noindex, ingen sjekksum-påstand" "200|0|0" "$(status "$A/eksempelrapport")|$(printf '%s' "$EKS" | grep -c 'noindex')|$(printf '%s' "$EKS" | grep -c 'SHA-256')"
+check "eksempelrapport: merket eksempeldata, ingen Byggforsk-nummer" "yes|0" "$([ "$(printf '%s' "$EKS" | grep -c 'Eksempeldata')" -ge 1 ] && echo yes || echo no)|$(printf '%s' "$EKS" | grep -Ec 'Byggforsk [0-9]')"
+check "eksempelrapport: canonical på fast vert med ond Host" "$FALLBACK/eksempelrapport" "$($CURL -H "Host: $EVIL_HOST" "$A/eksempelrapport" | canonical)"
+check "regel 6: /om og /faq uten pristall, «ubegrenset» og «per takstperson»" "0" "$( { $CURL "$A/om"; $CURL "$A/faq"; } | grep -ci '990\|ubegrens\|per takstperson')"
 
 # ── (ix) apiBase ≠ publicBase ───────────────────────────────────────────────
 # S20-kjernen (signert medie-URL til AI-motoren bruker aldri rå Host, og følger

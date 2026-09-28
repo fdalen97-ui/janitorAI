@@ -224,9 +224,14 @@
     .controls { gap: 10px; }
   }
 
+  /* Tilgjengelighet (WCAG 2.4.7): synlig fokus for tastaturbrukere (piltaster/mellomrom styrer scenene). */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  /* Visuelt skjult, men lest av skjermleser (WCAG 1.3.1). */
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 </style>
 
 <div class="page">
+  <h1 class="sr-only">DocrAI – kundereisen: fra befaring til forsikringsklar skaderapport</h1>
 
 
   <!-- Retur til nettstedet (W5: unngå navigasjonsblindvei) -->
@@ -467,7 +472,7 @@
       <div class="scene" data-dur="19000">
         <span class="sc-label">Scene 8 · Hos forsikringsselskapet</span>
         <div class="browser pop" style="left: 8%; top: 12%;">
-          <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="b-url">docrai.no/r/solbergveien-14</span></div>
+          <div class="b-bar"><span class="dots"><i></i><i></i><i></i></span><span class="b-url">docrai.io/share/k7q2m9</span></div>
           <div class="b-body">
             <span class="pinpill pop d1">PIN-beskyttet · utløper om 30 dager</span>
             <div class="r-h">Skaderapport – Solbergveien 14</div>
@@ -607,4 +612,8 @@
     sceneStart = performance.now();
     raf = requestAnimationFrame(tick);
   })();
+</script>
+<script>
+  // Cookiefri besøkstelling – kun sti + ev. kampanjekilde, aldri IP (som på /om).
+  try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/kundereisen', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}
 </script>
