@@ -232,6 +232,11 @@ check "eksempelrapport: indekserbar, ingen noindex, ingen sjekksum-påstand" "20
 check "eksempelrapport: merket eksempeldata, ingen Byggforsk-nummer" "yes|0" "$([ "$(printf '%s' "$EKS" | grep -c 'Eksempeldata')" -ge 1 ] && echo yes || echo no)|$(printf '%s' "$EKS" | grep -Ec 'Byggforsk [0-9]')"
 check "eksempelrapport: canonical på fast vert med ond Host" "$FALLBACK/eksempelrapport" "$($CURL -H "Host: $EVIL_HOST" "$A/eksempelrapport" | canonical)"
 check "regel 6: /om og /faq uten pristall, «ubegrenset» og «per takstperson»" "0" "$( { $CURL "$A/om"; $CURL "$A/faq"; } | grep -ci '990\|ubegrens\|per takstperson')"
+# Påstander uten målt baseline eller kode bak seg (docs/nettside-masterplan.md §1/§5.7).
+# «Byggforsk-henvisninger» som leveranse: referansen når verken app, dokument eller
+# delingsside ennå — bare sitatportens kontroll kan beskrives.
+check "regel 6: salgsflatene uten ubelagte tids-/tall-/aksept-påstander" "0" \
+  "$( for p in /om /demo /faq /eksempelrapport /kundereisen; do $CURL "$A$p"; done | grep -ci 'forsikringsklar\|forsikringsverdig\|på minutter\|2 t →\|datalag\|sju systemer\|to timer\|timevis\|fem åpne kilder\|hash-forseglet\|hash-sikret\|treningsdata\|in4mo\|2 sekunder\|byggforsk-henvisninger')"
 
 # ── (ix) apiBase ≠ publicBase ───────────────────────────────────────────────
 # S20-kjernen (signert medie-URL til AI-motoren bruker aldri rå Host, og følger

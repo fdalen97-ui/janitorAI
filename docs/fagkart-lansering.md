@@ -56,9 +56,15 @@ Dekket av sikkerhetsrevisjonen (se `sikkerhetsrevisjon-aug-2026.md`).
   når CI settes opp. AI-generert kode bør spotsjekkes mot copyleft ved distribusjon.
 
 ## 6 — Universell utforming (WCAG 2.1 AA / EAA)
-- [✓] Semantisk HTML, brødsmulesti, alt-tekst på demokartet, høy fargekontrast
-  (målt >14:1 hero, >7:1 knapper), skjemaer med `<label>`, `lang="nb"`.
-- [◐] Synlig fokusmarkering (`:focus-visible`) bør legges eksplisitt på sidene;
+- [✓] Semantisk HTML (`<main>` på alle salgssider), brødsmulesti, alt-tekst på
+  demokartet, skjemaer med `<label>` (adressefeltet på /demo fikk det 29.09.2026),
+  `lang="nb"`, `role="alert"`/`"status"` på feil- og statusmeldinger. Grep-sjekkes i
+  `apps/api/test/e2e-headere.sh`.
+- [◐] Fargekontrast: knapper i mørk modus hadde hvit tekst på `#8FC2CB` (1,95:1, under
+  AA) på /demo og i appens `PrimaryButton` — rettet til mørk tekst (9,2:1) 29.09.2026.
+  Ingen fullstendig kontrastmåling av alle flater er gjort; tidligere tall
+  («>14:1 hero, >7:1 knapper») gjaldt lys modus.
+- [◐] Synlig fokusmarkering (`:focus-visible`) på alle offentlige sider;
   full tastatur- og skjermlesertest med hjelpemiddel gjenstår.
 - [⚖] Mikrobedrift-unntaket i EAA (<10 ansatte / <2 mill. €) kan gjelde — avklar.
   Retter dere dere mot EU-marked, følg EAA uansett.

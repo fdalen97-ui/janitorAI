@@ -120,9 +120,9 @@
   <div id="cta" class="cta hidden">
     <b>Dette tok <span id="ctaSec"></span> sekunder.</b>
     <p>I DocrAI er dette bare starten: video og lyd fra befaringen blir et AI-utkast til
-      forsikringsrapport – årsak, akutt/gradvis-vurdering og Byggforsk-henvisninger – som
-      takstpersonen kontrollerer og godkjenner. Rapporten deles PIN-beskyttet, med
-      hash-forseglet bevis.</p>
+      skaderapport – med foreslått årsak og akutt/gradvis-vurdering – som takstpersonen
+      kontrollerer og godkjenner. Rapporten deles PIN-beskyttet, og hvert bevis får en
+      SHA-256-sjekksum ved opplasting.</p>
     <p><a href="/eksempelrapport" style="color:var(--accent);font-weight:600;">Se hvordan en ferdig rapport ser ut →</a></p>
     <p><b>Nysgjerrig?</b> Ta kontakt for pilot: <a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a></p>
   </div>
@@ -192,7 +192,7 @@
             (v.beskrivelse ? " · " + v.beskrivelse : "") +
             (v.nedborNeste24tMm ? " · " + String(v.nedborNeste24tMm).replace(".", ",") + " mm nedbør" : ""));
 
-          $("rStat").textContent = "Hentet live fra fem åpne kilder – uten én avtale.";
+          $("rStat").textContent = "Hentet live fra fem åpne tjenester hos Kartverket og MET – uten én avtale.";
           $("result").classList.remove("hidden");
           $("ctaSec").textContent = String(Math.max(1, Math.round((Date.now() - t0) / 1000)));
           $("cta").classList.remove("hidden");

@@ -17,7 +17,7 @@ flater og presse — detaljer og kilder i underlagene:
    tungt styre, Forskningsrådsmidler), iVerdi/Spir (distribusjonsmakt +
    annonsert AI i bolighandel-segmentet) og skinnene (in4mo/Solera, CAB/MEPS
    med Bdeo, Scalepoint — automatisering tett rundt rapporten).
-3. **Vinduet er 12–24 måneder.** Wenns CliVa-FoU løper 2025–2027; iVerdis AI
+3. **Vinduet er 12–24 måneder.** Wenns CliVa-FoU (klimarisiko på bygningsnivå) løper 2025–2028; iVerdis AI
    er annonsert men udokumentert; Soleras AI er fortsatt kun bil. Forsvaret
    er fart til dokumentert pilot, Byggforsk-dybde og godkjenningsflyten.
 4. **Markedet har allerede felt to dommer vi bygger på:** in4mos 1,9★ viser
@@ -45,8 +45,8 @@ selskap (CAB). Ingen står i DocrAIs rute.
 
 **Wenn Property AS** (Stavanger, 2023; trussel **middels–høy**). Mest
 troverdige nærkonkurrent: profilert styre, 12,9 MNOK EK, ARR >2 MNOK, og
-CliVa-prosjektet (Forskningsrådet 10,9 MNOK, 2025–2027) mot AI-basert
-skadevurdering med Byggforsk-data og forsikringsbransjen som interessent.
+CliVa-prosjektet (Forskningsrådet 10,9 MNOK). Wenns investorside beskriver CliVa som klimarisikoanalyse på bygningsnivå (2025–2028), ikke AI-skadevurdering (rettet 29.09.2026, jf. `docs/verdens-beste-losning.md` §6). Byggforsk-data
+og forsikringsbransjen som interessent gjør det fortsatt verdt å følge.
 Produktet er i dag 100 % håndverker/tilbudsfase — trusselen er FoU-løpet,
 ikke dagens produkt. *Vi slår dem på: årsak/ansvar i oppgjøret, fart til
 marked mens de forsker.*
@@ -106,7 +106,7 @@ største eier). Konsument-AI som tolket ferdige rapporter bar ikke.
 Prioritert — hvert punkt kobler til det verifiserte bildet over.
 
 ### 1. Fart foran alt: dokumentert pilot før FoU-løpene lander
-Vinduet er 12–24 mnd (CliVa ferdig 2027, iVerdi udokumentert, Solera kun
+Vinduet er 12–24 mnd (CliVa – klimarisiko – ferdig 2028, iVerdi udokumentert, Solera kun
 bil). Den eneste posisjonen ingen kan kopiere raskt er **målte tall fra
 ekte skadesaker**: minutter fra befaring til godkjent rapport,
 godkjenningsgrad, andel rapporter akseptert i oppgjør. Ocab-piloten er

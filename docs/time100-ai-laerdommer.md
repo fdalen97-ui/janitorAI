@@ -61,8 +61,9 @@ DocrAI-eksponeringen: hele motoren står på én modell (Gemini) hos én
 leverandør, med kvote og prising utenfor vår kontroll.
 
 **Tiltak (dokumentasjon, ikke kode):** et kort beredskapsnotat —
-modellbytte-runbook. Vi står allerede godt: modellkallet bor på ÉN flate
-(ai-engine), prompten og kunnskapsgrunnlaget er modellnøytral tekst,
+modellbytte-runbook. Vi står allerede godt: modellkallene bor på to kjente flater
+(ai-engine for analysen, `apps/api/src/index.js` for transkripsjon og
+bildebeskrivelse — se tabellen i `docs/modellbytte-runbook.md`), prompten og kunnskapsgrunnlaget er modellnøytral tekst,
 `PROMPT_VERSION`-regimet og valideringsbatteriet ER byttetesten (kjør
 casene på kandidatmodellen, sammenlign draft-vs-godkjent-diff). Det som
 mangler er å skrive ned stegene og beslutningskriteriene. **Ikke** bygg
