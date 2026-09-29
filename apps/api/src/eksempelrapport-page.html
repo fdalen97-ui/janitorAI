@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="/eksempelrapport" />
+<title>DocrAI – Eksempel på ferdig skaderapport</title>
+<meta name="description" content="Slik ser en ferdig, godkjent DocrAI-skaderapport ut for mottakeren: årsak, faglig beskrivelse, tiltak, bevis og notater. Oppdiktet eksempelsak – ingen ekte adresse, person eller bilder." />
+<meta property="og:title" content="DocrAI – Eksempel på ferdig skaderapport" />
+<meta property="og:description" content="Slik ser en ferdig, godkjent DocrAI-skaderapport ut for mottakeren. Oppdiktet eksempelsak." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="/og-bilde.png" />
+<meta property="og:locale" content="nb_NO" />
+<meta name="twitter:card" content="summary_large_image" />
+<!--
+  Eksempeldata fra øvingssaken (presentation/ovingssak.html): samme oppdiktede
+  sak, samme målinger. Siden er statisk og viser bare det den ekte delingssiden
+  (share-page.html) rendrer for mottakeren. Ingen sjekksummer, ingen
+  Byggforsk-nummer, ingen ekte foto — alt som ville stått uten kode bak seg
+  på en oppdiktet sak, er utelatt.
+-->
+<style>
+  :root {
+    --paper: #FFFFFF; --surface: #F1F3F3; --ink: #1B262B; --muted: #566670;
+    --border: #D8DEDF; --accent: #23545C; --accent-pale: #E0ECEE;
+    --ok: #14532D; --ok-bg: #DCEFE3; --ok-border: #8FC9A0;
+    --warn: #7F5A1D; --warn-bg: #FCF3DC; --warn-border: #E3C98A;
+    --copper: #9F5A2C; --stamp-ink: #7F4A22; --stamp-bg: #F7ECE1; --stamp-border: #C98B5A;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #1A2327; --surface: #11181B; --ink: #E4EAEC; --muted: #9AA8AE;
+      --border: #324047; --accent: #8FC2CB; --accent-pale: #16262C;
+      --ok: #8FC9A0; --ok-bg: #103524; --ok-border: #166534;
+      --warn: #E3C08A; --warn-bg: #2B2214; --warn-border: #4A3A20;
+      --copper: #C98B5A; --stamp-ink: #DBA173; --stamp-bg: #2A2019; --stamp-border: #7F4A22;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface); color: var(--ink);
+    font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px; line-height: 1.55;
+  }
+  .page { max-width: 840px; margin: 0 auto; padding: 32px 18px 64px; display: flex; flex-direction: column; gap: 20px; }
+  .brand { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .brand .sq { width: 20px; height: 20px; background: #23545C; flex: none; display: flex; align-items: center; justify-content: center; color: #F1F3F3; font-weight: 700; font-size: 13px; line-height: 1; }
+  .brand b { font-size: 15px; letter-spacing: 0.02em; }
+  .brand a { margin-left: auto; color: var(--accent); font-size: 14px; font-weight: 600; text-decoration: none; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600;
+    padding: 4px 12px; border-radius: 999px; border: 1px solid var(--warn-border);
+    color: var(--warn); background: var(--warn-bg); width: fit-content;
+  }
+  .banner { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--ink); border-radius: 10px; padding: 12px 16px; font-size: 14px; }
+  .banner b { color: var(--warn); }
+  .card { background: var(--paper); border: 1px solid var(--border); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+  h2 { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); }
+  .muted { color: var(--muted); }
+  .kv { display: grid; grid-template-columns: minmax(130px, 180px) 1fr; gap: 6px 14px; font-size: 14.5px; margin: 0; }
+  .kv dt { color: var(--muted); margin: 0; } .kv dd { margin: 0; }
+  /* Kobber — identitetens signaturdetalj: kun godkjenningsstempelet. */
+  .badge-stamp {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700;
+    color: var(--stamp-ink); background: var(--stamp-bg); border: 1.5px solid var(--stamp-border);
+    border-radius: 999px; padding: 2px 10px; letter-spacing: 0.03em; width: fit-content;
+  }
+  .evidence { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .ev { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--paper); display: flex; flex-direction: column; }
+  .ev svg { width: 100%; aspect-ratio: 4/3; display: block; background: #0b1020; }
+  .ev .meta { padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; }
+  .ev .cap { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .note { border-left: 3px solid var(--accent); background: var(--accent-pale); padding: 10px 14px; border-radius: 0 8px 8px 0; }
+  .note .when { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .note table { border-collapse: collapse; font-size: 13.5px; margin-top: 6px; }
+  .note th, .note td { text-align: left; padding: 3px 12px 3px 0; border-bottom: 1px solid var(--border); }
+  .note th { color: var(--muted); font-weight: 600; }
+  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn { display: inline-block; text-decoration: none; font-weight: 700; font-size: 15px; border-radius: 10px; padding: 13px 22px; min-height: 48px; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.ghost { border: 1.5px solid var(--border); color: var(--ink); background: var(--paper); }
+  @media (prefers-color-scheme: dark) { .btn.primary { color: #11181B; } }
+  footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="brand"><span class="sq">D</span><b>DocrAI</b><span class="muted">· eksempel på delt skaderapport</span><a href="/om">← Om DocrAI</a></div>
+
+  <div class="banner"><b>Eksempeldata.</b> Saken, adressen, takstpersonen og bildene er oppdiktet
+    (samme sak som i øvingssaken). Slik ser en ferdig, godkjent rapport ut for den som mottar
+    lenken – uten PIN-koden, som ekte rapporter krever.</div>
+  <div class="pill">Eksempel · ekte lenker er PIN-beskyttet og utløper</div>
+
+  <div class="card">
+    <h1>Skaderapport – Øvingsveien 12, Hamar</h1>
+    <span class="badge-stamp">Faglig vurdert og godkjent av Kari Eksempel · 28.09.2026</span>
+    <dl class="kv">
+      <dt>Adresse</dt><dd>Øvingsveien 12, 2317 Hamar</dd>
+      <dt>Befaringsdato</dt><dd>28.09.2026</dd>
+      <dt>Skadedato</dt><dd>Oppdaget 21.09.2026</dd>
+      <dt>Saksnummer</dt><dd>ØV-2026-0012</dd>
+      <dt>Takstperson</dt><dd>Kari Eksempel</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Skade og årsak</h2>
+    <dl class="kv">
+      <dt>Skadested</dt><dd>Kjeller, vegg bak sofa (sørvegg mot terreng)</dd>
+      <dt>Kilde</dt><dd>Overvann fra terreng som faller inn mot grunnmuren</dd>
+      <dt>Årsak</dt><dd>Nedbør / overvann – vann trenger inn nedenfra, gradvis</dd>
+      <dt>Faglig beskrivelse</dt><dd>Fukten er høyest nederst på veggen (18 ved 5 cm) og avtar
+        oppover (9 ved 100 cm). Røret til utekrana på 1 m er tørt rundt gjennomføringen og
+        holdt 6 bar i 10 minutter uten trykkfall. Saltutslag nederst på grunnmuren og terreng
+        som faller mot muren peker samme vei: vann fra utsiden, nedenfra. Eierens opplysning om
+        lekkasje fra røret er vurdert og ikke lagt til grunn.</dd>
+      <dt>Omfang</dt><dd>Fuktmerker 0–30 cm over gulv på ca. 2,5 m veggflate. Bunnsvill 11 (tørr).</dd>
+      <dt>Tiltak</dt><dd>Uttørking av vegg og bunnsvill med kontrollmåling etterpå.</dd>
+      <dt>Beboelig</dt><dd>Ja</dd>
+      <dt>Tiltak mot ny skade</dt><dd>Terrengarbeid slik at vannet ledes bort fra grunnmuren;
+        beskytte grunnmursplasten; vurdere drenering.</dd>
+    </dl>
+    <p class="muted" style="margin:0;font-size:12.5px;">1 felt er faglig korrigert av takstpersonen fra AI-utkastet før godkjenning.</p>
+  </div>
+
+  <div class="card">
+    <h2>Befaringsbeskrivelse</h2>
+    <p style="margin:0;">Fuktmerker nederst på veggen bak sofaen, opp til ca. tretti centimeter.
+      Saltutslag på grunnmuren. Bunnsvill er tørr. Eier mener røret til utekrana lekker.</p>
+  </div>
+
+  <div class="card">
+    <h2>Bevis</h2>
+    <p class="muted" style="margin:0;font-size:13px;">Fire bilder fra befaringen. I dette eksempelet er
+      bildene illustrasjoner – ingen ekte foto.</p>
+    <div class="evidence">
+      <div class="ev">
+        <svg viewBox="0 0 160 100" role="img" aria-label="B1 · Kjellervegg bak sofa: fuktmerker 0–30 cm">
+          <rect width="160" height="100" fill="#E9E4DA"/><rect y="86" width="160" height="14" fill="#C9C2B4"/>
+          <defs><linearGradient id="st1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#8A4B2E" stop-opacity=".55"/><stop offset="1" stop-color="#8A4B2E" stop-opacity="0"/></linearGradient></defs>
+          <rect x="0" y="58" width="160" height="28" fill="url(#st1)"/><rect x="34" y="60" width="92" height="26" rx="6" fill="#566670" opacity=".55"/>
+          <text x="6" y="12" font-size="8" font-family="monospace" fill="#1B262B">KJELLER · VEGG BAK SOFA</text>
+        </svg>
+        <div class="meta"><div class="cap">B1 · Kjellervegg bak sofa: fuktmerker 0–30 cm</div><div class="muted">Tatt 28.09.2026 · Kjeller</div></div>
+      </div>
+      <div class="ev">
+        <svg viewBox="0 0 160 100" role="img" aria-label="B2 · Saltutslag nederst på grunnmuren">
+          <rect width="160" height="100" fill="#B9B6AE"/><rect y="70" width="160" height="30" fill="#A7A39A"/>
+          <circle cx="1" cy="74" r="1" fill="#FFF" opacity=".85"/><circle cx="38" cy="87" r="2" fill="#FFF" opacity=".85"/><circle cx="75" cy="76" r="3" fill="#FFF" opacity=".85"/><circle cx="112" cy="89" r="1" fill="#FFF" opacity=".85"/><circle cx="149" cy="78" r="2" fill="#FFF" opacity=".85"/><circle cx="28" cy="91" r="3" fill="#FFF" opacity=".85"/><circle cx="65" cy="80" r="1" fill="#FFF" opacity=".85"/><circle cx="102" cy="93" r="2" fill="#FFF" opacity=".85"/><circle cx="139" cy="82" r="3" fill="#FFF" opacity=".85"/><circle cx="18" cy="95" r="1" fill="#FFF" opacity=".85"/><circle cx="55" cy="84" r="2" fill="#FFF" opacity=".85"/><circle cx="92" cy="97" r="3" fill="#FFF" opacity=".85"/><circle cx="129" cy="86" r="1" fill="#FFF" opacity=".85"/><circle cx="8" cy="75" r="2" fill="#FFF" opacity=".85"/><circle cx="45" cy="88" r="3" fill="#FFF" opacity=".85"/><circle cx="82" cy="77" r="1" fill="#FFF" opacity=".85"/><circle cx="119" cy="90" r="2" fill="#FFF" opacity=".85"/><circle cx="156" cy="79" r="3" fill="#FFF" opacity=".85"/>
+          <text x="6" y="12" font-size="8" font-family="monospace" fill="#1B262B">GRUNNMUR · SALTUTSLAG</text>
+        </svg>
+        <div class="meta"><div class="cap">B2 · Saltutslag nederst på grunnmuren</div><div class="muted">Tatt 28.09.2026 · Kjeller</div></div>
+      </div>
+      <div class="ev">
+        <svg viewBox="0 0 160 100" role="img" aria-label="B3 · Rørgjennomføring til utekran: tørr">
+          <rect width="160" height="100" fill="#E9E4DA"/><circle cx="80" cy="42" r="12" fill="none" stroke="#566670" stroke-width="3"/><rect x="92" y="38" width="68" height="8" fill="#566670"/>
+          <text x="6" y="12" font-size="8" font-family="monospace" fill="#1B262B">RØR TIL UTEKRAN · 1 M</text><text x="6" y="92" font-size="8" font-family="monospace" fill="#1B262B">TØRT RUNDT GJENNOMFØRING</text>
+        </svg>
+        <div class="meta"><div class="cap">B3 · Rørgjennomføring til utekran: tørr</div><div class="muted">Tatt 28.09.2026 · Kjeller</div></div>
+      </div>
+      <div class="ev">
+        <svg viewBox="0 0 160 100" role="img" aria-label="B4 · Terreng faller mot mur, ubeskyttet grunnmursplast">
+          <rect width="160" height="100" fill="#A9C4D0"/><rect x="0" y="18" width="92" height="60" fill="#D8D2C4"/><rect x="0" y="64" width="92" height="16" fill="#2B2B2B"/>
+          <polygon points="0,86 160,62 160,100 0,100" fill="#7A6A55"/>
+          <defs><marker id="ar" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#1B262B"/></marker></defs>
+          <path d="M150 70 L112 76" stroke="#1B262B" stroke-width="2" marker-end="url(#ar)"/>
+          <text x="96" y="12" font-size="8" font-family="monospace" fill="#1B262B">UTVENDIG</text><text x="96" y="56" font-size="7" font-family="monospace" fill="#1B262B">FALL MOT MUR</text>
+        </svg>
+        <div class="meta"><div class="cap">B4 · Terreng faller mot mur, ubeskyttet grunnmursplast</div><div class="muted">Tatt 28.09.2026 · Utvendig</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Notater fra befaringen</h2>
+    <div class="note">
+      <div>Fuktmåling, vegg bak sofa (målerverdi, %):</div>
+      <table>
+        <tr><th>Sted</th><th>Høyde</th><th>Verdi</th></tr>
+        <tr><td>Vegg bak sofa</td><td>5 cm</td><td>18</td></tr>
+        <tr><td>Vegg bak sofa</td><td>30 cm</td><td>14</td></tr>
+        <tr><td>Vegg bak sofa</td><td>60 cm</td><td>10</td></tr>
+        <tr><td>Ved rørgjennomføring</td><td>100 cm</td><td>9</td></tr>
+        <tr><td>Referanse, tørr innervegg</td><td>100 cm</td><td>8</td></tr>
+        <tr><td>Bunnsvill</td><td>5 cm</td><td>11</td></tr>
+      </table>
+      <div class="when">28.09.2026</div>
+    </div>
+    <div class="note">
+      <div>Trykktest av rør til utekran: 6 bar i 10 min, trykkfall 0 bar.</div>
+      <div class="when">28.09.2026</div>
+    </div>
+    <div class="note">
+      <div>Eier mener røret til utekrana lekker. Registrert som eierens opplysning – ikke som funn.</div>
+      <div class="when">28.09.2026</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Slik blir din rapport</h2>
+    <p style="margin:0;">Dette er mottakerens visning: en PIN-beskyttet lenke uten konto, med
+      utløpsdato, som takstpersonen kan trekke tilbake. Lenken kan ikke lages før rapporten er
+      godkjent – det håndheves av serveren.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="/om#pilot">Bli pilotdeltaker</a>
+      <a class="btn ghost" href="/demo">Prøv saksunderlaget på din adresse</a>
+    </div>
+  </div>
+
+  <footer>
+    <span>Eksempelrapport fra DocrAI · oppdiktet sak · ingen ekte adresse, person eller bilder.</span>
+    <span><a href="/om">Om DocrAI</a> · <a href="/demo">Demo</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a></span>
+  </footer>
+</main>
+
+<script>
+  try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/eksempelrapport', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}
+</script>
+</body>
+</html>

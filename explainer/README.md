@@ -13,6 +13,11 @@ Domain split (per the live setup): this site is meant for `docrai.io`; the
 product itself lives at `app.docrai.io` (that's what the "Åpne DocrAI" button
 links to).
 
+**Decision 2026-09-28:** `docrai.io` is to be pointed at the Express sales pages
+(`apps/api/src/om-page.html` and friends) instead of this site — see
+`docs/DEPLOYMENT.md` → «Domener» and `docs/nettside-masterplan.md` §0. This
+folder stays in the repo until the switch is verified, then it can be removed.
+
 ## Deploying to Render (Static Site)
 
 1. New → Static Site, point at this repo.

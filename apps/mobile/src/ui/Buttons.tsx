@@ -57,8 +57,12 @@ const PressableScale = ({ children, style, ...props }: ButtonProps & { backgroun
 
 export const PrimaryButton = ({ children, style, loading, disabled, icon, width, ...props }: ButtonProps) => {
   const theme = useAppTheme();
+  // Hvit på mørk modus-accent (#8FC2CB) er 1,95:1 — under WCAG AA. Mørk tekst
+  // (bakgrunnsfargen #11181B) gir 9,2:1; i lys modus er hvit på #23545C 8,4:1.
+  const onAccent = theme.mode === 'dark' ? theme.colors.background : '#fff';
   const baseStyle: ViewStyle = {
     backgroundColor: theme.colors.accent,
+    minHeight: 48,
     borderColor: 'transparent',
     borderWidth: 1,
     paddingVertical: theme.spacing.sm,
@@ -86,11 +90,11 @@ export const PrimaryButton = ({ children, style, loading, disabled, icon, width,
       foreground={theme.colors.foreground}
     >
       {loading ? (
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator color={onAccent} />
       ) : (
         <>
           {icon}
-          <Body style={{ color: '#fff', fontWeight: '600' }} numberOfLines={1}>{children}</Body>
+          <Body style={{ color: onAccent, fontWeight: '600' }} numberOfLines={1}>{children}</Body>
         </>
       )}
     </PressableScale>
@@ -101,6 +105,7 @@ export const SecondaryButton = ({ children, style, loading, disabled, icon, widt
   const theme = useAppTheme();
   const baseStyle: ViewStyle = {
     backgroundColor: theme.colors.surfaceSecondary,
+    minHeight: 48,
     borderColor: theme.colors.border,
     borderWidth: 1,
     paddingVertical: theme.spacing.sm,
@@ -137,8 +142,9 @@ export const SecondaryButton = ({ children, style, loading, disabled, icon, widt
 export const IconButton = ({ children, style, disabled, ...props }: ButtonProps) => {
   const theme = useAppTheme();
   const baseStyle: ViewStyle = {
-    width: 42,
-    height: 42,
+    // 48 px: minste berøringsflate for hansker (WCAG 2.5.8 krever 24, vi sikter høyere).
+    width: 48,
+    height: 48,
     borderRadius: theme.radii.pill,
     borderWidth: 1,
     borderColor: theme.colors.border,

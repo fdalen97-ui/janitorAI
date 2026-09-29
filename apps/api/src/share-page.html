@@ -88,14 +88,14 @@
 <body>
 <div class="page">
   <div class="brand"><span class="sq"></span><b>DocrAI</b><span class="muted">· delt skaderapport</span></div>
-  <div class="pill" id="statusPill">Laster …</div>
+  <div class="pill" id="statusPill" role="status">Laster …</div>
 
   <!-- PIN-port -->
   <div class="card gate" id="gate">
     <h1 style="font-size: 20px;">Skriv inn PIN-koden</h1>
     <p class="muted" style="margin: 0;">Du har fått en PIN-kode av avsenderen sammen med lenken.</p>
     <input id="pinInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="PIN-kode" />
-    <div class="error hidden" id="gateError"></div>
+    <div class="error hidden" id="gateError" role="alert"></div>
     <button id="unlockBtn">Lås opp rapporten</button>
   </div>
 

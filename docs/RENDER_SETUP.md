@@ -55,6 +55,7 @@ On `janitorai-backend` → **Environment**:
 | `ADMIN_SECRET` | `openssl rand -hex 32` | `/api/admin/*` og admin-dashbordet (`x-admin-secret`). |
 | `CORS_ORIGINS` | `https://docrai.io,https://…` | Lås API-et til webappens/admin-dashbordets origins (S12). Usatt → åpen (auth er header-token, ikke cookies). |
 | `BOOKING_URL` | valgfri | Bookinglenke på `/kontakt`; usatt → e-post-fallback. |
+| `LANDING_ROOT` | `/om` (kun på tjenesten docrai.io peker på) | `GET /` → `301` til denne stien. Uten den svarer roten 401 fra token-vakten (ingen `STATIC_DIR`) eller webappen (med). Kun relativ sti `/[a-z0-9-]+` godtas — en URL logges som ugyldig og ignoreres, så roten kan aldri bli en åpen redirect. **Ikke** sett den på tjenesten som serverer appen (app.docrai.io). Testes i `test/e2e-headere.sh`. |
 
 Valgfrie tuning-variabler (dokumentert i koden): `HEAVY_RATE_LIMIT`, `GENERAL_RATE_LIMIT`,
 `MEDIA_CLEANUP_GRACE_HOURS`, `MEDIA_SWEEP_DISABLED`, `MEDIA_DISK_WARN_PERCENT`,
