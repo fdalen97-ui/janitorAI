@@ -57,7 +57,7 @@ engang en skriftlig forpliktelse. Playbookens «false product-market fit»: lans
 energi ≠ PMF. **Tiltak:** hent en intensjonsavtale/forhåndsforpliktelse om betaling
 fra minst én pilot før vi bygger kredittmekanikken.
 
-**3. Ingen CLAUDE.md — playbookens mest fremhevede MVP-artefakt mangler.**
+**3. Ingen CLAUDE.md — playbookens mest fremhevede MVP-artefakt manglet (løst: finnes i repo-roten).**
 «Founders who skip specs, architectural decisions, and context files (like
 CLAUDE.md) hit a predictable wall.» Vi har en rik `docs/`-mappe, men ingen
 CLAUDE.md som Claude Code leser automatisk hver økt. **Tiltak (gjort nå):** opprettet

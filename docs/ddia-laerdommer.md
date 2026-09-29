@@ -355,6 +355,18 @@ Ingen bygging nå (nei-lista gjelder), men to DDIA-idéer bør ligge klare som
   promptversjon + modell lagret per utkast gjør «draft-vs-godkjent-diff»
   og batteri-re-kjøringer målbare per promptgenerasjon.
 
+## Status per 29.09.2026 (kontrollert mot koden)
+
+| Tiltak | Status | Belegg |
+|---|---|---|
+| 1. Transkriberingskontrakten | **Løst** — appen sender lydbytene som `FormData` når fil-URL ikke kan brukes | `apps/mobile/app/projects/[id].tsx:842-874` |
+| 2. Godkjent rapport vs. live-innhold | **Delvis** — deling krever stempel (409), og redigering nullstiller stempelet; uforanderlig snapshot er ikke bygget | `apps/api/src/routes/share.js:175-180`; `[id].tsx:1905-1922` |
+| 3. Timeout-mismatch | **Løst** — proxy-timeout 10 min, lik motorens | `apps/api/src/reportService.js:10` |
+| 4. PDF/DOCX viser AI-utkastet | **Delvis** — advarsel i appen etter redigering; eksporten er fortsatt Google-dokumentet med utkastet, og kan lastes ned før godkjenning | `[id].tsx:2401-2447`; `docs/nettside-masterplan.md` §7 |
+| 5. `stale`/`deleted`-svaret | **Uavklart** — verken server (`routes/projects.js`) eller klient (`src/sync/projectSync.ts`) bruker strengene lenger; kontrakten må leses på nytt før punktet lukkes | grep 29.09.2026 |
+| Del 4: `MEDIA_SWEEP_DISABLED` | **Løst** | `apps/api/src/mediaCleanup.js:90-91` |
+| Del 4: `navigator.storage.persist()` | **Åpent** | ingen treff i `apps/mobile` |
+
 ## Status og forbehold
 
 - Ingen kode er endret i denne omgangen — dette er et beslutningsunderlag.

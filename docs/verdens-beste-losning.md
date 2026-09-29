@@ -497,7 +497,8 @@ Hover gjør estimat og måling til allemannseie.
 
 ## Vedlegg A — Dokumentgjeld funnet under gjennomgangen
 
-Rettes ikke i denne omgangen; bør tas som egen oppgave.
+**Rettet 29.09.2026** (samme gren som `docs/nettside-masterplan.md`), bortsett fra
+DDIA-punktet, som har fått en statustabell i stedet for å markeres ferdig.
 - `docs/systemdesign-handbok.md:142-144` og `docs/byggepraksis-2026.md:95` sier at
   rate-limit er per IP uten 429-håndtering — det er per tester og implementert
   (`docs/system-design-laerdommer.md:61`).

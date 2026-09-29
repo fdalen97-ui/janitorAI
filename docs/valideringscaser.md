@@ -15,7 +15,7 @@ bildetekst brukes.
 
 ## Skåring
 
-5 sjekkpunkter per case (50 totalt). Per case, gi 1 poeng for hver:
+5 sjekkpunkter per case (55 totalt: 11 caser × 5). Per case, gi 1 poeng for hver:
 
 1. **Årsak** — konkluderer (eller lar være å konkludere) som fasit.
 2. **Akutt/gradvis** — riktig klassifisering, eller uttrykt usikkerhet der
