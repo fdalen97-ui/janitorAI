@@ -105,13 +105,13 @@ env -u NODE_ENV \
   TESTER_TOKEN="$TOKEN" PORT="$PORT_B" MEDIA_DIR="$WORK/media-b" STATIC_DIR="$WORK/static" \
   PUBLIC_BASE_URL="https://example.test/" API_BASE_URL="https://api-b.test" \
   AI_ENGINE_URL="http://127.0.0.1:${PORT_STUB}" AI_ENGINE_TOKEN="stub" \
-  SECURITY_CONTACT="mailto:sikkerhet@example.test" HSTS_MAX_AGE=300 \
+  SECURITY_CONTACT="mailto:sikkerhet@example.test" HSTS_MAX_AGE=300 LANDING_ROOT=/om \
   node src/index.js >"$WORK/b.log" 2>&1 &
 B_PID=$!
 env TESTER_TOKEN="$TOKEN" PORT="$PORT_C" MEDIA_DIR="$WORK/media-c" STATIC_DIR="$WORK/no-static" \
   NODE_ENV=production \
   PUBLIC_BASE_URL="http://example.test" API_BASE_URL='https://evil.test/x"><script>' \
-  SECURITY_CONTACT="fredrik@privat" HSTS_MAX_AGE=99999999999999999999 \
+  SECURITY_CONTACT="fredrik@privat" HSTS_MAX_AGE=99999999999999999999 LANDING_ROOT="https://evil.test/" \
   node src/index.js >"$WORK/c.log" 2>&1 &
 C_PID=$!
 
@@ -137,8 +137,8 @@ check "S20 /om: og:url på fast vert" "1" "$(printf '%s' "$OM_EVIL" | grep -c "<
 check "S20 /om: JSON-LD url på fast vert" "yes" "$([ "$(printf '%s' "$OM_EVIL" | grep -c "\"url\":\"$FALLBACK/om\"")" -ge 1 ] && echo yes || echo no)"
 SM="$($CURL -H "Host: $EVIL_HOST" "$A/sitemap.xml")"
 check "S20 sitemap: ingen script" "0" "$(printf '%s' "$SM" | grep -c '<script')"
-check "S20 sitemap: 7 loc" "7" "$(printf '%s' "$SM" | grep -c '<loc>')"
-check "S20 sitemap: alle loc på fast vert" "7" "$(printf '%s' "$SM" | grep -c "<loc>$FALLBACK/")"
+check "S20 sitemap: 8 loc" "8" "$(printf '%s' "$SM" | grep -c '<loc>')"
+check "S20 sitemap: alle loc på fast vert" "8" "$(printf '%s' "$SM" | grep -c "<loc>$FALLBACK/")"
 RB="$($CURL -H "Host: $EVIL_HOST" "$A/robots.txt")"
 check "S20 robots: én Sitemap-linje" "1" "$(printf '%s\n' "$RB" | grep -c '^Sitemap:')"
 check "S20 robots: Sitemap på fast vert" "Sitemap: $FALLBACK/sitemap.xml" "$(printf '%s\n' "$RB" | grep '^Sitemap:')"
@@ -206,6 +206,8 @@ check "prod: ugyldig base → fast fallback i canonical, loopback ikke allowlist
 check "prod: ond Host → fast fallback" "$FALLBACK/om" "$($CURL -H "Host: $EVIL_HOST" "$C/om" | canonical)"
 check "prod: ugyldig SECURITY_CONTACT → security.txt 404" "404" "$(status "$C/.well-known/security.txt")"
 check "prod: ugyldig HSTS_MAX_AGE → ingen HSTS (200, tom)" "200|" "$(status_header strict-transport-security -H 'X-Forwarded-Proto: https' "$C/health")"
+check "prod: LANDING_ROOT som URL avvises (logg)" "1" "$(grep -c 'LANDING_ROOT er ugyldig' "$WORK/c.log")"
+check "prod: ugyldig LANDING_ROOT → roten redirecter ikke (ingen åpen redirect)" "404|" "$(status_header location -H 'Accept: text/html' "$C/")"
 
 # ── (ix) apiBase ≠ publicBase ───────────────────────────────────────────────
 # S20-kjernen (signert medie-URL til AI-motoren bruker aldri rå Host, og følger

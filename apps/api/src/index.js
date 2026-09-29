@@ -23,6 +23,8 @@ const { startReplayWorker } = require("./replayWorker");
 
 const app = express();
 app.set("trust proxy", 1);
+// Ingen «X-Powered-By: Express» — unødig fingeravtrykk (OWASP Security Misconfiguration).
+app.disable("x-powered-by");
 const PORT = process.env.PORT || 3000;
 
 // ---------- SIKKERHETS-HEADERE (OWASP: Security Misconfiguration) ----------
@@ -199,11 +201,40 @@ app.get("/presentation", (req, res) => {
 // absolutizeSeo() og sitemapXml() ligger samme sted, så sink-escapingen kan
 // enhetstestes uten å starte serveren.
 
+// Salgssidene er statiske og like for alle: la nettleser og kant (Cloudflare)
+// cache dem i fem minutter. Kort nok til at en tekstendring er ute før noen
+// rekker å lese den gamle to ganger. Aldri på /share, /api eller admin.
+const PUBLIC_CACHE = "public, max-age=300";
+const ICON_MAX_AGE = "7d";
+
 // Server en offentlig salgsside med absolutte SEO-URL-er.
 function sendPublicPage(req, res, filename, routePath) {
   fs.readFile(path.join(__dirname, filename), "utf8", (err, html) => {
     if (err) return sendNotFound(req, res);
+    res.set("Cache-Control", PUBLIC_CACHE);
     res.type("html").send(absolutizeSeo(html, publicBase(req), routePath));
+  });
+}
+
+// LANDING_ROOT (f.eks. «/om»): når docrai.io peker på denne tjenesten, skal
+// roten sende besøkende til salgssiden i stedet for 401 fra token-vakten (uten
+// STATIC_DIR) eller webappen (med). Kun en relativ sti med små bokstaver
+// godtas — aldri en URL, så roten kan ikke gjøres til en åpen redirect.
+// Tjenesten som serverer selve appen (app.docrai.io) setter den ikke.
+const LANDING_ROOT = (() => {
+  const raw = process.env.LANDING_ROOT;
+  if (raw == null || String(raw).trim() === "") return "";
+  const s = String(raw).trim();
+  if (!/^\/[a-z0-9-]{1,40}$/.test(s)) {
+    console.error(`LANDING_ROOT er ugyldig (${JSON.stringify(raw)}; forventer «/sti» med små bokstaver) — ignorert`);
+    return "";
+  }
+  return s;
+})();
+if (LANDING_ROOT) {
+  app.get("/", (req, res) => {
+    res.set("Cache-Control", PUBLIC_CACHE);
+    res.redirect(301, LANDING_ROOT);
   });
 }
 
@@ -220,6 +251,7 @@ function sendPresentationPage(req, res, filename, routePath) {
     const isPublic = PUBLIC_PRESENTATION.has(filename);
     if (!isPublic) res.set("X-Robots-Tag", "noindex");
     if (isPublic) html = absolutizeSeo(html, publicBase(req), routePath);
+    res.set("Cache-Control", PUBLIC_CACHE);
     res.type("html").send('<!DOCTYPE html>\n<html lang="nb">\n' + html + "\n</html>");
   });
 }
@@ -251,6 +283,11 @@ app.get("/demo", (req, res) => sendPublicPage(req, res, "demo-page.html", "/demo
 // Landingsside med verdiløfte, prisnivåer og prøv-selv-inngang til /demo.
 app.get("/om", (req, res) => sendPublicPage(req, res, "om-page.html", "/om"));
 
+// ---------- EKSEMPELRAPPORT (public — oppdiktet sak fra øvingssaken) ---------
+// Viser mottakerens visning av en ferdig rapport uten PIN, med eksempeldata
+// merket som det. Statisk: ingen delingsrad, ingen media, ingen sjekksum.
+app.get("/eksempelrapport", (req, res) => sendPublicPage(req, res, "eksempelrapport-page.html", "/eksempelrapport"));
+
 // ---------- KONTAKT (public — L2X-mønsteret: book møte eller e-post) --------
 // To tydelige veier inn: 15-min introduksjonsmøte og e-post. Booking-lenken
 // settes med BOOKING_URL (f.eks. Microsoft Bookings/Calendly); uten den faller
@@ -272,6 +309,7 @@ app.get("/kontakt", (req, res) => {
           ? "Åpner bookingkalenderen i en ny fane."
           : "Knappen starter en e-post – foreslå tidspunkter, så bekrefter vi innen én virkedag."
       );
+    res.set("Cache-Control", PUBLIC_CACHE);
     res.type("html").send(absolutizeSeo(html, publicBase(req), "/kontakt"));
   });
 });
@@ -280,6 +318,7 @@ app.get("/kontakt", (req, res) => {
 app.get("/faq", (req, res) => sendPublicPage(req, res, "faq-page.html", "/faq"));
 app.get("/personvern", (req, res) => sendPublicPage(req, res, "personvern-page.html", "/personvern"));
 app.get("/takk", (req, res) => {
+  res.set("Cache-Control", PUBLIC_CACHE);
   res.sendFile(path.join(__dirname, "takk-page.html"));
 });
 app.get("/vilkar", (req, res) => sendPublicPage(req, res, "vilkar-page.html", "/vilkar"));
@@ -289,18 +328,18 @@ app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml").send(sitemapXml(publicBase(req)));
 });
 app.get("/og-bilde.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "assets/og-bilde.png"));
+  res.sendFile(path.join(__dirname, "assets/og-bilde.png"), { maxAge: ICON_MAX_AGE });
 });
 // Favicon (W9): egen merkevare-ikon i tre størrelser. /favicon.ico peker på
 // PNG-en — nettlesere godtar det, og vi slipper 401 fra token-vakten.
 app.get(["/favicon.ico", "/favicon.png"], (req, res) => {
-  res.sendFile(path.join(__dirname, "assets/favicon.png"));
+  res.sendFile(path.join(__dirname, "assets/favicon.png"), { maxAge: ICON_MAX_AGE });
 });
 app.get("/apple-touch-icon.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "assets/apple-touch-icon.png"));
+  res.sendFile(path.join(__dirname, "assets/apple-touch-icon.png"), { maxAge: ICON_MAX_AGE });
 });
 app.get("/apple-touch-icon-precomposed.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "assets/apple-touch-icon.png"));
+  res.sendFile(path.join(__dirname, "assets/apple-touch-icon.png"), { maxAge: ICON_MAX_AGE });
 });
 
 // Merkevare-404 for HTML-forespørsler som ikke traff noen rute; JSON-klienter

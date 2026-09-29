@@ -1,0 +1,769 @@
+<meta charset="utf-8">
+<title>DocrAI Øvingssak</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Farger fra appens designsystem (apps/mobile/src/ui/theme.tsx). */
+:root {
+  --bg: #F1F3F3;
+  --surface: #FFFFFF;
+  --surface-2: #E6EBEB;
+  --ink: #1B262B;
+  --muted: #566670;
+  --line: #CDD6D7;
+  --accent: #23545C;
+  --accent-strong: #1A4148;
+  --accent-soft: #DCE9EA;
+  --on-accent: #FFFFFF;
+  --copper: #9F5A2C;
+  --copper-soft: #F3E6DC;
+  --danger: #A6453A;
+  --danger-soft: #F6E3E0;
+  --ok: #2E6B4F;
+  --ok-soft: #DDEEE5;
+  --shadow: 0 1px 2px rgba(27,38,43,.06), 0 8px 24px rgba(27,38,43,.08);
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --cond: "IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101719; --surface: #182226; --surface-2: #213036; --ink: #E4ECEC; --muted: #9DAEB4;
+    --line: #2E3F45; --accent: #6FB0BA; --accent-strong: #8CC5CE; --accent-soft: #1F3A40; --on-accent: #0E1A1D;
+    --copper: #D8955F; --copper-soft: #3A2A1F; --danger: #E68476; --danger-soft: #3D2320;
+    --ok: #7CC4A0; --ok-soft: #1D3529; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101719; --surface: #182226; --surface-2: #213036; --ink: #E4ECEC; --muted: #9DAEB4;
+  --line: #2E3F45; --accent: #6FB0BA; --accent-strong: #8CC5CE; --accent-soft: #1F3A40; --on-accent: #0E1A1D;
+  --copper: #D8955F; --copper-soft: #3A2A1F; --danger: #E68476; --danger-soft: #3D2320;
+  --ok: #7CC4A0; --ok-soft: #1D3529; --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--sans); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; display: grid; gap: 20px; }
+h1, h2, h3 { font-family: var(--cond); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: 20px; font-weight: 700; }
+h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font: 500 11px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.lead { color: var(--muted); max-width: 62ch; }
+header.top { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; }
+header.top .titles { display: grid; gap: 6px; }
+.toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+.chipbtn { font: 500 13px var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 12px; cursor: pointer; }
+.chipbtn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, .field:focus-visible { outline: 3px solid var(--copper); outline-offset: 2px; }
+
+/* Oppsett: brettkart til venstre, telefonen i midten, designnotat til høyre */
+.stage { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 980px) { .stage { grid-template-columns: 220px minmax(0, 400px) minmax(0, 1fr); } }
+
+.track { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+@media (min-width: 980px) { .track { flex-direction: column; overflow: visible; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); } }
+.station { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--muted); text-align: left; font: inherit; min-width: 150px; cursor: default; }
+.station .num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 500 12px var(--mono); border: 1.5px solid var(--line); background: var(--surface); }
+.station .nm { font: 600 14px/1.2 var(--cond); }
+.station .st { font: 400 11px var(--mono); letter-spacing: .04em; }
+.station.done { color: var(--ink); }
+.station.done .num { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.station.now { background: var(--surface); border-color: var(--line); color: var(--ink); box-shadow: var(--shadow); }
+.station.now .num { border-color: var(--copper); color: var(--copper); }
+.station .st .bs { color: var(--copper); }
+
+/* Telefonen */
+.phone { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; min-height: 640px; }
+.mappebtn { font: 600 12px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+.sheet { position: absolute; inset: 0; z-index: 5; background: var(--surface); display: flex; flex-direction: column; }
+.sheet .sh-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+.sheet .sh-body { overflow-y: auto; padding: 14px 16px 24px; display: grid; gap: 12px; align-content: start; }
+.x { font: 600 13px var(--sans); background: var(--surface-2); color: var(--ink); border: 0; border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.ph { border-radius: 10px; overflow: hidden; background: var(--surface-2); display: grid; }
+.ph svg { width: 100%; height: auto; display: block; }
+.ph figcaption, .phcap { font: 500 11px var(--mono); color: var(--muted); padding: 5px 8px; background: var(--surface); }
+.phgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.phgrid button { border: 1.5px solid var(--line); background: none; padding: 0; border-radius: 12px; overflow: hidden; cursor: pointer; text-align: left; color: inherit; font: inherit; }
+.phgrid button[aria-pressed="true"] { border-color: var(--ok); }
+.tbl-wrap { overflow-x: auto; }
+table.meas { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.meas th, table.meas td { text-align: left; padding: 6px 6px; border-bottom: 1px solid var(--line); }
+table.meas th { font: 500 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+table.meas td.num, table.meas th.num { white-space: nowrap; text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.measform { display: grid; gap: 8px; }
+.measrow { display: grid; grid-template-columns: 1fr 76px; gap: 8px; align-items: center; font-size: 14px; }
+.measrow input { width: 100%; font: 500 15px var(--mono); text-align: right; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.measrow input.bad { border-color: var(--danger); background: var(--danger-soft); }
+.measrow small { display: block; color: var(--muted); font-size: 12px; }
+.profile svg { width: 100%; height: auto; display: block; }
+.doc { display: grid; gap: 14px; font-size: 14px; }
+.doc h3 { font-size: 15px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.doc ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.doc .small { font-size: 12px; color: var(--muted); }
+.ghostlink { justify-self: start; text-align: left; font: 500 14px var(--sans); background: none; border: 0; color: var(--accent-strong); text-decoration: underline; cursor: pointer; padding: 0; }
+.appbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+.appbar .brand { font: 700 15px var(--cond); letter-spacing: .02em; }
+.appbar .tag { font: 500 11px var(--mono); color: var(--copper); background: var(--copper-soft); padding: 3px 8px; border-radius: 999px; }
+.progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 10px 16px 0; }
+.progress span { font: 500 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-top: 3px solid var(--line); padding-top: 5px; }
+.progress span.on { color: var(--accent); border-color: var(--accent); }
+.coach { margin: 12px 16px 0; padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); display: grid; gap: 6px; }
+.coach .goal { font: 600 15px/1.35 var(--sans); }
+.coach .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.hintbtn { font: 500 12px var(--sans); background: none; border: 0; color: var(--accent-strong); text-decoration: underline; cursor: pointer; padding: 0; }
+.hint { font-size: 13px; color: var(--ink); border-left: 3px solid var(--copper); padding-left: 10px; }
+.screen { padding: 14px 16px 18px; display: grid; gap: 12px; flex: 1; align-content: start; }
+.feedback { margin: 0 16px 16px; padding: 10px 12px; border-radius: 12px; font-size: 14px; display: grid; gap: 4px; }
+.feedback.good { background: var(--ok-soft); color: var(--ink); }
+.feedback.bad { background: var(--danger-soft); color: var(--ink); }
+.feedback b { font-weight: 600; }
+
+.card { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 8px; background: var(--surface); }
+.label { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+input[type=text], textarea { width: 100%; font: 15px var(--sans); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+textarea { min-height: 70px; resize: vertical; }
+.btn { font: 600 15px var(--sans); border: 0; border-radius: 12px; padding: 13px 16px; cursor: pointer; background: var(--accent); color: var(--on-accent); width: 100%; }
+.btn:hover { background: var(--accent-strong); }
+.btn.ghost { background: var(--surface-2); color: var(--ink); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.suggest { justify-self: start; font: 500 13px var(--sans); background: var(--surface-2); color: var(--ink); border: 1px dashed var(--muted); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; font-weight: 500; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.rooms { display: flex; gap: 6px; overflow-x: auto; }
+.room { font: 600 13px var(--sans); border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 14px; cursor: pointer; white-space: nowrap; }
+.room[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.capture { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.cap { display: grid; justify-items: center; gap: 4px; padding: 12px 4px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 600 12px var(--sans); cursor: pointer; min-height: 76px; }
+.cap svg { width: 26px; height: 26px; }
+.cap:disabled { opacity: .4; cursor: not-allowed; }
+.notes { display: grid; gap: 8px; }
+.note { border-radius: 12px; background: var(--bg); padding: 10px 12px; font-size: 14px; display: block; }
+.note .meta { display: block; margin-bottom: 4px; font: 500 11px var(--mono); color: var(--muted); }
+.term { background: var(--accent-soft); border-radius: 4px; padding: 0 3px; font-weight: 500; }
+.photo { height: 74px; border-radius: 10px; background:
+  linear-gradient(180deg, transparent 55%, rgba(166,69,58,.28) 56%, rgba(166,69,58,.12) 80%, transparent 81%),
+  repeating-linear-gradient(90deg, var(--surface-2) 0 38px, var(--line) 38px 40px); position: relative; }
+.photo.out { background: linear-gradient(180deg, #9DB7C4 0 45%, transparent 45%), linear-gradient(170deg, transparent 58%, #7A6A55 58%), repeating-linear-gradient(0deg, var(--surface-2) 0 10px, var(--line) 10px 11px); }
+.photo span { position: absolute; left: 8px; bottom: 6px; font: 500 10px var(--mono); background: var(--surface); padding: 1px 6px; border-radius: 6px; color: var(--ink); }
+.check { display: grid; gap: 6px; }
+.check li { list-style: none; display: grid; grid-template-columns: 20px 1fr; gap: 8px; font-size: 14px; align-items: start; }
+.check ul { margin: 0; padding: 0; display: grid; gap: 6px; }
+.box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--muted); display: grid; place-items: center; margin-top: 2px; }
+.box.on { background: var(--ok); border-color: var(--ok); color: var(--surface); }
+.box.on::after { content: ""; width: 5px; height: 9px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(45deg) translate(-1px,-1px); }
+
+.draft { display: grid; gap: 8px; }
+.field { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 4px; background: var(--surface); text-align: left; font: inherit; color: inherit; width: 100%; }
+button.field { cursor: pointer; }
+button.field:hover { border-color: var(--accent); }
+.field .fl { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.field .val { font-size: 14px; }
+.field.edited { border-color: var(--ok); }
+.field.wrong { border-color: var(--danger); }
+.src { font: 500 10px var(--mono); letter-spacing: .05em; text-transform: uppercase; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+.src.eier { background: var(--copper-soft); color: var(--copper); }
+.src.obs { background: var(--accent-soft); color: var(--accent-strong); }
+.src.maal { background: var(--ok-soft); color: var(--ok); }
+.src.deg { background: var(--ink); color: var(--bg); }
+.legend { display: flex; gap: 6px; flex-wrap: wrap; }
+.opts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.opt { font: 500 13px var(--sans); border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 9px 8px; cursor: pointer; text-align: left; }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.ev { display: grid; gap: 6px; }
+.ev label { display: grid; grid-template-columns: 20px 1fr auto; gap: 8px; align-items: center; font-size: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; cursor: pointer; }
+.ev input { width: 18px; height: 18px; accent-color: var(--accent); }
+.bar { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .35s ease; }
+.stamp { justify-self: center; transform: rotate(-4deg); border: 3px solid var(--copper); color: var(--copper); border-radius: 10px; padding: 10px 16px; text-align: center; font: 700 18px/1.15 var(--cond); letter-spacing: .06em; }
+.stamp small { display: block; font: 500 11px var(--mono); letter-spacing: .02em; }
+.stars { font: 500 13px var(--mono); color: var(--copper); letter-spacing: .1em; }
+.link { font: 500 13px var(--mono); background: var(--bg); border-radius: 10px; padding: 10px; word-break: break-all; }
+.locked { opacity: .5; text-decoration: line-through; }
+.tick { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
+.tick input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex: none; }
+.seq { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.seq button { font: 600 14px var(--mono); padding: 9px 0; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.seq button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.seqends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.result { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.result div { background: var(--bg); border-radius: 12px; padding: 10px 4px; }
+.result b { display: block; font: 700 22px var(--cond); font-variant-numeric: tabular-nums; }
+.result span { font-size: 11px; color: var(--muted); }
+
+/* Designnotatet */
+.notes-panel { display: grid; gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+.panel ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.pill { display: inline-block; font: 500 11px var(--mono); padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
+.pill.finnes { background: var(--ok-soft); color: var(--ok); }
+.pill.ny { background: var(--copper-soft); color: var(--copper); }
+.maprow { display: grid; gap: 6px; }
+.maprow div { font-size: 14px; }
+footer.foot { color: var(--muted); font-size: 13px; max-width: 70ch; }
+
+/* Wireframe-modus: samme flyt, uten visuell design */
+.phone.wf, .phone.wf * { font-family: var(--mono) !important; box-shadow: none !important; }
+.phone.wf { filter: grayscale(1); border-style: dashed; }
+.phone.wf .coach, .phone.wf .card, .phone.wf .field, .phone.wf .note, .phone.wf .cap, .phone.wf .btn, .phone.wf .room, .phone.wf .opt, .phone.wf .ev label, .phone.wf .result div, .phone.wf .seq button, .phone.wf .appbar .tag, .phone.wf .link { border: 1.5px dashed var(--muted) !important; background: transparent !important; color: var(--ink) !important; border-radius: 4px !important; }
+.phone.wf .photo { background: linear-gradient(to top right, transparent calc(50% - 1px), var(--muted) 50%, transparent calc(50% + 1px)), linear-gradient(to bottom right, transparent calc(50% - 1px), var(--muted) 50%, transparent calc(50% + 1px)) !important; border: 1.5px dashed var(--muted); }
+.phone.wf .stamp { border-style: dashed; }
+.phone.wf .ph svg, .phone.wf .profile svg { visibility: hidden; }
+.phone.wf .ph, .phone.wf .profile { background: linear-gradient(to top right, transparent calc(50% - 1px), var(--muted) 50%, transparent calc(50% + 1px)), linear-gradient(to bottom right, transparent calc(50% - 1px), var(--muted) 50%, transparent calc(50% + 1px)) !important; border: 1.5px dashed var(--muted); }
+.phone.wf .sheet { background: var(--surface); }
+.wfnote { display: none; font: 500 12px var(--mono); color: var(--muted); padding: 8px 16px 0; }
+.phone.wf .wfnote { display: block; }
+
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="titles">
+      <span class="eyebrow">Klikkbar prototype · øvingssak</span>
+      <h1>Lær DocrAI på én sak</h1>
+      <p class="lead">Sju korte brett, rundt ti minutter. Du lager en oppdiktet vannskadesak fra start til delt rapport. Bildene og fuktmålingene du trenger ligger i befaringsmappen øverst i appen. Ingenting sendes noe sted, og ingen AI kalles.</p>
+    </div>
+    <div class="toggles">
+      <button class="chipbtn" id="wfToggle" aria-pressed="false" type="button">Vis som wireframe</button>
+      <button class="chipbtn" id="restart" type="button">Start på nytt</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <nav class="track" id="track" aria-label="Brettene i øvingssaken"></nav>
+
+    <section class="phone" id="phone" aria-live="polite">
+      <div class="appbar"><span class="brand">DocrAI</span><span style="display:flex;gap:6px;align-items:center"><button class="mappebtn" id="mappeBtn" type="button">Befaringsmappe</button><span class="tag">ØVINGSSAK</span></span></div>
+      <div class="sheet" id="sheet" hidden><div class="sh-head"><h3 id="sheetTitle"></h3><button class="x" id="sheetClose" type="button">Lukk</button></div><div class="sh-body" id="sheetBody"></div></div>
+      <p class="wfnote">Lo-fi wireframe: samme flyt og innhold, uten farger og form. Slik tester man struktur før utseende.</p>
+      <div class="progress" id="progress" aria-hidden="true"><span>Sak</span><span>Befaring</span><span>Rapport</span><span>Godkjent</span></div>
+      <div class="coach" id="coach"></div>
+      <div class="screen" id="screen"></div>
+      <div id="fb"></div>
+    </section>
+
+    <aside class="notes-panel" id="notes"></aside>
+  </div>
+
+  <footer class="foot">Øvingssaken er oppdiktet: adresse, eier og funn finnes ikke. Merket «Finnes i appen» betyr at grepet er bygget i DocrAI i dag. «Ny idé som testes» betyr at det bare finnes her, og at vi vil se om det hjelper før noe bygges.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var LEVELS = [
+    { id: "profil",  name: "Hvem er du",      stage: 0 },
+    { id: "sak",     name: "Opprett saken",   stage: 0 },
+    { id: "fang",    name: "Fang i rommet",   stage: 1 },
+    { id: "utkast",  name: "Lag utkastet",    stage: 2 },
+    { id: "boss",    name: "Gjennomgangen",   stage: 2, boss: true },
+    { id: "godkjenn",name: "Godkjenn",        stage: 3 },
+    { id: "del",     name: "Del rapporten",   stage: 3 }
+  ];
+  var ADDRESS = "Øvingsveien 12, Hamar";
+  var CAUSES = ["Nedbør / overvann", "Trykksatt rør", "Avløpsrør", "Kondens", "Utett bad", "Usikker"];
+  var EVIDENCE = [
+    { id: "fukt",   text: "Fukt 18 % nederst, avtar oppover til 9 % ved røret (1 m)", src: "maal", good: true },
+    { id: "trykk",  text: "Trykktest av rør til utekran: ingen drypp", src: "maal", good: true },
+    { id: "terreng",text: "Terrenget faller inn mot grunnmuren", src: "obs", good: true },
+    { id: "salt",   text: "Saltutslag nederst på grunnmuren", src: "obs", good: true },
+    { id: "eier",   text: "Eier mener røret til utekrana lekker", src: "eier", good: false }
+  ];
+  var SRC_LABEL = { eier: "Eier sier", obs: "Du observerte", maal: "Måling viser", deg: "Endret av deg" };
+
+  /* Eksempeldata: det brukeren «fant» på befaringen. Oppdiktet, men fysisk konsistent:
+     fukten avtar oppover fra gulvet (vann nedenfra), røret på 1 m er tørt og trykktestet tett. */
+  var MEAS = [
+    { id: "p1", place: "Vegg bak sofa", h: 5,   v: 18 },
+    { id: "p2", place: "Vegg bak sofa", h: 30,  v: 14 },
+    { id: "p3", place: "Vegg bak sofa", h: 60,  v: 10 },
+    { id: "p4", place: "Ved rørgjennomføring", h: 100, v: 9 },
+    { id: "ref",place: "Referanse, tørr innervegg", h: 100, v: 8 },
+    { id: "svill", place: "Bunnsvill", h: 5, v: 11 }
+  ];
+  var PRESS = [ { id: "bar", label: "Prøvetrykk (bar)", v: 6 }, { id: "min", label: "Varighet (min)", v: 10 }, { id: "fall", label: "Trykkfall (bar)", v: 0 } ];
+  var PHOTOS = [
+    { id: "b1", room: "Kjeller",  cap: "B1 · Kjellervegg bak sofa: fuktmerker 0–30 cm", check: "oversikt" },
+    { id: "b2", room: "Kjeller",  cap: "B2 · Saltutslag nederst på grunnmuren" },
+    { id: "b3", room: "Kjeller",  cap: "B3 · Rørgjennomføring til utekran: tørr" },
+    { id: "b4", room: "Utvendig", cap: "B4 · Terreng faller mot mur, ubeskyttet grunnmursplast", check: "utvendig" }
+  ];
+  var TALE = "Fuktmerker nederst på veggen bak sofaen, opp til ca. tretti centimeter. Saltutslag på grunnmuren. Bunnsvill er tørr. Eier mener røret til utekrana lekker.";
+  var KEY = "docrai-ovingssak-v2";
+  function fresh() {
+    return { level: 0, name: "", started: Date.now(), finished: 0, stars: {}, hintUsed: {},
+      addr: "", underlag: false,
+      room: "", notes: [], checks: { oversikt: false, fukt: false, trykk: false, utvendig: false }, earlyDone: false,
+      photos: [], meas: {}, measTries: 0, press: {}, pressTries: 0,
+      draftMade: false, l3pick: "", l3tries: 0,
+      hyp: "", bossFound: false, bossWrongTaps: 0, editOpen: false, cause: "", mode: "", ev: {}, saveTries: 0, bossDone: false,
+      read: false, approvedAt: 0, share: null, withdrawn: false, seq: 0, comment: "" };
+  }
+  var S = load() || fresh();
+  var wf = false;
+
+  function load() { try { var r = localStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function starsFor(i) { return S.stars[i] || 0; }
+  function totalStars() { var t = 0; for (var i = 0; i < LEVELS.length; i++) t += starsFor(i); return t; }
+  function starStr(n) { var s = ""; for (var i = 0; i < 3; i++) s += i < n ? "★" : "☆"; return s; }
+  function now() { var d = new Date(); function p(n) { return (n < 10 ? "0" : "") + n; } return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() + " kl. " + p(d.getHours()) + ":" + p(d.getMinutes()); }
+
+  /* Stjerner per brett: fullført (1) + uten hint (1) + brettets egen ferdighet (1). */
+  function award(i, skill) {
+    var n = 1 + (S.hintUsed[i] ? 0 : 1) + (skill ? 1 : 0);
+    S.stars[i] = n; save();
+  }
+  function next() { if (S.level < LEVELS.length) S.level++; if (S.level === LEVELS.length) S.finished = S.finished || Date.now(); fb(""); save(); render(); }
+
+  function fb(html, kind) { $("fb").innerHTML = html ? '<div class="feedback ' + (kind || "good") + '">' + html + "</div>" : ""; }
+
+  function coach(goal, hint) {
+    var i = S.level;
+    var h = hint ? (S.hintUsed[i]
+      ? '<p class="hint">' + hint + "</p>"
+      : '<button class="hintbtn" id="hintBtn" type="button">Vis hint (koster én stjerne)</button>') : "";
+    $("coach").innerHTML = '<span class="eyebrow">Brett ' + (i + 1) + " av " + LEVELS.length + (LEVELS[i] && LEVELS[i].boss ? " · boss" : "") + '</span><p class="goal">' + goal + '</p><div class="row">' + h + '<span class="stars">' + starStr(starsFor(i)) + "</span></div>";
+    var hb = $("hintBtn"); if (hb) hb.onclick = function () { S.hintUsed[i] = true; save(); render(); };
+  }
+
+  /* ---------- Brettene ---------- */
+  var R = {};
+
+  R.profil = function () {
+    coach("Skriv navnet ditt. Det står på godkjenningsstempelet når du signerer rapporten.", null);
+    $("screen").innerHTML =
+      '<div class="card"><label class="label" for="navn">Ditt navn</label><input type="text" id="navn" autocomplete="name" placeholder="For eksempel Kari Nordmann" value="' + esc(S.name) + '"><p style="font-size:13px;color:var(--muted)">I appen ligger dette i Guide-fanen. Uten navn kan ingen rapport godkjennes.</p></div>' +
+      '<button class="btn" id="go" type="button">Start øvingssaken</button>' +
+      '<button class="ghostlink" id="goal" type="button">Se målet først: slik blir den ferdige rapporten</button>';
+    $("goal").onclick = function () { openReport(false); };
+    $("navn").oninput = function (e) { S.name = e.target.value; save(); };
+    $("go").onclick = function () {
+      if (!S.name.trim()) { fb("<b>Navnet mangler.</b> Skriv navnet ditt først, så kan du godkjenne rapporten på slutten.", "bad"); $("navn").focus(); return; }
+      S.started = Date.now(); award(0, true); next();
+    };
+  };
+
+  R.sak = function () {
+    coach("Opprett saken på adressen. Appen henter saksunderlaget selv.", "Trykk på adresseforslaget under feltet, eller skriv adressen. Deretter «Hent saksunderlag».");
+    var u = S.underlag ? '<div class="card"><span class="label">Saksunderlag · øvingsdata</span><dl class="kv"><dt>Byggeår</dt><dd class="mono">1976</dd><dt>Bygning</dt><dd>Enebolig, delvis innredet kjeller</dd><dt>Grunnmur</dt><dd>Betong, grunnmursplast</dd><dt>Avløp</dt><dd>Plastrør (etter 1970)</dd></dl><p style="font-size:13px;color:var(--muted)">Byggeåret er et forhåndssignal: etter 1970 er støpejernsavløp lite sannsynlig, før 1979 er dampsperren ofte mangelfull.</p></div><button class="btn" id="go" type="button">Opprett sak og gå til befaring</button>' : "";
+    $("screen").innerHTML =
+      '<div class="card"><label class="label" for="adr">Adresse</label><input type="text" id="adr" placeholder="Gate og sted" value="' + esc(S.addr) + '"><button class="suggest" id="sug" type="button">' + ADDRESS + "</button></div>" +
+      (S.underlag ? "" : '<button class="btn" id="hent" type="button">Hent saksunderlag</button>') + u;
+    $("adr").oninput = function (e) { S.addr = e.target.value; save(); };
+    $("sug").onclick = function () { S.addr = ADDRESS; save(); render(); };
+    var h = $("hent"); if (h) h.onclick = function () {
+      if (S.addr.trim().length < 5) { fb("<b>Adressen mangler.</b> Velg forslaget eller skriv adressen først.", "bad"); return; }
+      S.underlag = true; save(); fb("<b>Saksunderlaget er hentet.</b> I appen kommer dette fra Kartverket og matrikkelen."); render();
+    };
+    var g = $("go"); if (g) g.onclick = function () { award(1, true); next(); };
+  };
+
+  var ICON = {
+    tale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+    foto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+    maal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 7h4M12 17v-6"/></svg>',
+    trykk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="M12 13l3-3M12 3v3"/></svg>'
+  };
+  function missing() { var m = []; var c = S.checks;
+    if (!c.oversikt) m.push("oversiktsbilde av kjelleren"); if (!c.fukt) m.push("fuktmåling nederst på veggen");
+    if (!c.trykk) m.push("trykktest av røret til utekrana"); if (!c.utvendig) m.push("bilde av grunnmuren utvendig"); return m; }
+
+  /* ---------- Illustrasjoner (inline SVG, ingen ekte foto) ---------- */
+  function illus(id) {
+    var wall = 'fill="var(--surface-2)"', ink = 'stroke="var(--muted)"';
+    var svg = {
+      b1: '<rect width="160" height="100" ' + wall + '/><rect y="86" width="160" height="14" fill="var(--line)"/>' +
+          '<defs><linearGradient id="st1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#8A4B2E" stop-opacity=".55"/><stop offset="1" stop-color="#8A4B2E" stop-opacity="0"/></linearGradient></defs>' +
+          '<rect x="0" y="58" width="160" height="28" fill="url(#st1)"/><rect x="34" y="60" width="92" height="26" rx="6" fill="var(--muted)" opacity=".55"/>' +
+          '<text x="6" y="12" font-size="8" font-family="monospace" fill="var(--ink)">KJELLER · VEGG BAK SOFA</text>',
+      b2: '<rect width="160" height="100" fill="#B9B6AE"/><rect y="70" width="160" height="30" fill="#A7A39A"/>' +
+          (function () { var d = ""; for (var i = 0; i < 46; i++) { d += '<circle cx="' + ((i * 37) % 158 + 1) + '" cy="' + (74 + (i * 13) % 24) + '" r="' + (1 + i % 3) + '" fill="#FFFFFF" opacity=".85"/>'; } return d; })() +
+          '<text x="6" y="12" font-size="8" font-family="monospace" fill="#1B262B">GRUNNMUR · SALTUTSLAG</text>',
+      b3: '<rect width="160" height="100" ' + wall + '/><circle cx="80" cy="42" r="12" fill="none" ' + ink + ' stroke-width="3"/><rect x="92" y="38" width="68" height="8" fill="var(--muted)"/>' +
+          '<text x="6" y="12" font-size="8" font-family="monospace" fill="var(--ink)">RØR TIL UTEKRAN · 1 M</text><text x="6" y="92" font-size="8" font-family="monospace" fill="var(--ink)">TØRT RUNDT GJENNOMFØRING</text>',
+      b4: '<rect width="160" height="100" fill="#A9C4D0"/><rect x="0" y="18" width="92" height="60" fill="#D8D2C4"/><rect x="0" y="64" width="92" height="16" fill="#2B2B2B"/>' +
+          '<polygon points="0,86 160,62 160,100 0,100" fill="#7A6A55"/>' +
+          '<defs><marker id="ar" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#1B262B"/></marker></defs>' +
+          '<path d="M150 70 L112 76" stroke="#1B262B" stroke-width="2" marker-end="url(#ar)"/>' +
+          '<text x="96" y="12" font-size="8" font-family="monospace" fill="#1B262B">UTVENDIG</text><text x="96" y="56" font-size="7" font-family="monospace" fill="#1B262B">FALL MOT MUR</text>'
+    }[id];
+    return '<svg viewBox="0 0 160 100" role="img" aria-label="' + esc(photoById(id).cap) + '">' + svg + "</svg>";
+  }
+  function photoById(id) { for (var i = 0; i < PHOTOS.length; i++) if (PHOTOS[i].id === id) return PHOTOS[i]; return PHOTOS[0]; }
+  function figure(id) { return '<figure class="ph" style="margin:0">' + illus(id) + "<figcaption>" + esc(photoById(id).cap) + "</figcaption></figure>"; }
+
+  /* Fuktprofil: stolper etter høyde over gulv, stiplet referanselinje for tørr vegg. */
+  function profileSvg(vals) {
+    var rows = MEAS.filter(function (m) { return m.id !== "ref" && m.id !== "svill"; });
+    var W = 300, left = 56, max = 20, rowH = 24, top = 18, H = top + rows.length * rowH + 22, span = W - left - 34;
+    var x = function (v) { return left + span * Math.min(v, max) / max; };
+    var ref = vals.ref != null ? vals.ref : 8;
+    var out = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Fuktprofil etter høyde over gulv">' +
+      '<text x="0" y="11" font-size="10" font-family="monospace" fill="var(--muted)">HØYDE</text><text x="' + left + '" y="11" font-size="10" font-family="monospace" fill="var(--muted)">MÅLERVERDI %</text>';
+    rows.slice().reverse().forEach(function (m, i) {
+      var y = top + i * rowH, v = vals[m.id];
+      out += '<text x="0" y="' + (y + 15) + '" font-size="11" font-family="monospace" fill="var(--ink)">' + m.h + " cm</text>" +
+        '<rect x="' + left + '" y="' + (y + 4) + '" width="' + span + '" height="14" rx="3" fill="var(--surface-2)"/>' +
+        (v != null ? '<rect x="' + left + '" y="' + (y + 4) + '" width="' + (x(v) - left) + '" height="14" rx="3" fill="' + (v >= 15 ? "var(--danger)" : "var(--accent)") + '"/>' +
+        '<text x="' + (x(v) + 4) + '" y="' + (y + 15) + '" font-size="11" font-family="monospace" fill="var(--ink)">' + v + "</text>" : "");
+    });
+    var rx = x(ref);
+    out += '<line x1="' + rx + '" y1="' + top + '" x2="' + rx + '" y2="' + (top + rows.length * rowH) + '" stroke="var(--ink)" stroke-dasharray="3 3"/>' +
+      '<text x="' + left + '" y="' + (H - 6) + '" font-size="10" font-family="monospace" fill="var(--muted)">stiplet: tørr referanse ' + ref + " %</text></svg>";
+    return '<div class="profile">' + out + "</div>";
+  }
+  function measTable(vals) {
+    return '<div class="tbl-wrap"><table class="meas"><thead><tr><th>Punkt</th><th>Plassering</th><th class="num">Høyde</th><th class="num">Verdi</th></tr></thead><tbody>' +
+      MEAS.map(function (m) { var v = vals ? vals[m.id] : m.v; return "<tr><td>" + m.id.toUpperCase() + "</td><td>" + m.place + '</td><td class="num">' + m.h + ' cm</td><td class="num">' + (v != null ? v + " %" : "–") + "</td></tr>"; }).join("") +
+      "</tbody></table></div>";
+  }
+
+  /* ---------- Arket: befaringsmappe, fuktmåler, trykktest og rapport ---------- */
+  function openSheet(title, html, bind) {
+    $("sheetTitle").textContent = title; $("sheetBody").innerHTML = html; $("sheet").hidden = false; $("sheetBody").scrollTop = 0;
+    if (bind) bind();
+  }
+  function closeSheet() { $("sheet").hidden = true; }
+
+  function mappeHtml() {
+    return '<p class="eyebrow">Eksempeldata · dette fant du på befaringen</p>' +
+      '<p style="font-size:14px">Du har ikke vært på stedet, så alt du trenger ligger her. Bruk bildene og måleskjemaet når appen ber om dem.</p>' +
+      '<h3>Bilder</h3><div class="phgrid">' + PHOTOS.map(function (ph) { return figure(ph.id); }).join("") + "</div>" +
+      '<h3>Talenotat</h3><div class="note">' + esc(TALE) + "</div>" +
+      "<h3>Måleskjema fra fuktmåleren</h3>" + measTable(null) +
+      '<p style="font-size:12px;color:var(--muted)">Målerverdi i % på fuktmålerens materialskala. Referansen er målt i en tørr innervegg i samme rom.</p>' +
+      '<h3>Trykktest, rør til utekran</h3><dl class="kv"><dt>Prøvetrykk</dt><dd class="mono">6 bar</dd><dt>Varighet</dt><dd class="mono">10 min</dd><dt>Trykkfall</dt><dd class="mono">0 bar</dd></dl>';
+  }
+
+  function photoPicker() {
+    var room = S.room, list = PHOTOS.filter(function (p) { return p.room === room; });
+    openSheet("Velg bilde fra befaringsmappen", '<p style="font-size:14px">I felt tar du bildet med kameraet. I øvingen velger du det fra mappen. Rom: <b>' + esc(room) + "</b>.</p>" +
+      '<div class="phgrid">' + list.map(function (p) { return '<button type="button" data-ph="' + p.id + '" aria-pressed="' + (S.photos.indexOf(p.id) >= 0) + '">' + illus(p.id) + '<span class="phcap" style="display:block">' + esc(p.cap) + "</span></button>"; }).join("") + "</div>",
+      function () { Array.prototype.forEach.call(document.querySelectorAll("[data-ph]"), function (b) { b.onclick = function () {
+        var id = b.getAttribute("data-ph"), ph = photoById(id);
+        if (S.photos.indexOf(id) < 0) { S.photos.push(id); S.notes.push({ type: "foto", room: ph.room, id: id }); if (ph.check) S.checks[ph.check] = true; }
+        save(); closeSheet(); render();
+        fb(id === "b4" ? "<b>Viktig funn.</b> Terrenget faller inn mot grunnmuren, og grunnmursplasten er ubeskyttet." : "<b>Bildet er lagt til.</b> " + esc(ph.cap));
+      }; }); });
+  }
+
+  function measSheet() {
+    var rows = MEAS.map(function (m) { var v = S.meas[m.id]; return '<label class="measrow" for="m-' + m.id + '"><span>' + m.id.toUpperCase() + " · " + m.place + "<small>" + m.h + ' cm over gulv</small></span><input id="m-' + m.id + '" inputmode="decimal" autocomplete="off" value="' + (v != null ? v : "") + '" placeholder="%"></label>'; }).join("");
+    openSheet("Registrer fuktmålinger", '<p style="font-size:14px">Tast inn verdiene fra måleskjemaet i befaringsmappen. Ett felt per målepunkt.</p><div class="measform">' + rows + "</div>" +
+      '<p id="measMsg" style="font-size:14px;color:var(--danger)"></p><button class="btn" id="measSave" type="button">Lagre målingene</button>' +
+      '<button class="ghostlink" id="measPeek" type="button">Åpne måleskjemaet</button>' +
+      '<button class="ghostlink" id="measFill" type="button">Fyll inn fra måleskjemaet for meg (koster én stjerne)</button>',
+      function () {
+        $("measPeek").onclick = function () {
+          MEAS.forEach(function (m) { var n = parseFloat(String($("m-" + m.id).value).replace(",", ".")); if (!isNaN(n)) S.meas[m.id] = n; }); save();
+          openSheet("Måleskjema", measTable(null) + '<button class="btn" id="back" type="button">Tilbake til registreringen</button>', function () { $("back").onclick = measSheet; });
+        };
+        $("measFill").onclick = function () { S.hintUsed[S.level] = true; MEAS.forEach(function (m) { $("m-" + m.id).value = m.v; }); save(); };
+        $("measSave").onclick = function () {
+          S.measTries++; var wrong = [];
+          MEAS.forEach(function (m) {
+            var el = $("m-" + m.id), n = parseFloat(String(el.value).replace(",", "."));
+            if (isNaN(n) || Math.abs(n - m.v) > 1) { wrong.push(m.id.toUpperCase()); el.classList.add("bad"); } else { el.classList.remove("bad"); S.meas[m.id] = n; }
+          });
+          save();
+          if (wrong.length) { $("measMsg").textContent = "Sjekk " + wrong.join(", ") + " mot måleskjemaet. En feil måling i rapporten er en feil i beviset."; return; }
+          S.checks.fukt = true;
+          S.notes.push({ type: "maal", room: "Kjeller", label: "fuktmåling · 6 punkt", html: '<span class="mono">18 %</span> ved 5 cm, avtar til <span class="mono">9 %</span> ved røret på 1 m. Referanse <span class="mono">8 %</span>.' });
+          save(); closeSheet(); render();
+          fb("<b>Målingene er lagret.</b> Fuktprofilen viser at fukten avtar oppover fra gulvet. Det peker mot vann nedenfra, ikke fra røret på 1 m.");
+        };
+      });
+  }
+
+  function pressSheet() {
+    var rows = PRESS.map(function (p) { var v = S.press[p.id]; return '<label class="measrow" for="t-' + p.id + '"><span>' + p.label + '</span><input id="t-' + p.id + '" inputmode="decimal" autocomplete="off" value="' + (v != null ? v : "") + '"></label>'; }).join("");
+    openSheet("Registrer trykktest", '<p style="font-size:14px">Røret til utekrana, trykksatt i åpen og lukket stilling. Verdiene står i befaringsmappen.</p><div class="measform">' + rows + '</div><p id="pMsg" style="font-size:14px;color:var(--danger)"></p><button class="btn" id="pSave" type="button">Lagre trykktesten</button>' +
+      '<button class="ghostlink" id="pPeek" type="button">Åpne befaringsmappen</button>',
+      function () {
+        $("pPeek").onclick = function () { openSheet("Befaringsmappe", mappeHtml() + '<button class="btn" id="back" type="button">Tilbake til trykktesten</button>', function () { $("back").onclick = pressSheet; }); };
+        $("pSave").onclick = function () {
+          S.pressTries++; var wrong = [];
+          PRESS.forEach(function (p) { var el = $("t-" + p.id), n = parseFloat(String(el.value).replace(",", "."));
+            if (isNaN(n) || Math.abs(n - p.v) > 0.05) { wrong.push(p.label.toLowerCase()); el.classList.add("bad"); } else { el.classList.remove("bad"); S.press[p.id] = n; } });
+          save();
+          if (wrong.length) { $("pMsg").textContent = "Sjekk " + wrong.join(", ") + " mot befaringsmappen."; return; }
+          S.checks.trykk = true;
+          S.notes.push({ type: "maal", room: "Kjeller", label: "trykktest", html: 'Røret til utekrana: <span class="mono">6 bar i 10 min, fall 0 bar</span>. <b>Tett.</b>' });
+          save(); closeSheet(); render(); fb("<b>Trykktesten er lagret.</b> Røret holder trykket. Eierens teori svekkes.");
+        };
+      });
+  }
+
+  R.fang = function () {
+    coach("Dokumenter skaden med bildene og målingene i befaringsmappen. Sjekklisten «Før du drar» viser hva som mangler.", "Kjeller: tale, bilde B1, fuktmålinger og trykktest. Bytt så til «Utvendig» og velg bilde B4.");
+    var rooms = ["Kjeller", "Bad", "Utvendig"].map(function (r) { return '<button class="room" type="button" data-room="' + r + '" aria-pressed="' + (S.room === r) + '">' + r + "</button>"; }).join("");
+    var inKj = S.room === "Kjeller";
+    var caps =
+      '<button class="cap" type="button" id="cTale" ' + (inKj ? "" : "disabled") + ">" + ICON.tale + "Tale</button>" +
+      '<button class="cap" type="button" id="cFoto" ' + (S.room ? "" : "disabled") + ">" + ICON.foto + "Foto</button>" +
+      '<button class="cap" type="button" id="cMaal" ' + (inKj ? "" : "disabled") + ">" + ICON.maal + "Fukt</button>" +
+      '<button class="cap" type="button" id="cTrykk" ' + (inKj ? "" : "disabled") + ">" + ICON.trykk + "Trykktest</button>";
+    var notes = S.notes.map(function (n) {
+      if (n.type === "foto") return figure(n.id);
+      return '<div class="note"><span class="meta">' + esc(n.room) + " · " + n.label + "</span>" + n.html + "</div>";
+    }).join("");
+    var c = S.checks;
+    function li(on, t) { return '<li><span class="box' + (on ? " on" : "") + '"></span><span>' + t + "</span></li>"; }
+    $("screen").innerHTML =
+      '<button class="ghostlink" id="openMappe" type="button">Åpne befaringsmappen (bilder og måleskjema)</button>' +
+      '<div class="card"><span class="label">Rom</span><div class="rooms">' + rooms + "</div></div>" +
+      '<div class="capture">' + caps + "</div>" +
+      (notes ? '<div class="notes">' + notes + "</div>" : '<p style="font-size:14px;color:var(--muted)">Velg rommet du står i. Knappene virker med hansker i appen: store flater, ett trykk.</p>') +
+      (c.fukt ? '<div class="card"><span class="label">Fuktprofil</span>' + profileSvg(S.meas) + "</div>" : "") +
+      '<div class="card check"><span class="label">Før du drar</span><ul>' +
+      li(c.oversikt, "Oversiktsbilde av kjelleren (B1)") + li(c.fukt, "Fuktmålinger registrert (6 punkt)") +
+      li(c.trykk, "Trykktest av røret til utekrana") + li(c.utvendig, "Bilde av grunnmur og terreng utvendig (B4)") + "</ul></div>" +
+      '<button class="btn" id="done" type="button">Ferdig med befaringen</button>';
+    $("openMappe").onclick = function () { openSheet("Befaringsmappe", mappeHtml()); };
+    Array.prototype.forEach.call(document.querySelectorAll(".room"), function (b) { b.onclick = function () { S.room = b.getAttribute("data-room"); save(); fb(""); render(); }; });
+    $("cTale").onclick = function () {
+      if (S.notes.some(function (n) { return n.type === "tale"; })) { fb("Talenotatet er allerede tatt opp."); return; }
+      S.notes.push({ type: "tale", room: "Kjeller", label: "tale · 0:42", html:
+        'Fuktmerker nederst på veggen bak sofaen, opp til ca. tretti centimeter. <span class="term">Saltutslag</span> på <span class="term">grunnmuren</span>. <span class="term">Bunnsvill</span> er tørr. Eier mener røret til <span class="term">utekrana</span> lekker.' });
+      save(); render();
+      fb("<b>Transkribert.</b> Fagordene er gjenkjent og merket. Eierens mening blir registrert som det den er: en påstand.");
+    };
+    $("cFoto").onclick = function () {
+      if (S.room === "Bad") { fb("Badet er ikke en del av denne skaden. Velg Kjeller eller Utvendig.", "bad"); return; }
+      photoPicker();
+    };
+    $("cMaal").onclick = function () { if (c.fukt) { fb("Målingene er registrert. Se fuktprofilen under."); return; } measSheet(); };
+    $("cTrykk").onclick = function () { if (c.trykk) { fb("Trykktesten er registrert."); return; } pressSheet(); };
+    $("done").onclick = function () {
+      var m = missing();
+      if (m.length) { S.earlyDone = true; save(); fb("<b>" + m.length + " punkt mangler:</b> " + m.join(", ") + ". Det er dette forsikringen spør om senere. Ta det nå, mens du står der.", "bad"); return; }
+      award(2, !S.earlyDone && S.measTries === 1 && S.pressTries === 1); next();
+    };
+  };
+
+  /* ---------- Den ferdige rapporten (mål først, og resultatet til slutt) ---------- */
+  function reportHtml(mine) {
+    var name = mine ? S.name : "Kari Eksempel";
+    var vals = mine ? S.meas : MEAS.reduce(function (o, m) { o[m.id] = m.v; return o; }, {});
+    var photos = mine ? S.photos : PHOTOS.map(function (p) { return p.id; });
+    var ev = mine ? EVIDENCE.filter(function (e) { return e.good && S.ev[e.id]; }) : EVIDENCE.filter(function (e) { return e.good; });
+    var cause = mine && S.cause ? S.cause : "Nedbør / overvann", mode = mine && S.mode ? S.mode : "Gradvis";
+    var d = new Date(), date = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
+    var stamp = mine && S.approvedStr ? '<div class="stamp">GODKJENT<small>' + esc(name) + " · " + esc(S.approvedStr) + "</small></div>" : '<div class="stamp">EKSEMPEL<small>slik blir rapporten din</small></div>';
+    return '<div class="doc">' +
+      '<div><p class="eyebrow">Skaderapport · vannskade · øvingssak</p><h2 style="margin-top:4px">' + ADDRESS + '</h2></div>' +
+      '<dl class="kv"><dt>Saksnr.</dt><dd class="mono">ØV-2026-0012</dd><dt>Befaring</dt><dd class="mono">' + date + "</dd><dt>Takstperson</dt><dd>" + esc(name) + "</dd><dt>Bygning</dt><dd>Enebolig, byggeår 1976, delvis innredet kjeller</dd></dl>" +
+      "<h3>1 Observasjoner</h3><ul>" +
+      '<li>Fuktmerker nederst på vegg bak sofa, opp til ca. 30 cm. <span class="src obs">Du observerte</span></li>' +
+      '<li>Saltutslag nederst på grunnmuren. <span class="src obs">Du observerte</span></li>' +
+      '<li>Terrenget faller inn mot grunnmuren; grunnmursplasten er ubeskyttet. <span class="src obs">Du observerte</span></li>' +
+      '<li>Eier opplyser at røret til utekrana lekker. <span class="src eier">Eier sier</span></li></ul>' +
+      "<h3>2 Fuktmålinger</h3>" + measTable(vals) + profileSvg(vals) +
+      '<p class="small">Trykktest av rør til utekran: 6 bar i 10 min, trykkfall 0 bar. <span class="src maal">Måling viser</span></p>' +
+      "<h3>3 Bilder</h3>" + (photos.length ? '<div class="phgrid">' + photos.map(figure).join("") + "</div>" : '<p class="small">Ingen bilder valgt.</p>') +
+      "<h3>4 Årsak og vurdering</h3>" +
+      '<dl class="kv"><dt>Årsak</dt><dd>' + esc(cause) + "</dd><dt>Forløp</dt><dd>" + esc(mode) + "</dd></dl>" +
+      '<p>Fukten er høyest nederst og avtar oppover, og røret på 1 m er tørt og tett ved trykktest. Vann trenger inn nedenfra fra utsiden, der terrenget faller mot muren. Eierens opplysning om lekkasje fra røret er vurdert og ikke lagt til grunn.</p>' +
+      '<p class="small">Bevis knyttet til årsaken:</p><ul>' + ev.map(function (e) { return "<li>" + esc(e.text) + ' <span class="src ' + e.src + '">' + SRC_LABEL[e.src] + "</span></li>"; }).join("") + "</ul>" +
+      "<h3>5 Tiltak</h3><ul><li>Uttørking av vegg og bunnsvill, kontrollmåling etterpå.</li><li>Terrengarbeid slik at vannet ledes bort fra grunnmuren.</li><li>Beskytte grunnmursplasten, vurdere drenering.</li></ul>" +
+      "<h3>6 Faglig grunnlag</h3><p class=\"small\">Henvisning til Byggforskserien settes inn og kontrolleres av sitatporten i ekte rapporter.</p>" +
+      stamp +
+      '<p class="small">AI-utkast, kontrollert og ' + (mine && S.approvedStr ? "godkjent av " + esc(name) : "godkjennes av takstpersonen") + ". Det opprinnelige utkastet arkiveres uendret.</p></div>";
+  }
+  function openReport(mine) { openSheet(mine ? "Din ferdige rapport" : "Slik blir den ferdige rapporten", reportHtml(mine)); }
+
+  function draftFields(edited) {
+    var causeTxt = edited ? esc(S.cause) + " · " + esc(S.mode) : "Lekkasje fra rør til utekran i vegg · Akutt";
+    return [
+      { id: "omr",  name: "Område",       val: "Kjeller, yttervegg mot nord, nederst 0–30 cm", src: "obs" },
+      { id: "fukt", name: "Fuktnivå",     val: "18 % ved 5 cm, avtar oppover til 9 % ved rørgjennomføring (1 m). Referanse 8 %.", src: "maal" },
+      { id: "rør",  name: "Rør til utekran", val: "Trykktest 6 bar i 10 min, trykkfall 0 bar", src: "maal" },
+      { id: "aars", name: "Årsak",        val: causeTxt, src: edited ? "deg" : "eier" },
+      { id: "tilt", name: "Tiltak",       val: "Tørking, drenering og terrengarbeid mot grunnmur", src: "obs" }
+    ];
+  }
+  function fieldHtml(f, clickable, cls) {
+    var tag = clickable ? "button" : "div";
+    return "<" + tag + ' class="field ' + (cls || "") + '" ' + (clickable ? 'type="button" data-f="' + f.id + '"' : "") + '><span class="fl"><span class="label">' + f.name + '</span><span class="src ' + f.src + '">' + SRC_LABEL[f.src] + '</span></span><span class="val">' + f.val + "</span></" + tag + ">";
+  }
+
+  R.utkast = function () {
+    if (!S.draftMade) {
+      coach("Lag rapportutkastet fra det du fanget.", null);
+      $("screen").innerHTML = '<div class="card"><span class="label">Grunnlag</span><p style="font-size:14px">1 talenotat, ' + S.photos.length + " bilder, 6 fuktmålinger og 1 trykktest.</p></div>" +
+        '<div class="card" id="prog" hidden><span class="label" id="plabel">Leser talenotatet …</span><div class="bar"><i id="pbar"></i></div><p style="font-size:12px;color:var(--muted)">I øvingssaken er utkastet ferdig på forhånd. Ingen AI kalles.</p></div>' +
+        '<button class="btn" id="mk" type="button">Lag rapportutkast</button>';
+      $("mk").onclick = function () {
+        $("mk").disabled = true; $("prog").hidden = false;
+        var steps = ["Leser talenotatet …", "Kobler bilder og målinger …", "Setter opp utkastet …"], k = 0;
+        var tick = setInterval(function () { k++; $("pbar").style.width = Math.min(100, k * 34) + "%"; if (steps[k]) $("plabel").textContent = steps[k];
+          if (k >= 3) { clearInterval(tick); S.draftMade = true; save(); render(); } }, 550);
+      };
+      return;
+    }
+    coach("Les utkastet. Hvert utsagn er merket med hvor det kommer fra. Trykk på utsagnet som er best dokumentert.", "Se etter merket «Måling viser». Et målt tall veier tyngre enn en påstand.");
+    $("screen").innerHTML = '<div class="legend"><span class="src maal">Måling viser</span><span class="src obs">Du observerte</span><span class="src eier">Eier sier</span></div><div class="draft">' +
+      draftFields(false).map(function (f) { return fieldHtml(f, true); }).join("") + "</div>";
+    Array.prototype.forEach.call(document.querySelectorAll("[data-f]"), function (b) { b.onclick = function () {
+      var f = b.getAttribute("data-f"); S.l3tries++;
+      if (f === "fukt" || f === "rør") { award(3, S.l3tries === 1); fb("<b>Riktig.</b> Målingene er det sterkeste beviset i saken. Legg også merke til årsaksfeltet: det er merket «Eier sier». Det tar vi i neste brett."); save();
+        setTimeout(function () { next(); }, 1600); }
+      else if (f === "aars") fb("<b>Motsatt.</b> Årsaken er merket «Eier sier». Det er det svakeste grunnlaget i utkastet. Prøv igjen.", "bad");
+      else fb("Dette er en observasjon. Den er nyttig, men et målt tall veier tyngre. Prøv igjen.", "bad");
+    }; });
+  };
+
+  R.boss = function () {
+    if (!S.hyp) {
+      coach("Før du ser AI-ens forslag: hva tror du selv er årsaken?", "Tenk på målingene. Røret er trykktestet uten drypp, og fukten sitter nederst.");
+      $("screen").innerHTML = '<p style="font-size:14px">Du har vært i kjelleren og ute. Velg den kilden du mener er mest sannsynlig. Du kan endre mening etterpå.</p><div class="opts">' +
+        CAUSES.map(function (c) { return '<button class="opt" type="button" data-c="' + c + '">' + c + "</button>"; }).join("") + "</div>";
+      Array.prototype.forEach.call(document.querySelectorAll("[data-c]"), function (b) { b.onclick = function () { S.hyp = b.getAttribute("data-c"); save(); fb(""); render(); }; });
+      return;
+    }
+    if (!S.editOpen) {
+      coach("Én påstand i utkastet holder ikke. Finn den og rett den.", "Se på merkene. Hvilket utsagn bygger bare på det eieren sa?");
+      $("screen").innerHTML = '<div class="card"><span class="label">Din vurdering</span><p style="font-size:14px">' + esc(S.hyp) + "</p></div>" +
+        '<div class="draft">' + draftFields(false).map(function (f) { return fieldHtml(f, true); }).join("") + "</div>";
+      Array.prototype.forEach.call(document.querySelectorAll("[data-f]"), function (b) { b.onclick = function () {
+        if (b.getAttribute("data-f") === "aars") { S.bossFound = true; S.editOpen = true; save(); fb("<b>Funnet.</b> Utkastet har gjort eierens teori om til årsak. Det skjedde i vår første ekte sak også. Rett feltet nå."); render(); }
+        else { S.bossWrongTaps++; save(); b.classList.add("wrong"); fb("Dette utsagnet er støttet av " + (b.querySelector(".src").textContent.toLowerCase()) + ". Let videre.", "bad"); }
+      }; });
+      return;
+    }
+    coach("Velg årsak og hvordan skaden oppsto. Kryss av for bevisene som støtter valget.", "Nedbør og overvann, gradvis. Eierens mening er ikke et bevis.");
+    var co = CAUSES.map(function (c) { return '<button class="opt" type="button" data-cause="' + c + '" aria-pressed="' + (S.cause === c) + '">' + c + "</button>"; }).join("");
+    var mo = ["Akutt", "Gradvis", "Usikker"].map(function (m) { return '<button class="opt" type="button" data-mode="' + m + '" aria-pressed="' + (S.mode === m) + '">' + m + "</button>"; }).join("");
+    var ev = EVIDENCE.map(function (e) { return '<label><input type="checkbox" id="ev-' + e.id + '" data-ev="' + e.id + '"' + (S.ev[e.id] ? " checked" : "") + '><span>' + e.text + '</span><span class="src ' + e.src + '">' + SRC_LABEL[e.src] + "</span></label>"; }).join("");
+    $("screen").innerHTML = '<div class="card"><span class="label">Årsak</span><div class="opts">' + co + '</div><span class="label">Akutt eller gradvis</span><div class="opts" style="grid-template-columns:repeat(3,1fr)">' + mo + "</div></div>" +
+      '<div class="card"><span class="label">Bevis som støtter valget</span><div class="ev">' + ev + "</div></div>" +
+      '<button class="btn" id="saveCause" type="button">Lagre endringen</button>';
+    Array.prototype.forEach.call(document.querySelectorAll("[data-cause]"), function (b) { b.onclick = function () { S.cause = b.getAttribute("data-cause"); save(); render(); }; });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-mode]"), function (b) { b.onclick = function () { S.mode = b.getAttribute("data-mode"); save(); render(); }; });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ev]"), function (b) { b.onchange = function () { S.ev[b.getAttribute("data-ev")] = b.checked; save(); }; });
+    $("saveCause").onclick = function () {
+      S.saveTries++; save();
+      var goodN = EVIDENCE.filter(function (e) { return e.good && S.ev[e.id]; }).length;
+      if (!S.cause || !S.mode) { fb("Velg både årsak og om skaden er akutt eller gradvis.", "bad"); return; }
+      if (S.ev.eier) { fb("<b>Eierens mening er ikke et bevis.</b> Den kan stå i rapporten som «eier opplyser», men den kan ikke bære årsaken. Fjern avkrysningen.", "bad"); return; }
+      if (S.cause !== "Nedbør / overvann") { fb("Sjekk målingene igjen. Røret er trykktestet uten drypp, fukten sitter nederst, og terrenget faller inn mot muren.", "bad"); return; }
+      if (S.mode !== "Gradvis") { fb("Saltutslag og kapillært oppsug tar tid. Er dette akutt?", "bad"); return; }
+      if (goodN < 2) { fb("Knytt minst to bevis til årsaken, så en kontrollør ser hvorfor du konkluderte slik.", "bad"); return; }
+      S.bossDone = true;
+      var skill = S.bossWrongTaps === 0 && S.saveTries === 1;
+      award(4, skill);
+      var match = S.hyp === "Nedbør / overvann";
+      fb("<b>Rettet og begrunnet.</b> " + (match ? "Du vurderte riktig før du så forslaget. Det er derfor vi spør deg først." : "Du tippet «" + esc(S.hyp) + "» før du så forslaget. Å spørre deg først gjør at du ikke bare godtar det AI-en foreslår.")); render();
+      setTimeout(function () { next(); }, 2200);
+    };
+  };
+
+  R.godkjenn = function () {
+    coach("Les gjennom og godkjenn rapporten. Godkjenningen er din faglige signatur.", null);
+    if (S.approvedAt) {
+      $("screen").innerHTML = '<div class="stamp">GODKJENT<small>' + esc(S.name) + " · " + esc(S.approvedStr) + "</small></div>" +
+        '<p style="font-size:14px">Rapporten er låst med navn og tidspunkt. Hvis du endrer den igjen, må den godkjennes på nytt.</p><button class="btn" id="go" type="button">Gå til deling</button>';
+      $("go").onclick = function () { next(); }; return;
+    }
+    $("screen").innerHTML = '<div class="card"><span class="label">Endringer du har gjort</span><p style="font-size:14px">2 felt endret: <b>Årsak</b> og <b>Akutt/gradvis</b>. AI-ens opprinnelige utkast er arkivert uendret, så det alltid kan vises hva du endret.</p></div>' +
+      '<div class="draft">' + draftFields(true).map(function (f) { return fieldHtml(f, false, f.id === "aars" ? "edited" : ""); }).join("") + "</div>" +
+      '<label class="tick" for="read"><input type="checkbox" id="read"' + (S.read ? " checked" : "") + '><span>Jeg har lest rapporten og står faglig inne for innholdet.</span></label>' +
+      '<button class="btn" id="stamp" type="button"' + (S.read ? "" : " disabled") + ">Godkjenn rapporten</button>";
+    $("read").onchange = function (e) { S.read = e.target.checked; save(); render(); };
+    $("stamp").onclick = function () { S.approvedAt = Date.now(); S.approvedStr = now(); award(5, true); fb("<b>Godkjent.</b> Nå, og først nå, kan rapporten deles."); render(); };
+  };
+
+  R.del = function () {
+    coach("Del rapporten med en PIN-beskyttet lenke. Prøv så å trekke godkjenningen og se hva som skjer med lenken.", null);
+    var sh = S.share;
+    var body = sh ? '<div class="card"><span class="label">Delingslenke · øvingslenke, virker ikke</span><p class="link' + (S.withdrawn ? " locked" : "") + '">docrai.no/r/ovingssak-' + sh.code + '</p><p style="font-size:14px">PIN til mottaker: <b class="mono">' + sh.pin + "</b> · Send PIN på en annen kanal enn lenken.</p>" +
+      (S.withdrawn ? '<p style="font-size:14px;color:var(--danger)"><b>Låst.</b> Rapporten er ikke lenger godkjent, så lenken viser ingenting.</p>' : "") + "</div>" +
+      (S.withdrawn ? '<button class="btn" id="reapp" type="button">Godkjenn på nytt</button>' : '<button class="btn ghost" id="wd" type="button">Trekk godkjenningen</button>') +
+      '<button class="btn ghost" id="seeRep" type="button">Åpne den ferdige rapporten</button>' +
+      '<button class="btn" id="fin" type="button"' + (S.withdrawn ? " disabled" : "") + ">Fullfør øvingssaken</button>"
+      : '<button class="btn" id="mk" type="button">Lag delingslenke</button>';
+    $("screen").innerHTML = '<div class="stamp">GODKJENT<small>' + esc(S.name) + " · " + esc(S.approvedStr || "") + "</small></div>" + body;
+    var mk = $("mk"); if (mk) mk.onclick = function () { S.share = { code: Math.random().toString(36).slice(2, 7), pin: String(1000 + Math.floor(Math.random() * 9000)) }; save(); fb("<b>Lenken er laget.</b> Serveren nekter deling av rapporter som ikke er godkjent. Det gjelder også i appen."); render(); };
+    var wd = $("wd"); if (wd) wd.onclick = function () { S.withdrawn = true; S.sawLock = true; save(); fb("Lenken ble låst med en gang. Godkjenningen styrer delingen.", "bad"); render(); };
+    var ra = $("reapp"); if (ra) ra.onclick = function () { S.withdrawn = false; S.approvedStr = now(); save(); fb("<b>Godkjent på nytt.</b> Lenken virker igjen."); render(); };
+    var sr = $("seeRep"); if (sr) sr.onclick = function () { openReport(true); };
+    var fi = $("fin"); if (fi) fi.onclick = function () { award(6, !!S.sawLock); next(); };
+  };
+
+  R.slutt = function () {
+    var mins = Math.max(1, Math.round(((S.finished || Date.now()) - S.started) / 60000));
+    $("coach").innerHTML = '<span class="eyebrow">Øvingssaken er fullført</span><p class="goal">Bra jobbet, ' + esc(S.name.split(" ")[0] || "") + '. Du har laget en sak fra start til delt rapport.</p><span class="stars">' + totalStars() + " av " + LEVELS.length * 3 + " stjerner</span>";
+    var seq = ""; for (var i = 1; i <= 7; i++) seq += '<button type="button" data-seq="' + i + '" aria-pressed="' + (S.seq === i) + '">' + i + "</button>";
+    $("screen").innerHTML =
+      '<div class="result"><div><b class="mono">' + mins + '</b><span>minutter</span></div><div><b class="mono">' + totalStars() + '</b><span>av ' + LEVELS.length * 3 + ' stjerner</span></div><div><b class="mono">' + (S.bossWrongTaps === 0 ? "Ja" : "Nei") + '</b><span>fant feilen på første forsøk</span></div></div>' +
+      '<button class="btn" id="seeRep2" type="button">Åpne den ferdige rapporten din</button>' +
+      '<div class="card"><span class="label">Dette kan du nå</span><ul style="margin:0;padding-left:18px;font-size:14px;display:grid;gap:4px"><li>Opprette en sak og bruke saksunderlaget</li><li>Fange tale, foto, fuktmålinger og trykktest per rom, uten hull</li><li>Lese hvor hvert utsagn i utkastet kommer fra</li><li>Finne og rette en årsak som bare bygger på eierens teori</li><li>Godkjenne og dele trygt</li></ul></div>' +
+      '<div class="card"><span class="label">Hvor lett var øvingssaken? (1 = svært vanskelig, 7 = svært lett)</span><div class="seq">' + seq + '</div><div class="seqends"><span>Svært vanskelig</span><span>Svært lett</span></div>' +
+      '<label class="label" for="kom">Hva var uklart?</label><textarea id="kom" placeholder="Skriv fritt">' + esc(S.comment) + "</textarea>" +
+      '<button class="btn" id="copy" type="button">Kopier resultatet</button><p style="font-size:12px;color:var(--muted)" id="copyNote">Svarene lagres bare på denne enheten. Lim resultatet inn i en melding til DocrAI-teamet.</p></div>';
+    Array.prototype.forEach.call(document.querySelectorAll("[data-seq]"), function (b) { b.onclick = function () { S.seq = +b.getAttribute("data-seq"); save(); render(); }; });
+    $("kom").oninput = function (e) { S.comment = e.target.value; save(); };
+    $("seeRep2").onclick = function () { openReport(true); };
+    $("copy").onclick = function () {
+      var txt = "Øvingssak fullført: " + mins + " min, " + totalStars() + "/" + LEVELS.length * 3 + " stjerner, feil funnet på første forsøk: " + (S.bossWrongTaps === 0 ? "ja" : "nei") +
+        ", målinger riktig første gang: " + (S.measTries === 1 ? "ja" : "nei") + ", egen hypotese: " + S.hyp + ", hint brukt på " + Object.keys(S.hintUsed).length + " brett, SEQ: " + (S.seq || "ikke svart") + ". Uklart: " + (S.comment || "–");
+      var note = $("copyNote");
+      function fallback() { var ta = $("kom"); ta.value = txt; ta.focus(); ta.select(); note.textContent = "Kunne ikke kopiere automatisk. Teksten er markert i feltet over, kopier den selv."; }
+      try { navigator.clipboard.writeText(txt).then(function () { note.textContent = "Kopiert. Lim inn i en melding til DocrAI-teamet."; }, fallback); } catch (e) { fallback(); }
+    };
+    fb("");
+  };
+
+  /* ---------- Designnotatet ved siden av telefonen ---------- */
+  var NOTES = {
+    profil:   { grep: "Vis målet før brettet: lenken under knappen viser den ferdige rapporten du skal lage. Tutorialen ber om navnet først, fordi du trenger det for å godkjenne på slutten.", app: [["finnes", "Profil med navn i Guide-fanen"], ["finnes", "Ferdig rapport (Google Doc i appen)"]] },
+    sak:      { grep: "Ett grep per brett. Her er det bare adresse og saksunderlag. Resten av appen er skjult til du trenger den.", app: [["finnes", "Adresseoppslag og saksunderlag fra Kartverket i veiviseren"]] },
+    fang:     { grep: "Lær ved å gjøre, i en trygg sandkasse. Du har ikke vært på stedet, så befaringsmappen gir deg bildene og måleskjemaet. Du taster målingene selv, fordi det er det du gjør i felt. Sjekklisten gir umiddelbar tilbakemelding.", app: [["finnes", "Romstripe, tale, foto og våtromssjekkliste"], ["ny", "Befaringsmappe med eksempeldata (bare i øvingen)"], ["ny", "Fuktmålinger per målepunkt med fuktprofil"], ["ny", "Trykktest som egen registrering"], ["ny", "«Før du drar»-sjekk for alle rom"]] },
+    utkast:   { grep: "Nytt begrep, én ting å lære: hvert utsagn har en kilde. Oppgaven tvinger deg til å lese merkene før boss-brettet.", app: [["finnes", "Rapportutkast fra tale, bilder og notater"], ["ny", "Kildemerke per utsagn: eier sier, du observerte, måling viser"]] },
+    boss:     { grep: "Boss-brettet tester alt du har lært. Feilen er plantet med vilje, fordi den skjedde i første ekte sak: modellen gjorde eierens teori til årsak. Du vurderer selv først, så du ikke bare godtar forslaget.", app: [["finnes", "Redigere felt i rapporten"], ["ny", "Egen vurdering før AI-forslaget vises (bare for årsak)"], ["ny", "Knytte bevis til årsaken"]] },
+    godkjenn: { grep: "Belønningen er stempelet med ditt navn. Avkrysningen gjør signaturen til et bevisst valg, ikke et klikk.", app: [["finnes", "Godkjenning med navn og tidspunkt"], ["finnes", "AI-utkastet arkiveres uendret"]] },
+    del:      { grep: "Siste brett viser regelen i praksis: trekk godkjenningen og se lenken låse seg. Til slutt ser du rapporten bygget av dine egne registreringer.", app: [["finnes", "PIN-beskyttet deling"], ["finnes", "Serveren nekter deling uten godkjenning"], ["finnes", "Ferdig rapport (Google Doc i appen)"]] },
+    slutt:    { grep: "Oppsummeringen viser hva du mestrer, og ber om én vurdering (SEQ 1–7). Det er tallet vi bruker for å avgjøre om øvingssaken skal bygges inn i appen.", app: [] }
+  };
+  function renderNotes() {
+    var id = S.level < LEVELS.length ? LEVELS[S.level].id : "slutt";
+    var n = NOTES[id];
+    var app = n.app.map(function (a) { return '<div><span class="pill ' + a[0] + '">' + (a[0] === "finnes" ? "Finnes i appen" : "Ny idé som testes") + "</span>" + a[1] + "</div>"; }).join("");
+    $("notes").innerHTML = '<div class="panel"><span class="eyebrow">Spillgrepet i dette brettet</span><p>' + n.grep + "</p></div>" +
+      (app ? '<div class="panel"><span class="eyebrow">I den ekte appen</span><div class="maprow">' + app + "</div></div>" : "") +
+      '<div class="panel"><span class="eyebrow">Øvingssaken</span><dl class="kv"><dt>Adresse</dt><dd>' + ADDRESS + ' (oppdiktet)</dd><dt>Rom</dt><dd>Kjeller og utvendig</dd><dt>Stjerner</dt><dd class="mono">' + totalStars() + " / " + LEVELS.length * 3 + "</dd></dl></div>";
+  }
+
+  function renderTrack() {
+    $("track").innerHTML = LEVELS.map(function (l, i) {
+      var cls = i < S.level ? "done" : i === S.level ? "now" : "";
+      return '<div class="station ' + cls + (l.boss ? " boss" : "") + '"' + (i === S.level ? ' aria-current="step"' : "") + '><span class="num">' + (i < S.level ? "✓" : i + 1) + '</span><span><span class="nm">' + l.name + '</span><br><span class="st">' + (l.boss ? '<span class="bs">boss</span> · ' : "") + (i < S.level ? starStr(starsFor(i)) : i === S.level ? "nå" : "låst") + "</span></span></div>";
+    }).join("");
+  }
+  function renderProgress() {
+    var st = S.level < LEVELS.length ? LEVELS[S.level].stage : 4;
+    Array.prototype.forEach.call($("progress").children, function (s, i) { s.className = i <= st ? "on" : ""; });
+  }
+  function render() {
+    renderTrack(); renderProgress(); renderNotes();
+    if (S.level >= LEVELS.length) R.slutt(); else R[LEVELS[S.level].id]();
+  }
+
+  $("wfToggle").onclick = function () { wf = !wf; $("phone").classList.toggle("wf", wf); this.setAttribute("aria-pressed", String(wf)); this.textContent = wf ? "Vis ferdig design" : "Vis som wireframe"; };
+  $("restart").onclick = function () { var n = S.name; S = fresh(); S.name = n; save(); fb(""); closeSheet(); render(); };
+  $("mappeBtn").onclick = function () { openSheet("Befaringsmappe", mappeHtml()); };
+  $("sheetClose").onclick = closeSheet;
+  render();
+})();
+</script>
