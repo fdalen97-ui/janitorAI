@@ -30,12 +30,12 @@ i søknaden uten det forbeholdet som står ved tallet.
   viser betydelig innskutt kapital.
 - **Substans:** ARR >2 MNOK, >180 lisenser, 100+ betalende bedrifter, 4 %
   churn (egenrapportert, investorside apr. 2026). Leder FoU-prosjektet CliVa —
-  Forskningsrådet-tildeling 10,9 MNOK (2025–2027; selskapet omtaler selv et
-  IPN-prosjekt på 28 MNOK totalt) om **AI-basert skadevurdering** med SINTEF
-  Byggforsk-data og forsikringsbransjen som uttalt interessent.
+  Forskningsrådet-tildeling 10,9 MNOK (selskapet omtaler selv et IPN-prosjekt
+  på 28 MNOK totalt). Wenns investorside beskriver CliVa som klimarisikoanalyse på bygningsnivå (2025–2028), ikke AI-skadevurdering (rettet 29.09.2026, jf. `docs/verdens-beste-losning.md` §6). SINTEF Byggforsk-data og forsikringsbransjen
+  som uttalt interessent.
 - **Risiko for DocrAI:** eneste norske aktør med dokumentert kurs mot
   skadedomenet + kapital + fagpartnere. Men: produktet er fortsatt 100 %
-  håndverker/tilbudsfase, og CliVa er FoU (2025–2027), ikke produkt.
+  håndverker/tilbudsfase, og CliVa er klimarisiko-FoU (2025–2028), ikke produkt.
   Vårt forsprang er årsaks-/ansvarslaget i forsikringsflyten og farten.
 
 ### iVerdi AS — strukturell distribusjonsrisiko

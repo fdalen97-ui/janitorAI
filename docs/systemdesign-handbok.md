@@ -139,9 +139,11 @@ må telleren bo i delt lager med atomiske operasjoner — og du må velge om
 limiteren feiler åpent (slipp gjennom) eller lukket (avvis) når det
 delte lageret er nede.
 
-**DocrAI:** `heavyLimiter` er i dag 30 kall/15 min *per IP* — hele
-Ocab-kontoret deler én pott, og appen har ingen 429-håndtering. Konkret
-forslag med fil:linje i `docs/system-design-laerdommer.md` del 2.1.
+**DocrAI (rettet 29.09.2026):** `heavyLimiter` er 30 kall/15 min *per tester*
+(`apps/api/src/middleware/rateLimiters.js:39-56`; IP bare for offentlige flater uten
+token), svarer 429 med `retryAfterSeconds`, og appen viser ventetiden
+(`apps/mobile/app/projects/[id].tsx:825-833`). Bakgrunn i
+`docs/system-design-laerdommer.md` del 2.1.
 
 ---
 

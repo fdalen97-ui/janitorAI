@@ -186,8 +186,8 @@ og nye funn under — alt annet i dokumentet står uendret og er re-verifisert.
   Android-app mai 2026 (50+ nedlastinger); App Store fortsatt 5,0★/3.
 - Feb 2026: API/MCP-kobling — kundene kan koble Claude/ChatGPT til
   prosjektdataene sine.
-- **Viktigst:** Wenn leder FoU-prosjektet CliVa (Forskningsrådet, 10,9 MNOK,
-  2025–2027): AI-basert skadevurdering og klimarisiko per bygg, med SINTEF
+- **Viktigst:** Wenn leder FoU-prosjektet CliVa (Forskningsrådet, 10,9 MNOK).
+  Wenns investorside beskriver CliVa som klimarisikoanalyse på bygningsnivå (2025–2028), ikke AI-skadevurdering (rettet 29.09.2026, jf. `docs/verdens-beste-losning.md` §6). Klimarisiko per bygg, med SINTEF
   Byggforsk-levetidsdata og forsikringsbransjen som uttalt interessent.
   FoU, ikke produkt — men dokumentert kurs mot vårt domene; trussel 2 i
   USA-analysen er skjerpet. Produktflatene er fortsatt 100 % håndverker/

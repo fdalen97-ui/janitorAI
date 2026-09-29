@@ -44,9 +44,9 @@ Nielsens heuristikker) er i stor grad på plass.
 | Systematisk spacing/grid, ikke magiske tall | ✓ `theme.tsx`: 5-stegs spacing + radii-skala, konsumert av komponenter |
 | Begrenset typografi (få størrelser/vekter) | ✓ 3-tier `Title/Body/Caption` · ▲ vurder h1/h2/h3-nyanse på sikt |
 | Unngå ren svart/hvit; dempet palett | ✓ varm papir + stålblå (bevisst «lite KI-generert») |
-| Nielsen: synlig systemstatus, skeleton, feilhjelp | ✓ ekte prosess-status ved rapportgenerering + byte-nivå opplastingsprogresjon · ▲ ingen skeleton-loaders (kun spinnere) |
+| Nielsen: synlig systemstatus, skeleton, feilhjelp | ◐ tidsstyrt steg-overlay ved rapportgenerering (ikke serverprogresjon, jf. «UX (mindre)» under) + byte-nivå opplastingsprogresjon · ▲ ingen skeleton-loaders (kun spinnere) |
 | AI-produkter: vis prosessering **og konfidens** | ◐ Prosessering vises; **konfidenssignaler mangler bevisst** — tillit er forankret i menneskelig godkjenning, ikke modell-selvtillit. Vurder et «bør kontrolleres»-flagg per felt der AI-en er usikker |
-| Fokusmarkering (WCAG 2.4.7) | ✓ `:focus-visible` på alle offentlige sider |
+| Fokusmarkering (WCAG 2.4.7) | ✓ `:focus-visible` på alle offentlige sider (kundereisen fikk det 29.09.2026; `e2e-headere.sh` sjekker) |
 
 **Én nyanse verdt en beslutning:** rapport-genereringsoverlayet viser en
 4-stegs framdrift, men stegene er *tidsstyrte simuleringer*, ikke drevet av ekte
@@ -92,7 +92,7 @@ distribusjon». Her er DocrAIs største strategiske rom.
   lav saldo). Dokumentets `WITH CHECK`-ekvivalent: saldo muteres kun server-side.
 - **Reserver-så-oppgjør:** kostnad kjennes først etter LLM-svaret → reserver
   maks-estimat ved start, gjør opp faktisk ved fullført rapport.
-- **Per-token forbrukstak** (dagens `heavyLimiter` er kun IP-basert).
+- **Per-token forbrukstak** (`heavyLimiter` teller allerede per tester, men kall — ikke tokens).
 - Utvid angrepstesten til saldo-endepunktene før betaling shippes.
 
 **Distribusjon (roadmap):**

@@ -83,3 +83,64 @@ EAS builds should target the mobile workspace.
 - **Environment variables**: `APP_ENV` (or `EAS_BUILD_PROFILE`) selects the build profile; optional `API_BASE_URL` override is read by `app.config.js`.
 
 Expo Router continues to look for the `app/` directory inside `apps/mobile/app`, so no additional configuration is required after pointing EAS at the new workspace.
+
+## Domener: docrai.io → salgssidene på Express
+
+**Status 28.09.2026 (målt med `curl`):** `https://docrai.io/` serverer
+`explainer/index.html` byte-identisk (Cloudflare Pages/Static Site, jf.
+`explainer/README.md`), `https://docrai.io/om` svarer 404, og hele salgsflaten
+(`/om`, `/demo`, `/eksempelrapport`, `/faq`, `/kontakt`, `/personvern`, `/vilkar`,
+`/kundereisen`, `sitemap.xml`, `robots.txt`) finnes bare på
+`https://janitorai-backend.onrender.com`. `https://app.docrai.io/` er webappen
+(Expo-eksport). Beslutning (`docs/nettside-masterplan.md` §0 og §4): docrai.io
+skal peke på Express-tjenesten, så det som er bygget faktisk er det som er live.
+
+Rekkefølgen under er valgt så ingenting er brukket underveis: koden er allerede
+klar for begge verter (`publicBase.js` allowlister `docrai.io` og
+`www.docrai.io`; `LANDING_ROOT` gjør roten til salgssiden).
+
+1. **Render — custom domain på `janitorai-backend`:** Settings → Custom Domains →
+   legg til `docrai.io` og `www.docrai.io`. Render viser hvilken CNAME/ALIAS-verdi
+   DNS skal peke på og utsteder TLS-sertifikat når DNS stemmer.
+2. **Miljøvariabler på `janitorai-backend`** (alle beskrevet i `RENDER_SETUP.md`):
+   - `LANDING_ROOT=/om` — ellers svarer `https://docrai.io/` med 401 JSON fra
+     token-vakten, fordi denne tjenesten ikke har `STATIC_DIR`.
+   - `PUBLIC_BASE_URL=https://docrai.io` — canonical, `og:url`, sitemap, robots og
+     security.txt. Sett den **etter** at DNS peker hit (før det ville Google fått
+     en canonical som 404-er).
+   - `API_BASE_URL` — uendret (`https://janitorai-backend.onrender.com`) på både
+     API og `ai-engine`, eller usatt på begge (to-tjeneste-kontrakten). Den
+     styrer medie-URL-ene til motoren, ikke salgssidene, og trenger ikke bytte.
+   - `CORS_ORIGINS` — legg til `https://docrai.io` om admin-dashbordet skal
+     åpnes derfra; appen på `app.docrai.io` står der allerede.
+   - `HSTS_MAX_AGE=300` — start trappa (ingen `strict-transport-security` sendes
+     i dag). Ett døgn på 300, så 86400, så 31536000.
+3. **Cloudflare DNS:** `docrai.io` → CNAME/flattened til Render-verten fra steg 1;
+   `www` → CNAME til det samme. Behold proxy (oransje sky): Cloudflare
+   brotli-komprimerer og cacher salgssidene i fem minutter fordi de nå sender
+   `Cache-Control: public, max-age=300`. Legg en **Redirect Rule**
+   `www.docrai.io/*` → `https://docrai.io/$1` (301), så det finnes én kanonisk vert.
+4. **Cloudflare Pages/Static Site for `explainer/`:** fjern custom domain
+   `docrai.io` fra det prosjektet (ellers vinner det DNS-oppslaget). Prosjektet
+   kan beholdes uten domene, eller slettes; `explainer/` i repoet er ikke lenket
+   fra noe etter byttet. Explainer laster Inter fra Google Fonts
+   (`explainer/index.html:33-34`) — det er derfor personvernsidens «ingen
+   tredjeparts sporing» ikke er sann for dagens forside. Express-sidene laster
+   ingen eksterne ressurser.
+5. **Verifiser** (fra en maskin utenfor Render):
+   ```
+   curl -sI https://docrai.io/            | grep -i '^location'        # 301 → /om
+   curl -s  https://docrai.io/om          | grep -c fonts.googleapis   # 0
+   curl -s  https://docrai.io/om          | grep -o '<link rel="canonical" href="[^"]*"'   # https://docrai.io/om
+   curl -s  https://docrai.io/sitemap.xml | grep -c '<loc>'            # 8
+   curl -sI https://docrai.io/om          | grep -i 'cache-control\|strict-transport\|x-powered'  # public, max-age=300; HSTS; ingen x-powered-by
+   curl -sI https://app.docrai.io/        | head -1                    # 200 — appen uberørt
+   ```
+   Send deretter `sitemap.xml` på nytt i Search Console (om domenet er verifisert
+   der; uverifisert i repoet).
+
+**Webappen (`app.docrai.io`)** er en egen utrulling av Expo-eksporten og røres ikke
+av byttet. Merk: `apps/mobile/app.json` setter `web.lang: "nb"`, men den utrullede
+bundlen sender `<html lang="en">` (målt 28.09.2026) — neste web-eksport bør
+kontrolleres med `curl -s https://app.docrai.io/ | grep -o '<html[^>]*>'`.
+

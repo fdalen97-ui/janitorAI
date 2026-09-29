@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<title>DocrAI – Fra befaring til forsikringsklar skaderapport</title>
-<meta name="description" content="DocrAI gjør befaringsvideo og tale om til forsikringsklar skaderapport med årsak, akutt/gradvis-vurdering og Byggforsk-henvisninger. Du kontrollerer og godkjenner – AI-en skriver utkastet." />
-<meta property="og:title" content="DocrAI – Fra befaring til forsikringsklar skaderapport" />
-<meta property="og:description" content="Snakk deg gjennom befaringen – AI-en skriver utkastet med årsak og Byggforsk-henvisninger. Du kontrollerer, korrigerer og godkjenner." />
+<title>DocrAI – Fra befaring til skaderapport du godkjenner</title>
+<meta name="description" content="DocrAI gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Du kontrollerer og godkjenner – AI-en skriver utkastet." />
+<meta property="og:title" content="DocrAI – Fra befaring til skaderapport du godkjenner" />
+<meta property="og:description" content="Snakk deg gjennom befaringen – AI-en skriver utkastet med foreslått årsak. Du kontrollerer, korrigerer og godkjenner." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
@@ -57,7 +57,7 @@
 
   .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
   .stat { flex: 1; min-width: 150px; background: var(--paper); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-  .stat b { display: block; font-size: 22px; color: var(--copper); letter-spacing: -0.01em; }
+  .stat b { display: block; font-size: 22px; color: var(--copper); letter-spacing: -0.01em; overflow-wrap: anywhere; }
   .stat span { font-size: 13px; color: var(--muted); }
 
   h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
@@ -139,40 +139,44 @@
 </style>
 </head>
 <body>
-<div class="page">
+<main class="page">
 
   <div class="brand"><span class="sq">D</span><b>DocrAI</b><a href="/demo">Prøv demoen →</a></div>
 
   <div class="hero">
-    <h1>Fra befaring til forsikringsklar skaderapport. På minutter – ikke timer.</h1>
+    <h1>Fra befaring til skaderapport. AI‑en skriver utkastet – du godkjenner.</h1>
     <p>
-      To timer rapportskriving i bilen etterpå. Notater på små knapper med våte hansker.
+      Rapportskriving i bilen etterpå. Notater på små knapper med våte hansker.
       Dokumentasjon som ikke holder i oppgjøret. <strong>DocrAI snur det:</strong> snakk deg
-      gjennom befaringen, så skriver AI-en utkastet – med årsak, akutt/gradvis-vurdering og
-      Byggforsk-henvisninger. Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten
+      gjennom befaringen, så skriver AI-en utkastet – med foreslått årsak og
+      akutt/gradvis-vurdering. Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten
       stempelet ditt.
     </p>
     <div class="cta-row">
-      <a class="btn primary" href="/demo">Se din egen adresse på 2 sekunder</a>
+      <a class="btn primary" href="/demo">Se saksunderlaget for din adresse</a>
+      <a class="btn ghost" href="/eksempelrapport">Se en ferdig rapport</a>
       <a class="btn ghost" href="#pilot">Bli pilotdeltaker</a>
       <a class="btn ghost" href="/kontakt">Book et 15-min møte</a>
     </div>
   </div>
 
   <div class="stat-row">
-    <div class="stat"><b>2 t → 15 min</b><span>målet per rapport – og appen måler tiden på hver sak</span></div>
-    <div class="stat"><b>7 datalag</b><span>saksunderlag hentet automatisk fra åpne kilder før avreise</span></div>
+    <!-- Regel 6: hero-tall venter på målt baseline (Port 0, docs/verdens-beste-losning.md).
+         Til da står det bare det koden gjør: underlag fra fem åpne tjenester
+         (routes/underlag.js), delingssperre før stempel (routes/share.js, 409). -->
+    <div class="stat"><b>Før avreise</b><span>kart, gnr/bnr, bygningstype, terreng og vær hentes fra Kartverket og MET</span></div>
+    <div class="stat"><b>Stempel først</b><span>ingen delingslenke før du har stemplet rapporten – håndhevet av serveren</span></div>
     <div class="stat"><b>SHA-256</b><span>hvert bevis får geo og tid ved fangst, og sjekksum ved opplasting</span></div>
   </div>
 
   <section>
     <h2>Fem grunner til at takstpersoner velger DocrAI</h2>
     <ol class="reasons">
-      <li><b>Saken er klar før bilen starter.</b> Skriv inn adressen – kart, matrikkel, bygningstype, terreng og vær hentes automatisk fra Kartverket og MET. Ingen avtaler, ingen oppslag i sju systemer.</li>
+      <li><b>Saken er klar før bilen starter.</b> Skriv inn adressen – kart, matrikkel, bygningstype, terreng og vær hentes automatisk fra Kartverket og MET. Ingen avtaler, ingen manuelle oppslag.</li>
       <li><b>Snakk – ikke tast.</b> Store knapper laget for våte hansker, og transkripsjon styrt mot norsk fagspråk: klemring, svill, diffusjonssperre. Talen din blir strukturen i rapporten.</li>
       <li><b>AI-en skriver utkastet. Du eier konklusjonen.</b> Årsak og akutt/gradvis foreslås – aldri fastslås. Du redigerer direkte i den ferdige rapportvisningen og stempler med navn og tidspunkt.</li>
-      <li><b>Bevis som holder i oppgjøret.</b> Geo og klokkeslett settes i fangstøyeblikket; SHA-256-sjekksummen settes av serveren ved opplasting. Mottakeren åpner en PIN-beskyttet rapport – uten konto – og kan verifisere at ingenting er endret siden opplasting.</li>
-      <li><b>Leverer inn i flyten forsikringen krever.</b> Uavhengig av forsikringsselskapene – men bygget for å levere strukturert rett inn i saksflyten deres. Gjør befaringen i DocrAI, lever som før.</li>
+      <li><b>Bevis med sporbarhet.</b> Geo og klokkeslett settes i fangstøyeblikket; SHA-256-sjekksummen settes av serveren ved opplasting. Mottakeren åpner en PIN-beskyttet rapport – uten konto – og kan verifisere at ingenting er endret siden opplasting.</li>
+      <li><b>Passer inn i flyten du har.</b> Uavhengig av forsikringsselskapene: rapporten deles som PIN-beskyttet lenke eller lastes ned som PDF eller Word. Gjør befaringen i DocrAI, lever som før.</li>
     </ol>
   </section>
 
@@ -181,7 +185,7 @@
     <div class="steps">
       <div class="step"><span class="n">1 · Før</span><h3>Adressen inn</h3><p>Ett søk gir saksunderlaget: kart, gnr/bnr, bygningstype, terreng og vær – ferdig utfylt sak før avreise.</p></div>
       <div class="step"><span class="n">2 · I felt</span><h3>Fang og snakk</h3><p>Video, foto og lydnotater rom for rom. Alt lagres lokalt først – appen virker uten dekning i kjelleren.</p></div>
-      <div class="step"><span class="n">3 · Etter</span><h3>Godkjenn og del</h3><p>Ett trykk, så skrives AI-utkastet mens du kjører. Kontrollér, stemple – og del PIN-beskyttet med forsikringen.</p></div>
+      <div class="step"><span class="n">3 · Etter</span><h3>Godkjenn og del</h3><p>Ett trykk, så skriver AI-en utkastet på serveren. Kontrollér, stemple – og del PIN-beskyttet med forsikringen.</p></div>
     </div>
   </section>
 
@@ -191,19 +195,22 @@
       <p><b>AI foreslår. Du avgjør. Det er systemet – ikke et forbehold.</b></p>
       <p>Rapporten er merket som utkast til du aktivt godkjenner den, og delingslenker kan ikke
         lages før stempelet er satt – det håndheves av serveren, ikke bare av appen. Byggforsk-
-        henvisninger vises kun med verifisert bladnummer. AI-prosesseringen skjer hos Google;
+        referanser AI-en foreslår, kontrolleres mot en liste over verifiserte bladnummer –
+        uverifiserte forkastes. AI-prosesseringen skjer hos Google;
         databehandleravtale og EU/EØS-region er ikke på plass ennå – vi sier det som det er.</p>
     </div>
   </section>
 
   <section>
     <h2>Pris – enkel og uten binding</h2>
-    <!-- Ærlig prisankring (kontrasteffekten): referansepunktet er kostnaden
-         ved dagens manuelle rapportskriving — ikke et kunstig «før-pris»-tall. -->
+    <!-- Regel 6 (CLAUDE.md): bare tall og løfter med kodelinje bak seg. Tidsbruk
+         måles per sak i appen (metrics.ts); mottakerens felt-telling rendres på
+         delingssiden; «ingenting faktureres» er sant fordi det ikke finnes
+         fakturagrunnlag (db.js). Baseline-tall kommer når de er målt. -->
     <div class="stat-row" style="margin-bottom:14px">
-      <div class="stat"><b>2–3 timer</b><span>tar en manuell skaderapport å skrive i dag</span></div>
-      <div class="stat"><b>2 400–4 500 kr</b><span>koster det i timeverk per rapport (typisk timepris 1 200–1 500 kr)</span></div>
-      <div class="stat"><b>990 kr/mnd</b><span>DocrAI — mindre enn én manuell rapport, ubegrensede saker</span></div>
+      <div class="stat"><b>Tid per sak</b><span>appen måler tiden fra første bevis til godkjent rapport – sak for sak</span></div>
+      <div class="stat"><b>Utkast → godkjent</b><span>korrigerer du AI-utkastet, ser mottakeren hvor mange felt som ble endret</span></div>
+      <div class="stat"><b>Ingen bindingstid</b><span>ingenting faktureres i pilotfasen</span></div>
     </div>
     <div class="tiers">
       <div class="tier">
@@ -218,11 +225,11 @@
       </div>
       <div class="tier hot">
         <h3>Takstperson</h3>
-        <div class="price">990 kr <span>/mnd eks. mva., veiledende</span></div>
+        <div class="price">Settes i pilotfasen <span>· ingen bindingstid</span></div>
         <ul>
-          <li>Ubegrensede saker og rapporter</li>
-          <li>Saksunderlag, AI-utkast, godkjenning, PIN-deling</li>
-          <li>Én rapport sparer inn måneden</li>
+          <li>Saksunderlag, AI-utkast, godkjenning og PIN-deling inkludert</li>
+          <li>Prisnivået bekreftes mot målt kostnad per rapport før det publiseres</li>
+          <li>Pilotdeltakere: 50 % rabatt første år</li>
         </ul>
       </div>
       <div class="tier">
@@ -231,15 +238,14 @@
         <ul>
           <li>Samlefakturering og felles maler</li>
           <li>Prioritert støtte</li>
-          <li>In4mo-eksport når den lanseres</li>
         </ul>
       </div>
     </div>
-    <p class="fineprint">Veiledende priser i pilotfasen – endelig prising settes sammen med pilotdeltakerne. Ingen bindingstid.</p>
+    <p class="fineprint">Prisen settes i pilotfasen sammen med pilotdeltakerne, etter at kostnaden per rapport er målt på ekte saker. Ingen bindingstid.</p>
   </section>
 
   <section>
-    <h2>Prøv det på 2 sekunder</h2>
+    <h2>Prøv det på din egen adresse</h2>
     <p style="margin:0;color:var(--muted);">Skriv inn en adresse du kjenner, og se saksunderlaget slik det ligger klart i DocrAI før hver befaring – hentet live fra åpne offentlige kilder.</p>
     <div class="cta-row">
       <a class="btn primary" href="/demo">Åpne demoen</a>
@@ -275,11 +281,11 @@
 
   <footer>
     <span>Kontakt: <a href="/kontakt">book et møte</a> eller <a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a> · vi svarer innen én virkedag.</span>
-    <span><a href="/demo">Demo</a> · <a href="/kontakt">Snakk med oss</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a> · <a href="/kundereisen">Kundereisen</a></span>
+    <span><a href="/demo">Demo</a> · <a href="/eksempelrapport">Eksempelrapport</a> · <a href="/kontakt">Snakk med oss</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a> · <a href="/kundereisen">Kundereisen</a></span>
     <span>DocrAI er under utvikling mot pilot. Kilder i demoen: Kartverket, åpen matrikkel (Geonorge) og Meteorologisk institutt.</span>
   </footer>
 
-</div>
+</main>
 
 <nav class="sticky-cta" aria-label="Hurtigvalg">
   <a class="p" href="/demo">Prøv demoen</a>
@@ -293,16 +299,15 @@
   "name": "DocrAI",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "iOS, Android, Web",
-  "description": "Gjør befaringsvideo og tale om til forsikringsklar skaderapport med årsak, akutt/gradvis-vurdering og Byggforsk-henvisninger. Takstpersonen kontrollerer og godkjenner.",
-  "inLanguage": "nb",
-  "offers": { "@type": "Offer", "price": "990", "priceCurrency": "NOK", "description": "Veiledende månedspris per takstperson i pilotfasen, uten bindingstid." }
+  "description": "Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner.",
+  "inLanguage": "nb"
 }
 </script>
 <script>
   try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/om', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}
 </script>
 <script type="application/ld+json">
-{ "@context":"https://schema.org","@type":"Organization","name":"DocrAI","url":"/om","logo":"/apple-touch-icon.png","email":"fdalen.97@gmail.com","description":"Gjør befaringsvideo og tale om til forsikringsklar skaderapport med årsak, akutt/gradvis-vurdering og Byggforsk-henvisninger."}
+{ "@context":"https://schema.org","@type":"Organization","name":"DocrAI","url":"/om","logo":"/apple-touch-icon.png","email":"fdalen.97@gmail.com","description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner."}
 </script>
 </body>
 </html>

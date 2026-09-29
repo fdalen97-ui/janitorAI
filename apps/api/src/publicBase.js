@@ -113,7 +113,7 @@ function absolutizeSeo(html, base, routePath) {
 }
 
 // Sitemap (SEO): kun de offentlige, indekserbare salgssidene. XML-escape ved sinken.
-const SITEMAP_PATHS = ["/om", "/demo", "/faq", "/personvern", "/vilkar", "/kontakt", "/kundereisen"];
+const SITEMAP_PATHS = ["/om", "/demo", "/eksempelrapport", "/faq", "/personvern", "/vilkar", "/kontakt", "/kundereisen"];
 function sitemapXml(base) {
   const safeBase = escapeHtml(base);
   const urls = SITEMAP_PATHS.map((p) => `  <url><loc>${safeBase}${p}</loc></url>`).join("\n");
