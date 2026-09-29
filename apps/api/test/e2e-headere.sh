@@ -225,6 +225,15 @@ for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk; do
   PAGE="$($CURL "$A$p")"
   check "UU $p: lang=nb, <main>, h1" "1|1|yes" "$(printf '%s' "$PAGE" | grep -c '<html lang="nb">')|$(printf '%s' "$PAGE" | grep -c '<main')|$([ "$(printf '%s' "$PAGE" | grep -c '<h1')" -ge 1 ] && echo yes || echo no)"
 done
+# Delingsforhåndsvisning (Messenger/Facebook): absolutt bilde med mål, så
+# forhåndsvisningen vises allerede første gang lenken deles.
+for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /kundereisen; do
+  PAGE="$($CURL "$A$p")"
+  check "deling $p: og:image absolutt + 1200×630 + alt + site_name" "1|1|1|1|1" \
+    "$(printf '%s' "$PAGE" | grep -c "<meta property=\"og:image\" content=\"http://127.0.0.1:$PORT_A/og-bilde.png?v=2\"")|$(printf '%s' "$PAGE" | grep -c 'og:image:width" content="1200"')|$(printf '%s' "$PAGE" | grep -c 'og:image:height" content="630"')|$(printf '%s' "$PAGE" | grep -c 'og:image:alt')|$(printf '%s' "$PAGE" | grep -c 'og:site_name')"
+done
+check "deling: /og-bilde.png?v=2 er PNG 1200×630" "200|image/png|1200x630" \
+  "$(status "$A/og-bilde.png?v=2")|$(header content-type "$A/og-bilde.png?v=2")|$($CURL "$A/og-bilde.png?v=2" | head -c 24 | tail -c 8 | od -An -tu4 --endian=big | awk '{print $1"x"$2}')"
 check "UU /demo: adressefeltet har label" "1" "$($CURL "$A/demo" | grep -c '<label for="adr"')"
 check "UU /kundereisen: h1 og fokusstil" "1|1" "$($CURL "$A/kundereisen" | grep -c '<h1 class="sr-only"')|$($CURL "$A/kundereisen" | grep -c 'focus-visible')"
 EKS="$($CURL "$A/eksempelrapport")"
