@@ -56,6 +56,28 @@ jobs:
           name: sbom
           path: sbom.json
 
+  engine:
+    # Motoren hadde en syntaksfeil på main i en uke uten at noe sa fra (merge
+    # 7e6ca83): e2e-rapport-motor.sh kjører mot en Node-stub, og enhetstestene
+    # importerer ikke main.py. Denne jobben kompilerer alle moduler, lar pyflakes
+    # finne navn som ikke er definert (udefinerte importer er like dødelige som
+    # syntaksfeil), og kjører enhetstestene. Ingen nettverk, ingen tunge
+    # avhengigheter: alt kjører på runnerens egen python3.
+    name: AI-motor — kompilering, pyflakes, enhetstester
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Kompilerer alle moduler
+        working-directory: ai-engine
+        run: python3 -m py_compile *.py
+      - name: pyflakes (udefinerte navn, ubrukte importer)
+        working-directory: ai-engine
+        run: python3 -m pip install --quiet --user pyflakes && python3 -m pyflakes *.py
+      - name: Enhetstester (sitatport, idempotens, promptblokker, signaler)
+        working-directory: ai-engine
+        run: python3 -m unittest -v test_byggforsk_index test_idempotency test_prompt_blocks test_prompt_signals
+
   mobile:
     name: App — typesjekk + lint
     runs-on: ubuntu-latest

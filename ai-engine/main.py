@@ -9,7 +9,11 @@ from google import genai
 from models import DamageAnalysis
 from google_api import connect_to_google_api_personal, upload_knowledge_base, share_doc_with_email
 from doc_engine import replace_text_in_doc, upload_and_insert_image, insert_photo_gallery
-from prompt import system_prompt, main_prompt, build_inspector_context, PROMPT_VERSION
+from prompt import (
+    PROMPT_VERSION,
+    resolve_enabled,
+    resolve_prompt,
+)
 from template_replacement import build_replacements
 import re
 from datetime import datetime, timezone
@@ -199,7 +203,10 @@ def _photo_manifest(photo_records: list) -> str:
     return "\n".join(lines)
 
 
-GEMINI_MODEL = "gemini-3.8-flash"
+# Én kilde for modellnavnet: både selve kallet og token_usage/prompt_meta leser
+# herfra. Prisen i apps/api/src/costTracking.js må finnes for samme streng,
+# ellers bokføres rapportkostnaden som NULL (docs/modellbytte-runbook.md).
+GEMINI_MODEL = "gemini-2.5-flash"
 
 
 def prepare_gemini_media(genai_client, video_path: str | None, project: dict | None):
@@ -255,8 +262,9 @@ def analyze_damage(
     create_report() med produksjonsstandarden, der `enabled=None`.
 
     `enabled` er blokk-id-er fra prompt.BLOCKS. Returnerer
-    (analysis, token_usage, prompt_meta), der prompt_meta beskriver nøyaktig
-    den prompten som faktisk ble sendt (sha256 over system + oppdrag + kontekst).
+    (analysis, token_usage, prompt_meta, citation_stats), der prompt_meta
+    beskriver nøyaktig den prompten som faktisk ble sendt (sha256 over system +
+    oppdrag + kontekst) og citation_stats er sitatportens telling for kjøringen.
     """
     photo_records = photo_records or []
     active = resolve_enabled(enabled)
@@ -290,21 +298,25 @@ def analyze_damage(
         if manifest:
             context_parts.append(manifest)
 
+    # Feiler Gemini-kallet eller sitatporten, skal de lokale fotokopiene ikke
+    # bli liggende i temp-katalogen. Kallerne rydder også (create_report og
+    # Labs-veien i server.py); cleanup_photo_files tåler å kjøres to ganger.
+    try:
         contents = (
             ([video_file] if video_file else [])
             + photo_files
             + knowledge_files
             + context_parts
-            + [main_prompt()]
+            + [resolved["mission"]]
         )
 
         print("🧠 Sending content to Gemini for analysis...")
         gemini_response = genai_client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=GEMINI_MODEL,
             contents=contents,
             config={"response_mime_type": "application/json",
                     "response_schema": DamageAnalysis,
-                    "system_instruction": system_prompt(),
+                    "system_instruction": resolved["system"],
                     "temperature": 0.0,    # Setter kreativiteten til null
                     "top_p": 0.1,         # Velger kun de mest sannsynlige ordene
                     "top_k": 1,           # Velger kun det aller beste ordet for hvert steg
@@ -347,7 +359,7 @@ def analyze_damage(
             f"{citation_stats['unparseable']} uten nummer"
         )
     except Exception:
-        _cleanup_photo_files(photo_records)
+        cleanup_photo_files(photo_records)
         raise
 
     # COGS: fang tokenforbruk fra rå-responsen før den forkastes, så backend kan
@@ -373,7 +385,7 @@ def analyze_damage(
     }
 
     del contents, knowledge_files, photo_files
-    return analysis, token_usage, prompt_meta
+    return analysis, token_usage, prompt_meta, citation_stats
 
 
 def create_report(video_path: str | None, master_id, output_folder, gemini_key, report_meta: dict | None = None, project: dict | None = None, tester_email: str | None = None, report_attempt_id: str | None = None):
@@ -433,7 +445,7 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
     # valideringen), skal de lokale fotokopiene ikke bli liggende igjen i
     # temp-katalogen — unntaket propagerer ellers uendret som før.
     try:
-        analysis, token_usage, _prompt_meta = analyze_damage(
+        analysis, token_usage, _prompt_meta, citation_stats = analyze_damage(
             genai_client,
             project,
             report_meta,
@@ -466,7 +478,7 @@ def create_report(video_path: str | None, master_id, output_folder, gemini_key, 
     # Meldingen er statisk med hensikt: leverandørens unntakstekst skal aldri
     # nå klienten.
     if analysis is None:
-        _cleanup_photo_files(photo_records)
+        cleanup_photo_files(photo_records)
         raise ReportPipelineError(
             "Analysen kom tom tilbake fra modellen (svaret matchet ikke rapportskjemaet). Prøv igjen.",
             token_usage=token_usage,
