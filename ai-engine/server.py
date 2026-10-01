@@ -270,7 +270,7 @@ def run_doc_free_analysis(fastapi_req: Request, request: AnalyzeRequest):
         video_file, photo_records = prepare_gemini_media(
             genai_client, video_path, request.project
         )
-        analysis, token_usage, prompt_meta = analyze_damage(
+        analysis, token_usage, prompt_meta, citation_stats = analyze_damage(
             genai_client,
             request.project,
             request.report_meta,
@@ -295,6 +295,9 @@ def run_doc_free_analysis(fastapi_req: Request, request: AnalyzeRequest):
         "prompt_sha256": prompt_meta["sha256"],
         "blocks_enabled": prompt_meta["blocks_enabled"],
         "model": prompt_meta["model"],
+        # Samme telling som /api/report bokfører i report_generations, slik at
+        # Labs-varianter kan sammenlignes på sitatporten også.
+        "citation_stats": citation_stats,
     }
     if request.include_prompt:
         payload["resolved_prompt"] = {
@@ -311,7 +314,7 @@ def run_analysis(fastapi_req: Request, request: ReportRequest):
     server_token = os.getenv("TESTER_TOKEN")
 
     if client_token != server_token:
-        print(f"🚫 Rejected request: wrong token")
+        print("🚫 Rejected request: wrong token")
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     # Korrelasjon med API-loggen: backend sender sin request-id videre hit.
