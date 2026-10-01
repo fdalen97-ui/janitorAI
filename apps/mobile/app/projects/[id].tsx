@@ -1512,10 +1512,14 @@ export default function ProjectDetailScreen() {
           ...(n.text ? { text: n.text } : {}),
           ...(n.transcription ? { transcription: n.transcription } : {}),
           ...(n.roomId ? { roomId: n.roomId } : {}),
+          // Serveren bruker dette snapshotet som rapportgrunnlag og tar bare med
+          // bilder den finner igjen på remoteId (reportService.projectContext);
+          // den signerer selv URL-en til motoren. Et bilde som ennå ikke er
+          // lastet opp kan ikke analyseres, så det utelates her.
           photos: (n.photos || [])
-            .filter(p => p.remoteId || p.uri)
+            .filter(p => p.remoteId)
             .map(p => ({
-              uri: p.remoteId ?? p.uri,
+              remoteId: p.remoteId,
               ...(p.caption ? { caption: p.caption } : {}),
             })),
         }));

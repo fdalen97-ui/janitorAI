@@ -11,6 +11,9 @@
 #   - apiBase: medie-URL følger API_BASE_URL, ikke PUBLIC_BASE_URL
 #   - hovedboken lagrer prompt_version og sitatportens telling per kjøring
 #   - video som testeren ikke eier gir 404
+#   - appens prosjektsnapshot (`project` i kroppen) tar bildene med til motoren
+#     som signerte URL-er (regresjon: appen sendte {uri} uten remoteId, og
+#     serveren krever remoteId — ingen bilder nådde motoren)
 # Porter kan overstyres (PGPORT/PORT_A/PORT_B/PORT_STUB) for parallelle kjøringer.
 # Standardportene ligger under Linux' dynamiske portområde (32768–60999), så en
 # utgående tilkobling fra et tidligere CI-steg ikke kan ha tatt dem (CI-feil
@@ -162,6 +165,23 @@ curl -s -m 30 -o /dev/null -X POST "$B/report/google-doc" -H "x-tester-token: $T
   -d "{\"video_filename\":\"$MEDIA_ID\",\"project_id\":\"r2\",\"report_attempt_id\":\"e2e-b-1\"}"
 check "apiBase: medie-URL til motor følger API_BASE_URL, ikke PUBLIC_BASE_URL" "https://api-b.test/api/media/$MEDIA_ID" \
   "$(jq -r '.video_url // empty' "$WORK/engine-body.json" 2>/dev/null | sed 's/?.*//')"
+
+# ── Appens snapshot: bilder med remoteId når motoren som signerte URL-er ─────
+# Kroppen speiler det appen sender i dag ([id].tsx: photos: [{remoteId, caption}]).
+# Serveren skal bruke snapshotet, slå opp eierskap på remoteId, signere URL-en
+# selv og legge bildeteksten ved. Et bilde uten remoteId skal utelates.
+rm -f "$WORK/engine-body.json"
+STATUS=$(curl -s -m 30 -o /dev/null -w '%{http_code}' -X POST "$A/report/google-doc" -H "x-tester-token: $TOKEN" \
+  -H 'Content-Type: application/json' -H "Host: $EVIL_HOST" \
+  -d "{\"project_id\":\"r1\",\"report_attempt_id\":\"e2e-a-foto\",\"project\":{\"id\":\"r1\",\"name\":\"Øvingsveien 12, Hamar\",\"rooms\":[{\"id\":\"rom1\",\"name\":\"Kjeller\"}],\"notes\":[{\"roomId\":\"rom1\",\"text\":\"Fuktskjold nederst på vegg\",\"photos\":[{\"remoteId\":\"$MEDIA_ID\",\"caption\":\"Saltutslag ved gulv\"},{\"caption\":\"ikke lastet opp ennå\"}]}]}}")
+check "snapshot: rapport svarer 200" "200" "$STATUS"
+FOTO_URL="$(jq -r '.project.notes[0].photos[0].uri // empty' "$WORK/engine-body.json" 2>/dev/null)"
+check "snapshot: bildet når motoren som signert URL på fast vert" "$FALLBACK/api/media/$MEDIA_ID" "$(printf '%s' "$FOTO_URL" | sed 's/?.*//')"
+check "snapshot: bilde-URL er signert (sig= og exp=)" "yes" \
+  "$(printf '%s' "$FOTO_URL" | grep -q 'sig=' && printf '%s' "$FOTO_URL" | grep -q 'exp=' && echo yes || echo no)"
+check "snapshot: bildetekst og romnavn følger med" "Saltutslag ved gulv|Kjeller" \
+  "$(jq -r '(.project.notes[0].photos[0].caption // "")+"|"+(.project.notes[0].room // "")' "$WORK/engine-body.json" 2>/dev/null)"
+check "snapshot: bilde uten remoteId utelates" "1" "$(jq -r '.project.notes[0].photos | length' "$WORK/engine-body.json" 2>/dev/null)"
 
 # ── Eierskap: en video testeren ikke eier gir 404, og motoren kalles ikke ────
 rm -f "$WORK/engine-body.json"

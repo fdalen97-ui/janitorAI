@@ -1,0 +1,1186 @@
+<title>Produktmanus DocrAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: ett manus. Scenene står i en lesekolonne på ~70 tegn (manusformat: sceneoverskrift i
+   skrivemaskinskrift, handling i brødtekst). Produktflaten, funnene og veikartet bruker full bredde. */
+:root {
+  --bg: #F1F3F3; --fg: #1B262B; --muted: #566670;
+  --surface: #FFFFFF; --surface-2: #E6EBEB; --border: rgba(27, 38, 43, .16);
+  --accent: #23545C; --accent-strong: #1A4148; --accent-soft: #DCE7E9;
+  --copper: #9F5A2C; --copper-soft: #F2E5DA;
+  --danger: #A6453A; --danger-soft: #F5E2DF;
+  --warn: #85600F; --warn-soft: #F4EACF;
+  --ok: #2F6A46; --ok-soft: #DEEDE3;
+  --mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+  --sans: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11181B; --fg: #E4EAEC; --muted: #9AA8AE;
+    --surface: #1A2327; --surface-2: #222D32; --border: rgba(228, 234, 236, .16);
+    --accent: #8FC2CB; --accent-strong: #B3D8DE; --accent-soft: #1E3238;
+    --copper: #C98B5A; --copper-soft: #3A2A1C;
+    --danger: #D3766B; --danger-soft: #3B2421;
+    --warn: #D9A64A; --warn-soft: #3A3017;
+    --ok: #7FBF98; --ok-soft: #1B3226;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11181B; --fg: #E4EAEC; --muted: #9AA8AE;
+  --surface: #1A2327; --surface-2: #222D32; --border: rgba(228, 234, 236, .16);
+  --accent: #8FC2CB; --accent-strong: #B3D8DE; --accent-soft: #1E3238;
+  --copper: #C98B5A; --copper-soft: #3A2A1C;
+  --danger: #D3766B; --danger-soft: #3B2421;
+  --warn: #D9A64A; --warn-soft: #3A3017;
+  --ok: #7FBF98; --ok-soft: #1B3226;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 17px; line-height: 1.55; margin: 0; }
+.wrap { max-width: 1120px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); padding-block: 1.5rem 4rem; }
+h1, h2, h3, h4 { text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: clamp(2.1rem, 5vw, 3.3rem); font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+h3 { font-size: 1.3rem; font-weight: 700; }
+h4 { font-size: .8rem; font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+p { margin: 0; }
+p + p { margin-top: .8em; }
+ul, ol { margin: 0; padding-left: 1.2em; }
+li + li { margin-top: .35em; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--accent-strong); }
+code { font-family: var(--mono); font-size: .82em; color: var(--accent-strong); overflow-wrap: anywhere; }
+strong { font-weight: 700; }
+em { font-style: italic; }
+.eyebrow { font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.muted { color: var(--muted); }
+.small { font-size: .92rem; }
+.nowrap { white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Topp */
+.masthead { display: grid; gap: 1.1rem; padding-block: 1rem 2rem; border-bottom: 1px solid var(--border); }
+.lede { font-size: 1.22rem; max-width: 62ch; }
+.chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.chip { font-family: var(--mono); font-size: .76rem; padding: .25rem .6rem; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); background: var(--surface); }
+.summary { display: grid; gap: .9rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.3rem 1.4rem; max-width: 72ch; }
+.summary ol { padding-left: 1.3em; }
+.summary li { font-size: 1.05rem; }
+
+/* Navigasjon */
+.toc { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--border); margin-inline: calc(-1 * clamp(16px, 4vw, 40px)); padding-inline: clamp(16px, 4vw, 40px); }
+.toc ul { list-style: none; padding: 0; margin: 0; display: flex; gap: .2rem; overflow-x: auto; scrollbar-width: none; }
+.toc ul::-webkit-scrollbar { display: none; }
+.toc li { margin: 0; flex: none; }
+.toc a { display: block; padding: .8rem .7rem; font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; text-decoration: none; color: var(--muted); border-bottom: 2px solid transparent; }
+.toc a.active, .toc a:hover { color: var(--fg); border-bottom-color: var(--accent); }
+.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+section { padding-block: 3rem 1rem; scroll-margin-top: 3.6rem; }
+.sec-head { display: grid; gap: .5rem; margin-bottom: 1.5rem; max-width: 72ch; }
+.sec-head p { font-size: 1.08rem; }
+
+/* Signaler */
+.signals { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.signal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; display: grid; gap: .5rem; align-content: start; }
+.signal .who { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.signal blockquote { margin: 0; font-style: italic; }
+.signal .verdict { font-size: .95rem; }
+.callout { margin-top: 1.5rem; border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.4rem; background: var(--surface); display: grid; gap: .6rem; }
+.callout.danger { background: var(--danger-soft); border-color: transparent; }
+.callout.danger h4 { color: var(--danger); }
+.callout.accent { background: var(--accent-soft); border-color: transparent; }
+.callout.accent h4 { color: var(--accent-strong); }
+
+/* Produktflaten */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; display: grid; gap: .7rem; align-content: start; min-width: 0; }
+.card header { display: flex; justify-content: space-between; align-items: start; gap: .6rem; }
+.card h3 { font-size: 1.1rem; }
+.card ul { font-size: .95rem; }
+.pill { display: inline-block; font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; padding: .18rem .55rem; border-radius: 999px; white-space: nowrap; font-weight: 700; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.delvis { background: var(--warn-soft); color: var(--warn); }
+.pill.mangler { background: var(--surface-2); color: var(--muted); }
+.pill.kritisk { background: var(--danger-soft); color: var(--danger); }
+.pill.hoy { background: var(--warn-soft); color: var(--warn); }
+.pill.middels { background: var(--surface-2); color: var(--muted); }
+.pill.port { background: var(--accent-soft); color: var(--accent-strong); }
+.pill.kort { background: var(--accent-soft); color: var(--accent-strong); }
+.pill.lang { background: var(--surface-2); color: var(--muted); }
+.kv { display: grid; gap: .3rem; font-size: .95rem; }
+.kv b { font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+
+/* Manus */
+.manus { display: grid; gap: 1.4rem; max-width: 76ch; }
+.scene { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem clamp(1rem, 3vw, 1.8rem) 1.5rem; display: grid; gap: 1rem; min-width: 0; }
+.slug { font-family: var(--mono); font-size: .86rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.slug b { color: var(--fg); }
+.action { font-size: 1.08rem; max-width: 65ch; }
+.beats { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.beat { display: grid; gap: .5rem; align-content: start; padding: .9rem 1rem; border-radius: 10px; background: var(--surface-2); min-width: 0; }
+.beat ul { font-size: .95rem; padding-left: 1.1em; }
+.beat.kort { background: var(--accent-soft); }
+.beat.kort h4 { color: var(--accent-strong); }
+.beat.lang { background: var(--surface); border: 1px solid var(--border); }
+.wenn { font-size: .95rem; padding-top: .9rem; border-top: 1px dashed var(--border); }
+.wenn b { font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--copper); margin-right: .4rem; }
+@media (max-width: 640px) { .beats { grid-template-columns: 1fr; } }
+
+/* Funn */
+.filter { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+.filter button { font: inherit; font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; padding: .45rem .8rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer; min-height: 40px; }
+.filter button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.filter button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: .95rem; }
+th, td { text-align: left; vertical-align: top; padding: .75rem .9rem; border-top: 1px solid var(--border); }
+thead th { border-top: 0; font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; background: var(--surface-2); }
+td.n { font-family: var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; width: 2.5rem; }
+td code { display: block; margin-top: .2rem; }
+tr[hidden] { display: none; }
+.count { font-family: var(--mono); font-size: .8rem; color: var(--muted); margin-top: .6rem; }
+
+/* Wenn */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+.list { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; display: grid; gap: .8rem; min-width: 0; }
+.list ul { font-size: .97rem; }
+.list li small { display: block; color: var(--muted); font-size: .85rem; }
+.fact { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .8rem 1.2rem; font-size: .95rem; }
+.fact div { display: grid; gap: .15rem; }
+.fact b { font-family: var(--mono); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+
+/* Veikart */
+.roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+@media (max-width: 900px) { .roadmap { grid-template-columns: 1fr; } }
+.col { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; display: grid; gap: .9rem; align-content: start; min-width: 0; }
+.col header { display: grid; gap: .3rem; }
+.col .when { font-family: var(--mono); font-size: .78rem; color: var(--muted); }
+.items { list-style: none; padding: 0; display: grid; gap: .8rem; }
+.items li { padding: .8rem .9rem; border-radius: 10px; background: var(--surface-2); display: grid; gap: .3rem; font-size: .95rem; }
+.items li .t { font-weight: 700; }
+.items li .why { color: var(--muted); font-size: .9rem; }
+.items li .tags { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .2rem; }
+.no { margin-top: 1rem; }
+.no .items li { background: var(--surface); border: 1px solid var(--border); }
+
+/* Sigurd */
+.qs { display: grid; gap: 1rem; max-width: 76ch; }
+.qgroup { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.3rem; display: grid; gap: .6rem; }
+.qgroup ol { padding-left: 1.3em; }
+.qgroup li { margin-top: .5rem; }
+.qgroup li small { display: block; color: var(--muted); font-size: .88rem; }
+.copybar { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.btn { font: inherit; font-weight: 600; padding: .6rem 1rem; min-height: 44px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; }
+.btn:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+.btn:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+.copystatus { font-family: var(--mono); font-size: .8rem; color: var(--muted); min-height: 1.2em; }
+
+/* 14 dager */
+.plan td:first-child { white-space: nowrap; font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+
+footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: grid; gap: .8rem; max-width: 76ch; font-size: .95rem; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <div class="eyebrow">Internt arbeidsdokument · 1. oktober 2026 · utkast 1</div>
+  <h1>Produktmanus DocrAI</h1>
+  <p class="lede">Produktreisen scene for scene: slik den er i koden i dag, hvor den skurrer for takstpersonen, og hva vi legger inn på kort og lang sikt. Skrevet etter at Wenn Property kom inn i Ocabs testgruppe.</p>
+  <div class="chips">
+    <span class="chip">Kode @ 06d0caf (main 3301451)</span>
+    <span class="chip">Pilotlogg Ocab, aug.</span>
+    <span class="chip">Wenns hjelpesenter, juli–aug. 2026</span>
+    <span class="chip">Teamchat 30.09</span>
+    <span class="chip">Produksjon sjekket 01.10</span>
+  </div>
+  <div class="summary">
+    <h4>Tre setninger</h4>
+    <ol>
+      <li><strong>Markedet er bevist – av konkurrenten, inne hos pilotkunden vår.</strong> Ocab betaler allerede per prosjekt for et digitalt befaringsverktøy, og ledelsen tester om 3D gir verdi. Spørsmålet de stiller er det samme vi trenger svar på.</li>
+      <li><strong>Produktløftet vårt finnes i koden, men vises ikke der det teller.</strong> Årsak, akutt/gradvis og Byggforsk-referanser produseres av motoren, men mottakeren ser verken akutt/gradvis eller referansene, og takstpersonen får ikke se bevisene stempelet bygger på. I tillegg kompilerer ikke motoren på <code>main</code>, og bilder fra appen når aldri fram til den.</li>
+      <li><strong>Kort sikt: rett løftet og gjør det synlig. Lang sikt: bare på evidens fra Ocab.</strong> Sigurd sitter på den evidensen nå. Spørsmålslista nederst er laget for ham.</li>
+    </ol>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Innhold">
+  <ul>
+    <li><a href="#hvorfor">Hvorfor nå</a></li>
+    <li><a href="#flaten">Produktflaten</a></li>
+    <li><a href="#manus">Manuset</a></li>
+    <li><a href="#funn">Funn</a></li>
+    <li><a href="#wenn">Lært av Wenn</a></li>
+    <li><a href="#veikart">Veikart</a></li>
+    <li><a href="#sigurd">Spørsmål til Sigurd</a></li>
+    <li><a href="#plan">Neste 14 dager</a></li>
+  </ul>
+</nav>
+
+<!-- ───────────────────────────── HVORFOR NÅ ───────────────────────────── -->
+<section id="hvorfor">
+  <div class="sec-head">
+    <div class="eyebrow">Utgangspunkt</div>
+    <h2>Hvorfor nå</h2>
+    <p>Teamchatten 30. september ga tre signaler som endrer prioriteringen. Alle er gjengitt slik de ble sagt; det som er annenhånds er merket.</p>
+  </div>
+  <div class="signals">
+    <article class="signal">
+      <div class="who">Sigurd · Ocab · onsdag 16:44</div>
+      <blockquote>«Har fått full testtilgang til WP befaringsverktøyet. Sitter nå i testgruppa og skal rapportere om nytten til ledelsen.»</blockquote>
+      <p class="verdict"><strong>Betyr:</strong> Wenn er ikke lenger en aktør på et kart. De er inne hos pilotkunden vår, og den som skal vurdere dem for Ocab er den samme personen som har gitt oss nesten all brukerinnsikt.</p>
+    </article>
+    <article class="signal">
+      <div class="who">Sigurd · annenhånds</div>
+      <blockquote>«Sånn jeg skjønte det betaler Ocab 300 kr pr prosjekt i appen, hvis 3D scanning benyttes.»</blockquote>
+      <p class="verdict"><strong>Betyr:</strong> Et prisanker per sak finnes i markedet. Ikke verifisert; Sigurd tar forbehold selv. Men det er første gang vi hører hva en saneringsbedrift faktisk betaler per prosjekt.</p>
+    </article>
+    <article class="signal">
+      <div class="who">Sigurd · vurdering</div>
+      <blockquote>«Gode muligheter for å blindside Wenn, ved å fokusere på rapportkvalitet, og bruk av video/AI-briller som befaringsverktøy. LiDAR-scanningen kan holdes enkel, men nøyaktig.»</blockquote>
+      <p class="verdict"><strong>Betyr:</strong> Rapportkvalitet er fagpersonens eget valg av slagmark, og det stemmer med alt repoet sier om differensiering. Video og briller er derimot uten brukersignal: pilotsakene var kun foto, og ordet «briller» finnes ikke i dokumentasjonen vår.</p>
+    </article>
+    <article class="signal">
+      <div class="who">Sigurd · forslag</div>
+      <blockquote>«Kunne vært interessant å prate med in4mo direkte og avklare hvilke API vi evt kan koble oss på.»</blockquote>
+      <p class="verdict"><strong>Betyr:</strong> Riktig retning, og ingen kodejobb ennå. Repoet har In4mo-eksport som første bygg etter pilot (B1), men ingen API er dokumentert. En samtale koster ingenting og avgjør om B1 er mulig.</p>
+    </article>
+    <article class="signal">
+      <div class="who">Fredrik</div>
+      <blockquote>«Vi har vel fremdeles som hovedhypotese at vår løsning leverer mer enn deres. […] markedet er hvertfall modent for vårt produkt.»</blockquote>
+      <p class="verdict"><strong>Betyr:</strong> Begge deler er riktig lest. Men «leverer mer» må være målbart i Ocabs saker innen Port 2, ellers er det en følelse mot en faktura på 300 kr.</p>
+    </article>
+    <article class="signal">
+      <div class="who">William Tobias · Anders</div>
+      <blockquote>«Bare å arbeide raskt da.» «Her handler det om å jobbe raskt.»</blockquote>
+      <p class="verdict"><strong>Betyr:</strong> Fart ja, men i riktig rekkefølge. Det raskeste vi kan gjøre er å rette det som bryter løftet, ikke bygge noe nytt.</p>
+    </article>
+  </div>
+
+  <div class="callout danger">
+    <h4>Det ubehagelige først</h4>
+    <p>«Vi leverer mer enn Wenn» er en hypotese koden ikke dekker ennå. Tre ting må være sant før vi kan konkurrere på rapportkvalitet, og ingen av dem er det i dag:</p>
+    <ul>
+      <li>Motoren må kjøre. <code>ai-engine/main.py</code> har en syntaksfeil på <code>main</code> (linje 349, etter merge 7e6ca83 den 24.09). Produksjonsmotoren svarer fortsatt (<code>/health</code> 200, promptversjon 2026‑09‑14.1) fordi forrige vellykkede deploy lever, men neste deploy feiler. CI har ingen Python-jobb.</li>
+      <li>Bevisene må nå motoren. Appen sender bildene uten <code>remoteId</code> (<code>apps/mobile/app/projects/[id].tsx:1515‑1520</code>), og serveren krever nettopp det (<code>apps/api/src/reportService.js:181</code>). Resultat: i dag analyseres saker fra appen på tekst og én video, aldri på bildene.</li>
+      <li>Det vi selger må vises. Akutt/gradvis og kildekategori ligger i delingspayloaden, men siden mottakeren ser viser dem ikke (<code>share-page.html:253‑267</code>). Byggforsk-referansene når ingen bruker i det hele tatt.</li>
+    </ul>
+  </div>
+  <div class="callout accent">
+    <h4>Det gode</h4>
+    <p>Alt dette er rettbart på dager, ikke måneder, fordi dataene allerede finnes i systemet. Og Ocab har nettopp fortalt oss, via Wenn, at de er villige til å betale per sak for et verktøy i felt. Vårt verktøy har noe deres ikke har: en årsaksvurdering, en godkjenningsport og en bevislenke. Det må bare bli synlig.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────────── PRODUKTFLATEN ───────────────────────────── -->
+<section id="flaten">
+  <div class="sec-head">
+    <div class="eyebrow">Kart</div>
+    <h2>Produktflaten i dag</h2>
+    <p>Alle flatene en sak berører, med det koden faktisk gjør. «Finnes» betyr at det er i koden på <code>main</code>; «Delvis» at det finnes, men med et hull som endrer verdien; «Mangler» at det ikke er bygget.</p>
+  </div>
+  <div class="grid">
+    <article class="card">
+      <header><h3>Felt – appen</h3><span class="pill ok">Finnes</span></header>
+      <p class="small muted">app.docrai.io, Expo-webeksport. Det testerne bruker i dag («PWA-en», pilotloggen).</p>
+      <div class="kv">
+        <b>Finnes</b>
+        <ul>
+          <li>Prosjektveiviser med Kartverket-adresse, gnr/bnr og koordinater <code>index.tsx:352‑405</code></li>
+          <li>Rom med sjekkliste per romtype, «Fullfør rom» <code>rooms.ts:50‑123</code></li>
+          <li>Lydnotat, bilde, video; 56 px knapper for hansker; autolagring og synk <code>projectSync.ts</code></li>
+          <li>Saksunderlag fra fem åpne tjenester (adresse, bygningspunkt, høyde, vær, kart) <code>underlag.js</code></li>
+        </ul>
+        <b>Mangler</b>
+        <ul>
+          <li>Innstillinger, varsler, avspilling av video, zoom på bilder</li>
+          <li>Posisjon på native: <code>expo-location</code> er ikke installert</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Motor – analysen</h3><span class="pill kritisk">Kompilerer ikke</span></header>
+      <p class="small muted">ai-engine, FastAPI + Gemini 2.5 Flash, temperatur 0, fast skjema.</p>
+      <div class="kv">
+        <b>Finnes</b>
+        <ul>
+          <li><code>DamageAnalysis</code>: kildekategori (fem kilder + USIKKER), årsak, akutt/gradvis, bevispunkter med tidsstempel og bildenummer, beboelig, omfang, tiltak <code>models.py</code></li>
+          <li>Sitatport: foreslåtte Byggforsk-referanser kontrolleres mot et register på 33 bladnummer; resten forkastes <code>main.py:318‑348</code>, <code>byggforsk_index.py</code></li>
+          <li>Prompt med differensialdiagnose og «hypotese ≠ konklusjon» etter Midtgjerdinga <code>prompt.py:387‑433</code></li>
+          <li>Google Doc fra mal, idempotens per forsøk</li>
+        </ul>
+        <b>Hull</b>
+        <ul>
+          <li>Syntaksfeil på <code>main</code> <code>main.py:349</code>; i tillegg manglende importer og et omdøpt funksjonsnavn</li>
+          <li>Modellen merkes «gemini‑3.8‑flash» mens kallet går til 2.5 → kostnad logges som NULL <code>main.py:202/303</code></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Kontroll – rapportfanen</h3><span class="pill delvis">Delvis</span></header>
+      <p class="small muted">Der takstpersonen leser og retter før stempel.</p>
+      <div class="kv">
+        <b>Finnes</b>
+        <ul>
+          <li>Åtte felt redigerbare, lagres når du forlater feltet; «endret»-merke og telling <code>[id].tsx:2453‑2510</code></li>
+          <li>AI-utkastet lagres atskilt fra endelig tekst (<code>reportDraft</code> / <code>reportFinal</code>)</li>
+          <li>Tid fra befaring til godkjent måles <code>metrics.ts</code></li>
+        </ul>
+        <b>Hull</b>
+        <ul>
+          <li>Bevispunkter, Byggforsk-referanser og beboelig forsvinner i konverteringen <code>reportVersions.ts:14‑31</code></li>
+          <li>Kildekategori og tidsforløp vises som rå koder («NEDBØR», «GRADVIS») i fritekstfelt</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Godkjenning – stempelet</h3><span class="pill delvis">Delvis</span></header>
+      <p class="small muted">Det eneste i produktet Wenn ikke har.</p>
+      <div class="kv">
+        <b>Finnes</b>
+        <ul>
+          <li>Stempel med navn og tidspunkt; bekreftelse før godkjenning og tilbaketrekking <code>[id].tsx:1925‑1976</code></li>
+          <li>Serveren nekter deling uten stempel (409) og slukker lenken ved tilbaketrekking (410) <code>share.js:172‑180, 298‑308</code></li>
+        </ul>
+        <b>Hull</b>
+        <ul>
+          <li>Navnet er en klientstreng fra lokal profil; ikke bundet til tilgangskoden</li>
+          <li>Serveren nuller ikke stempelet når rapporten redigeres eller genereres på nytt; bare appen gjør det <code>reportService.js:325‑349</code>, <code>projects.js:215‑290</code></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Deling – lenke og PIN</h3><span class="pill delvis">Delvis</span></header>
+      <div class="kv">
+        <b>Finnes</b>
+        <ul>
+          <li>16 tilfeldige byte i lenken, 6-sifret PIN lagret som scrypt-hash, 5 forsøk per 15 min, 30 dager (maks 90) <code>shareUtils.js</code></li>
+          <li>Visningstoken 2 timer; samme 410 for ukjent, trukket og utløpt lenke</li>
+        </ul>
+        <b>Hull</b>
+        <ul>
+          <li>Appen har ingen liste over lenker og kan ikke trekke dem tilbake, selv om API-et kan <code>share.js:205‑221</code></li>
+          <li>PIN vises én gang og lever bare i skjermminnet <code>[id].tsx:205</code></li>
+          <li>Lenken peker på <code>janitorai-backend.onrender.com</code>, ikke docrai.io <code>api.ts:19‑36</code></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Mottaker – delingssiden</h3><span class="pill delvis">Delvis</span></header>
+      <p class="small muted">Det forsikringsselskapet ser.</p>
+      <div class="kv">
+        <b>Viser</b>
+        <ul>
+          <li>Stempel «Faglig vurdert og godkjent av …», saksfakta, skadested, kilde, årsak, omfang, tiltak, beboelig</li>
+          <li>Antall felt takstpersonen korrigerte fra AI-utkastet</li>
+          <li>Bevis med opptaksdato, posisjon og full SHA‑256; notater med lydavspilling <code>share-page.html:184‑318</code></li>
+        </ul>
+        <b>Viser ikke</b>
+        <ul>
+          <li>Akutt/gradvis og kildekategori (ligger i payloaden) <code>share.js:111‑121</code></li>
+          <li>Byggforsk-referanser (ikke i payloaden)</li>
+          <li>Sender hele <code>reportMeta</code>, også felt siden aldri viser: telefon og e-post til medvirkende, verdianslag <code>share.js:129</code></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Eksport – PDF og Word</h3><span class="pill delvis">Delvis</span></header>
+      <div class="kv">
+        <b>Finnes</b>
+        <ul><li>Nedlasting via Drive-eksport av Google-dokumentet <code>index.js:782‑845</code></li></ul>
+        <b>Hull</b>
+        <ul>
+          <li>Fila er AI-utkastet slik det ble fylt inn ved generering; takstpersonens rettelser og stempelet er ikke med</li>
+          <li>Kan lastes ned før godkjenning (bevisst «ikke nå» 28.09). Bør revurderes før Port 2, se scene 9</li>
+          <li>På native åpnes lenken uten tilgangskode → 401 <code>[id].tsx:1466‑1467</code></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Salg og opplæring</h3><span class="pill ok">Finnes</span></header>
+      <div class="kv">
+        <b>Finnes</b>
+        <ul>
+          <li>/om /demo /eksempelrapport /faq /kundereisen, regel 6-ryddet 29.09, grep-sjekket i CI</li>
+          <li>Øvingssak med plantet feil og fuktmålerregistrering, som klikkbar prototype</li>
+        </ul>
+        <b>Hull</b>
+        <ul>
+          <li>docrai.io peker fortsatt på den gamle forklaringssiden (DNS-bytte er din oppgave)</li>
+          <li>Øvingssaken er ikke testet med noen; Guide-fanen i appen beskriver en flyt uten godkjenning <code>explore.tsx:164‑175</code></li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="card">
+      <header><h3>Ikke bygget</h3><span class="pill mangler">Mangler</span></header>
+      <ul>
+        <li>Fuktmåling som strukturerte data (bare «si verdien høyt i opptaket»)</li>
+        <li>LiDAR / RoomPlan / planskisse</li>
+        <li>In4mo- eller MEPS-eksport; noen strukturert eksport i det hele tatt</li>
+        <li>Versjonshistorikk for godkjente rapporter; frosset kopi av det som ble delt</li>
+        <li>Innlogging per person; varsler; flere språk</li>
+        <li>Databehandleravtale og EU-region (sidene sier det ærlig)</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ───────────────────────────── MANUSET ───────────────────────────── -->
+<section id="manus">
+  <div class="sec-head">
+    <div class="eyebrow">Manus · ti scener</div>
+    <h2>Produktreisen scene for scene</h2>
+    <p>Kari er takstperson hos Ocab. Saken er oppdiktet (Solbergliveien 8, kjeller), det samme stedet som i kundereisen. Hver scene har fire slag: slik det er i koden i dag, der det skurrer, hva vi gjør på kort sikt, og hva som hører til lang sikt. Linja nederst sier hva Wenn gjør på samme punkt, hentet fra deres eget hjelpesenter.</p>
+  </div>
+
+  <div class="manus">
+
+  <article class="scene" id="scene-1">
+    <div class="slug"><b>Scene 1</b> · INT. BILEN UTENFOR OCAB – 07:40</div>
+    <h3>Oppdraget kommer inn</h3>
+    <p class="action">Kari får saken på telefonen: vannskade i kjeller, Solbergliveien 8. Hun åpner app.docrai.io, trykker «Nytt prosjekt», begynner å skrive adressen. Kartverket foreslår; gnr/bnr fylles ut av seg selv.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Veiviser i tre steg, adressesøk etter fire tegn, gnr/bnr og koordinater lagres <code>index.tsx:576‑853</code></li>
+          <li>Feltet «Takstperson» står tomt selv om profilen har navn <code>index.tsx:680‑685</code></li>
+          <li>Steg 2 «Legg til medier» lagrer bare filnavn, aldri filene <code>index.tsx:746‑748</code></li>
+          <li>Prosjektet åpnes ikke etter opprettelse; Kari må finne det i lista</li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill kritisk">Kritisk</span> Hjem leser prosjektlista én gang ved oppstart og skriver <em>hele</em> lista ved opprettelse. Har Kari lagt inn notater i et annet prosjekt som ikke rakk å synke, kan de overskrives <code>index.tsx:223‑298, 443</code> → <code>projectsStorage.ts:34</code>. Kodelest, ikke reprodusert i kjøring.</li>
+          <li>Steg 2 er en blindvei og bruker et web-element på native</li>
+          <li>Ingen lasteindikator på Hjem; tellere er utdaterte når du kommer tilbake</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Les lagret liste på nytt rett før skriving, eller la én kilde eie lagringen</li>
+          <li>Fjern steg 2; to steg holder</li>
+          <li>Åpne prosjektet etter opprettelse; forhåndsutfyll takstperson fra profil</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Oppdrag inn med saksnummer fra forsikringsselskapets system, når In4mo-spiken har vist om det går</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> «Start ny befaring» er ett trykk; adressen kan vente, skanningen kan begynne med en gang. Vi bør la Kari komme til fangst på to trykk.</p>
+  </article>
+
+  <article class="scene" id="scene-2">
+    <div class="slug"><b>Scene 2</b> · INT. BILEN – 07:52</div>
+    <h3>Før avreise</h3>
+    <p class="action">Saksunderlaget kommer opp: kart med nål, kommune, bygningstype fra matrikkelen, høyde over havet, været neste døgn. Nedbøren rundt skadedatoen mangler; den krever en nøkkel.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Fem åpne tjenester uten avtale: adressesøk, bygningspunkt, høyde, værvarsel, karttiles <code>underlag.js:15‑277, 330‑358</code></li>
+          <li>Historisk nedbør (Frost) bare med <code>FROST_CLIENT_ID</code>, og bare om skadedato er skrevet ÅÅÅÅ‑MM‑DD <code>[id].tsx:1789</code></li>
+          <li>Byggeår finnes ikke i den åpne matrikkelen; må tastes</li>
+          <li>Ingenting av underlaget sendes til motoren <code>reportService.js:176‑202</code></li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li>Underlaget er pynt for analysen. Prompten har allerede blokker for byggeår og sesong <code>prompt.py:79‑142</code>, men får aldri dataene.</li>
+          <li>Skadedato og befaringsdato er fritekst i to ulike formater <code>ReportDetailsSection.tsx:120‑121</code></li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Datovelger på begge datoer (<code>DateField</code> finnes allerede)</li>
+          <li>Send byggeår, nedbør og terreng som signaler til motoren; blokkene venter på dem</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Boligmappa med samtykke (plantegning, historikk). Står som «neste» i kundereisen; ikke bygget, ingen avtale</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> Utvendig 3D med takflater, takvinkel og veggareal fra adressen (Norkart/Geovekst). Det er kjernen deres og mengdeuttak, ikke vårt bord.</p>
+  </article>
+
+  <article class="scene" id="scene-3">
+    <div class="slug"><b>Scene 3</b> · INT. KJELLER, SOLBERGLIVEIEN 8 – 08:30</div>
+    <h3>I kjelleren</h3>
+    <p class="action">Mørkt, fuktig, hansker på. Kari velger rommet «Kjeller». Tre store knapper: Lydnotat, Bilde, Video. Hun snakker inn det hun ser, tar bilder av fuktskjoldet nederst på veggen, setter fuktmåleren i veggen og sier tallene høyt: «atten ved fem centimeter, fjorten ved tretti».</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Romchips og tre knapper på 56 px festet øverst; alt som fanges knyttes til valgt rom <code>[id].tsx:3152‑3275</code></li>
+          <li>Lydopptak uten tidteller eller nivå; på web beholdes en midlertidig blob-adresse, lyden lagres ikke i IndexedDB slik bilder gjør <code>[id].tsx:674</code>, <code>persistMedia.ts:26</code></li>
+          <li>Bilder vises 82 px uten forstørring; video kan ikke spilles av i appen</li>
+          <li>Fuktmåling finnes bare som påminnelse i sjekklista: «si verdien høyt» <code>rooms.ts:40</code></li>
+          <li>SHA‑256 beregnes på serveren av de opplastede bytene, altså etter komprimering, ikke av originalfila <code>media.js:175‑183</code></li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill hoy">Høy</span> Lyd på web overlever ikke en omlasting. Web er dagens distribusjon.</li>
+          <li><span class="pill hoy">Høy</span> Bilder og lyd har ingen «venter»/«feilet»-status. Nytt forsøk skjer først ved neste endring. Banneret lover «vi prøver igjen automatisk», men ingenting gjør det <code>MediaUploadErrorBanner.tsx:173‑174</code></li>
+          <li>Hansker og mørk kjeller er ikke felttestet; «virker med hansker» står i øvingssaken uten dekning</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Lagre lyd i IndexedDB som bilder; vis tidteller under opptak</li>
+          <li>Status per medie; nytt forsøk når appen kommer i forgrunnen eller nettet er tilbake; ærlig bannertekst</li>
+          <li>Én setning å si til beboeren før opptak starter, synlig på knappen (vi <em>beholder</em> lyden som bevis; det må sies)</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Fuktmåling som strukturerte data per rom og målepunkt, med profil etter høyde. Sigurd 25.08: sannheten i Midtgjerdinga «ble avgjort av fuktmåling». Øvingssaken tester grepet først; eksempelrapporten viser alt en tabell delingssiden ikke kan lage.</li>
+          <li>Video som primærkilde må testes før «AI-briller» får plass. Pilotsakene var kun foto.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> Ett rom om gangen, lukk dører, lommelykt-knapp, manuelle bilder merket «manuelt», maks 90 minutter opptak, «fortell kunden før du tar opp». Ta med: rom-ferdig-porten og personvernsetningen. Deres lyd slettes etter transkribering; vår er bevis og lagres. Det er en forskjell vi må være åpne om.</p>
+  </article>
+
+  <article class="scene" id="scene-4">
+    <div class="slug"><b>Scene 4</b> · EXT. GÅRDSPLASSEN – 09:40</div>
+    <h3>Før du drar</h3>
+    <p class="action">Kari vil kjøre. Har hun alt? Er bildene lastet opp? Fikk hun med referansemålingen på tørr vegg? I dag sier appen ingenting.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Statisk sjekkliste per romtype og «Fullfør rom» <code>rooms.ts:50‑123</code></li>
+          <li>«Lag rapport» sjekker ikke om medier er lastet opp eller lyd transkribert <code>[id].tsx:1488‑1520</code>; serveren dropper bilder uten serverkopi <code>reportService.js:181</code></li>
+          <li>Kun den første videoen brukes <code>reportService.js:65‑70</code></li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill hoy">Høy</span> En rapport kan genereres på ufullstendig grunnlag uten ett varsel. Det koster en generering og gir et dårligere utkast.</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>«Før du drar»-sjekk før rapport: alle rom fullført? alle medier lastet opp? all lyd transkribert? Dataene finnes; dette er billig.</li>
+          <li>Teksten fra øvingssaken fungerer: «Det er dette forsikringen spør om senere.»</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Sjekkliste som styres av rom <em>og</em> kildehypotese (årsaksveiviser). Prototypet i <code>produktdesign-aarsaksbildet.md</code>, ikke bygget, krever Port 1-funn.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> «Avslutt alltid skanningen av et rom før du legger bort telefonen.» De lærer det samme den harde veien: feilmeldingen «Missing information in the input data» har sin egen hjelpeartikkel.</p>
+  </article>
+
+  <article class="scene" id="scene-5">
+    <div class="slug"><b>Scene 5</b> · INT. BILEN – 09:45</div>
+    <h3>Motoren jobber</h3>
+    <p class="action">«Lag rapport». Et heldekkende lag: «KI-en jobber med rapporten». Fire steg lyser opp etter tur. Kari venter. Hun vet ikke at bildene hennes aldri ble med.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Overlegg med faste tidtakere (3 s, 4,5 s, 3 s), ingen avbryt-knapp <code>ReportGeneratingOverlay.tsx:25‑30</code></li>
+          <li>Appen sender bildene som <code>{uri, caption}</code>, uten <code>remoteId</code> <code>[id].tsx:1515‑1520</code>. Serveren krever <code>remoteId</code> og bruker appens snapshot når det sendes <code>reportService.js:59‑63, 181</code>. Bildene når aldri motoren.</li>
+          <li>Lydfiler sendes aldri, bare transkripsjonen; én video</li>
+          <li>Motoren: Gemini 2.5 Flash, temperatur 0, fast JSON-skjema, sitatport mot 33 Byggforsk-blad</li>
+          <li><code>main.py</code> kompilerer ikke på <code>main</code> (linje 349). CI kjører ingen Python; e2e-testen bruker en Node-stub for motoren.</li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill kritisk">Kritisk</span> Ingen bilder i analysen fra appen. Midtgjerdinga var en fotosak.</li>
+          <li><span class="pill kritisk">Kritisk</span> Neste deploy av motoren feiler. Produksjon lever på forrige vellykkede deploy.</li>
+          <li>Falsk fremdrift; ingen tidsgrense i appen, 10 minutter på serveren</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Rett syntaksen, importene (<code>resolve_enabled</code>, <code>resolve_prompt</code>), funksjonsnavnet (<code>cleanup_photo_files</code>) og <code>citation_stats</code>-skopet; legg <code>py_compile</code> + Python-testene inn i CI</li>
+          <li>Send <code>remoteId</code> fra appen; e2e-test med appens payload og minst ett bilde</li>
+          <li>Ekte fremdrift fra motoren (steg meldes) og avbryt</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Modellvalg etter WER-måling: NB‑Whisper gir tidsstempel og konfidens, Gemini ikke. Regelen er skrevet før målingen; målingen venter på samtykke og klipp.</li>
+          <li>Flere videoer per sak; lyd til motoren dersom målingen viser gevinst</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> «Fyll inn automatisk (AI)» er merket BETA med «gjennomgå alltid forslagene» og advarsel om at eksisterende tekst kan overskrives. Samme ydmykhet som vår, men uten sitatport og uten årsak.</p>
+  </article>
+
+  <article class="scene" id="scene-6">
+    <div class="slug"><b>Scene 6</b> · INT. KONTORET, OCAB – 10:30</div>
+    <h3>Gjennomgangen</h3>
+    <p class="action">Rapporten er klar. Kari leser: Kildekategori «NEDBØR». Tidsforløp «GRADVIS». Rå koder i et tekstfelt. Hun ser ikke hvilke bilder eller hvilket sekund i videoen AI-en bygde på. Hun ser ikke Byggforsk-referansene sitatporten slapp gjennom. Hun ser ikke om huset er beboelig. Så stempler hun.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Åtte felt redigerbare, «endret»-merke, AI-utkast arkivert atskilt <code>[id].tsx:2453‑2510</code></li>
+          <li>Bevispunkter (tekst, tidsstempel, bildenummer) og <code>technical_reference</code> droppes i konverteringen <code>reportVersions.ts:14‑31</code></li>
+          <li><code>is_habitable</code> konverteres, vises aldri</li>
+          <li>Sitatportens tellinger skrives til databasen, men ingen leser dem</li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill kritisk">Kritisk</span> Stempelet sertifiserer det takstpersonen ikke får se. Midtgjerdinga-lærdommen («modellen fulgte eierens teori») krever at bevis per påstand er synlig før godkjenning.</li>
+          <li>Enum-verdier som fritekst gir skrivefeil i det som skal være strukturert</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Vis bevispunktene: trykk på et punkt åpner bildet eller videorammen</li>
+          <li>Vis Byggforsk-referansene etter sitatporten, merket «kontrollert mot register»</li>
+          <li>Velgere for kildekategori og tidsforløp; bryter for beboelig</li>
+          <li>Egen vurdering først, så AI-forslaget (grepet øvingssaken tester)</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Port 1-kandidater, bare det feilanalysen peker på: kildemerke per setning (eier/obs/måling), «[MANGLER: …]», to–tre kandidatårsaker</li>
+          <li>Skrivebordsvisning for lange saker</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> Arbeidsbeskrivelsen er en matrise rom × fag. Vårt motstykke er rom × bevis → årsak. Det er den forskjellen Sigurd kaller rapportkvalitet, og den er usynlig i dag.</p>
+  </article>
+
+  <article class="scene" id="scene-7">
+    <div class="slug"><b>Scene 7</b> · INT. KONTORET – 10:50</div>
+    <h3>Godkjenn</h3>
+    <p class="action">Kari retter «akutt» til «gradvis, over uker». Trykker «Godkjenn rapport». Navnet hentes fra profilen hun la inn under Guide. Stempelet lyser kobber.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Stempel {navn, tidspunkt}; bekreftelse; nulles ved redigering med varsel <code>[id].tsx:1905‑1976</code></li>
+          <li>Nulles også ved ny generering, uten bekreftelse <code>[id].tsx:1494‑1501</code>; en delt lenke slukker når synken når serveren</li>
+          <li>Serveren sjekker bare at stempelet finnes <code>share.js:172‑180</code>; den nuller det ikke selv ved PUT eller ny generering</li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill hoy">Høy</span> Ett trykk på «Lag rapport» over en godkjent rapport fjerner stempelet og dreper lenken forsikringsselskapet har fått, uten spørsmål</li>
+          <li><span class="pill hoy">Høy</span> Stempelet er ikke bundet til identitet. Serveren stoler på klienten.</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Bekreftelsesdialog ved ny generering over godkjent rapport, med «delt lenke slutter å virke»</li>
+          <li>Server nuller stempelet når <code>reportFinal</code> endres eller ny generering lagres</li>
+          <li>Bind <code>approvedBy</code> til tilgangskodens navn og e-post på serveren</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Innlogging per takstperson i stedet for felles kode; da er stempel = identitet</li>
+          <li>Signert godkjenning som kan etterprøves av mottaker</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> Ingen godkjenningsport; rapporten går rett ut. Dette er vårt sterkeste kort, og nettopp derfor må det være vanntett.</p>
+  </article>
+
+  <article class="scene" id="scene-8">
+    <div class="slug"><b>Scene 8</b> · INT. KONTORET – 10:52</div>
+    <h3>Del</h3>
+    <p class="action">«Lag delingslenke». Svar: «Rapporten må godkjennes av takstperson før den kan deles.» Men den er jo godkjent, det står på skjermen. Hun prøver igjen; nå kommer lenke og PIN. Hun kopierer lenken, lukker fanen for å sende e-post. PIN-koden er borte.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Godkjenningen når serveren via synk forsinket 2 sekunder <code>projectSync.ts:35</code>; deleknappen er aktiv med en gang → 409 fra server, feil melding i app <code>[id].tsx:1991‑1996, 2606</code></li>
+          <li>PIN vises én gang, lever bare i skjermminnet; ingen liste eller tilbakekall i appen</li>
+          <li>Lenken har leverandørdomenet onrender.com fordi <code>API_BASE_URL=''</code> ignoreres i eksporten <code>api.ts:19‑27</code></li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill hoy">Høy</span> En feilmelding som motsier skjermen, i det øyeblikket produktet skal levere</li>
+          <li><span class="pill hoy">Høy</span> En lenke med leverandørdomene foran et forsikringsselskap undergraver «fagverktøy»-inntrykket</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Synk før deling (testkopien gjør det allerede <code>index.tsx:456‑458</code>)</li>
+          <li>Kort «Dine delingslenker»: opprettet, utløper, status, trekk tilbake. Ny PIN = ny lenke; vi lagrer ikke PIN i klartekst.</li>
+          <li>Lenke på docrai.io; rett <code>API_BASE_URL</code>-håndteringen</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>«Hvem har åpnet lenken, og når»; velg hva mottakeren får se; mottakerroller (forsikring, kunde, håndverker)</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> PIN pluss utløpsdato pluss loggen «Hvem har tilgang» pluss valg av synlige kategorier. Ta med loggen og utløpsvalget; de koster lite og tjener tillit.</p>
+  </article>
+
+  <article class="scene" id="scene-9">
+    <div class="slug"><b>Scene 9</b> · INT. SAKSBEHANDLERENS SKJERM – 13:10</div>
+    <h3>Hos forsikringsselskapet</h3>
+    <p class="action">Saksbehandleren åpner lenken, taster PIN. Øverst: «Faglig vurdert og godkjent av Kari …». Saksfakta, skade og årsak, bevis med SHA‑256. Men ikke om skaden er akutt eller gradvis, det ene som avgjør dekningen. Ikke én Byggforsk-referanse. Hun laster ned PDF-en for arkivet; den inneholder AI-utkastet, uten Karis rettelser og uten stempel.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Siden viser stempel, fakta, årsak, omfang, tiltak, beboelig, korrigerte felt, bevis med hash, notater <code>share-page.html:184‑318</code></li>
+          <li>Viser ikke <code>acuteOrGradual</code> og <code>sourceCategory</code> selv om de er i payloaden <code>share.js:111‑121</code></li>
+          <li>Byggforsk er ikke i payloaden; hele <code>reportMeta</code> sendes ufiltrert <code>share.js:129</code></li>
+          <li>Siden viser data slik de er <em>nå</em>, ikke slik de var da lenken ble laget</li>
+          <li>PDF/Word = AI-utkastet, nedlastbart før godkjenning (vedtak 28.09: «ikke nå»)</li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill kritisk">Kritisk</span> Det vi selger vises ikke der det teller. Regel 6 gjelder også baklengs: vi kan ikke si «akutt/gradvis-vurdering» på /om når mottakeren aldri ser den.</li>
+          <li><span class="pill hoy">Høy</span> Personvern: telefon og e-post til medvirkende og verdianslag går til mottakeren uten å vises</li>
+          <li><span class="pill hoy">Høy</span> En PDF uten stempel kan sirkulere som «rapporten»</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Vis akutt/gradvis og kildekategori som egne, tydelige felt; vis Byggforsk-referansene</li>
+          <li>Hvitelist payloaden; send bare det siden viser</li>
+          <li>Frys et øyeblikksbilde ved deling, eller vis «rapporten er endret etter at lenken ble laget»</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li><span class="pill port">Port 2</span> PDF av den godkjente teksten, med stempel og bevisliste: motoren må fylle dokumentet med <code>reportFinal</code>. Uten den har vi ikke noe forsikringsselskapet kan arkivere.</li>
+          <li>Strukturert eksport til In4mo-felt (B1). «Eksport er distribusjonskanalen, ikke fienden.»</li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> PDF med kundens logo og fast design, pluss IFC, Excel og CSV. Vår PDF må bære stempelet og bevisene; ellers taper vi på deres hjemmebane, filformatet.</p>
+  </article>
+
+  <article class="scene" id="scene-10">
+    <div class="slug"><b>Scene 10</b> · TRE UKER SENERE</div>
+    <h3>Etterpå</h3>
+    <p class="action">Saksbehandleren ringer: «Er dette den samme rapporten jeg så?» Kari rettet et felt etter at lenken ble sendt. Ingen av dem kan bevise hva som sto der den dagen.</p>
+    <div class="beats">
+      <div class="beat">
+        <h4>Slik er det i dag</h4>
+        <ul>
+          <li>Én <code>reportFinal</code>; overskrives ved ny generering, slettes ved tilbakestilling <code>projects.js:32‑47</code>; ingen historikk</li>
+          <li>Medier slettes 72 timer etter sletting, sweep hver 6. time <code>mediaCleanup.js:31‑37</code>; Drive-bilder er offentlige lenker <code>doc_engine.py:44</code>; Gemini-filer og videocache slettes aldri (opplyst i personvern)</li>
+          <li>Databehandleravtale og EU-region er ikke på plass; sidene sier det</li>
+        </ul>
+      </div>
+      <div class="beat">
+        <h4>Der det skurrer</h4>
+        <ul>
+          <li><span class="pill hoy">Høy</span> Ingen frosset versjon av det som ble delt. En bevislenke uten versjon er halv.</li>
+          <li><span class="pill port">Port 0</span> DPA og EU-region blokkerer ekte data, uansett hvor god appen blir</li>
+        </ul>
+      </div>
+      <div class="beat kort">
+        <h4>Kort sikt</h4>
+        <ul>
+          <li>Øyeblikksbilde ved deling (se scene 9)</li>
+          <li>Port 0: avtaleutkast, regionvalg, beboerinformasjon i appen</li>
+        </ul>
+      </div>
+      <div class="beat lang">
+        <h4>Lang sikt</h4>
+        <ul>
+          <li>Versjonslogg: hvem endret hva, når; dette er «bevispakken» (C2)</li>
+          <li>Vertex/EU og utfasing av Google Docs, etter In4mo-eksport i rekkefølgen fra <code>inkorporering.md</code></li>
+        </ul>
+      </div>
+    </div>
+    <p class="wenn"><b>Wenn her</b> Lagring «sikkert i skyen», DPA publisert, lyd slettes etter transkribering, tilgang kan trekkes når som helst. Vi har et sterkere bevisløfte, men svakere papirer. Papirene er Port 0.</p>
+  </article>
+
+  </div>
+</section>
+
+<!-- ───────────────────────────── FUNN ───────────────────────────── -->
+<section id="funn">
+  <div class="sec-head">
+    <div class="eyebrow">UX- og produktfunn</div>
+    <h2>Funnene, rangert</h2>
+    <p>Alt er lest ut av koden på <code>main</code>, med fil og linje. «Kritisk» bryter løftet eller gir datatap. «Høy» koster tillit i det øyeblikket produktet skal levere. «Middels» er friksjon vi rydder når vi likevel er i fila. Størrelse: S under en dag, M noen dager, L en uke eller mer.</p>
+  </div>
+  <div class="filter" role="group" aria-label="Filtrer funn">
+    <button type="button" data-filter="alle" aria-pressed="true">Alle</button>
+    <button type="button" data-filter="kritisk" aria-pressed="false">Kritisk</button>
+    <button type="button" data-filter="hoy" aria-pressed="false">Høy</button>
+    <button type="button" data-filter="middels" aria-pressed="false">Middels</button>
+  </div>
+  <div class="tablewrap">
+    <table id="funntabell">
+      <thead><tr><th>#</th><th>Alvor</th><th>Funn</th><th>Konsekvens</th><th>Fiks</th></tr></thead>
+      <tbody>
+        <tr data-sev="kritisk"><td class="n">1</td><td><span class="pill kritisk">Kritisk</span></td><td>AI-motoren kompilerer ikke på <code>main</code>: <code>except</code> uten <code>try</code>, manglende importer, omdøpt funksjon, variabel utenfor skop.<code>ai-engine/main.py:349, 262, 286, 350, 644 · .github/workflows/ci.yml</code></td><td>Neste deploy av motoren feiler; rapport, eksport og Labs stopper. Produksjon lever på forrige deploy.</td><td>S · rett og legg <code>py_compile</code> + pytest i CI</td></tr>
+        <tr data-sev="kritisk"><td class="n">2</td><td><span class="pill kritisk">Kritisk</span></td><td>Bilder fra appen når aldri motoren: appen sender <code>{uri}</code>, serveren krever <code>remoteId</code>.<code>apps/mobile/app/projects/[id].tsx:1515‑1520 · apps/api/src/reportService.js:59‑63, 181</code></td><td>Fotosaker analyseres på tekst og én video. Bildetekster fra «Beskriv automatisk» forsvinner også.</td><td>S · send <code>remoteId</code>; e2e med appens payload og bilde</td></tr>
+        <tr data-sev="kritisk"><td class="n">3</td><td><span class="pill kritisk">Kritisk</span></td><td>Nytt prosjekt kan overskrive usynkede notater i et annet prosjekt: Hjem leser lista én gang og skriver hele lista. Kodelest, ikke kjørt.<code>apps/mobile/app/(tabs)/index.tsx:223‑298, 443 · src/storage/projectsStorage.ts:34</code></td><td>Datatap. Bryter PMF-kravet «null datatap».</td><td>M · les lagret liste før skriving eller én lagringskilde; refresh på fokus</td></tr>
+        <tr data-sev="kritisk"><td class="n">4</td><td><span class="pill kritisk">Kritisk</span></td><td>Mottakeren ser ikke akutt/gradvis, kildekategori eller Byggforsk-referanser.<code>apps/api/src/share-page.html:253‑267 · routes/share.js:111‑121</code></td><td>Det vi selger vises ikke der dekningen avgjøres. Regel 6-eksponering på /om.</td><td>S–M · vis feltene; ta bevispunkter inn i payloaden</td></tr>
+        <tr data-sev="kritisk"><td class="n">5</td><td><span class="pill kritisk">Kritisk</span></td><td>Takstpersonen ser ikke bevispunkter, Byggforsk-referanser eller beboelig før stempling; enum vises som rå tekst.<code>apps/mobile/src/features/projects/reportVersions.ts:14‑31 · [id].tsx:2465‑2475</code></td><td>Stempelet sertifiserer usett innhold. Midtgjerdinga-feilen kan ikke oppdages i appen.</td><td>M · bevisliste med hopp til bilde/ramme; velgere; beboelig-bryter</td></tr>
+        <tr data-sev="hoy"><td class="n">6</td><td><span class="pill hoy">Høy</span></td><td>«Lag rapport» over godkjent rapport fjerner stempelet uten bekreftelse; serveren nuller ikke stempelet selv ved redigering eller ny generering.<code>[id].tsx:1494‑1501 · reportService.js:325‑349 · routes/projects.js:215‑290</code></td><td>Delt lenke slukker uventet; godkjenning kan overleve endret innhold hvis klienten feiler.</td><td>S · dialog i app; server-side nulling</td></tr>
+        <tr data-sev="hoy"><td class="n">7</td><td><span class="pill hoy">Høy</span></td><td>Deling rett etter godkjenning gir 409 fordi synken er forsinket 2 s mens knappen er aktiv.<code>src/sync/projectSync.ts:35 · [id].tsx:1991‑1996, 2606</code></td><td>Feilmelding som motsier skjermen.</td><td>S · synk før deling (som testkopi gjør)</td></tr>
+        <tr data-sev="hoy"><td class="n">8</td><td><span class="pill hoy">Høy</span></td><td>Delingslenker kan ikke ses eller trekkes tilbake i appen; PIN vises én gang; lenken bruker onrender-domenet.<code>[id].tsx:205, 2005‑2009 · src/config/api.ts:19‑36 · routes/share.js:205‑221</code></td><td>Tapt PIN = ny lenke uten å vite det; leverandørdomene foran kunde.</td><td>M · lenkekort med tilbakekall; docrai.io</td></tr>
+        <tr data-sev="hoy"><td class="n">9</td><td><span class="pill hoy">Høy</span></td><td>Hele <code>reportMeta</code> sendes til mottaker, også felt siden ikke viser: kontaktinfo til medvirkende, verdianslag.<code>routes/share.js:129</code></td><td>Personopplysninger deles uten grunn.</td><td>S · hvitelist</td></tr>
+        <tr data-sev="hoy"><td class="n">10</td><td><span class="pill hoy">Høy</span></td><td>PDF/Word er AI-utkastet uten rettelser og stempel, nedlastbart før godkjenning; på native åpnes lenken uten kode (401).<code>apps/api/src/index.js:782‑845 · [id].tsx:1466‑1467</code></td><td>Et dokument uten stempel kan bli «rapporten». Vedtak 28.09 sa «ikke nå»; bør revurderes før Port 2.</td><td>M · motoren fyller Doc med <code>reportFinal</code>; stempel i fila</td></tr>
+        <tr data-sev="hoy"><td class="n">11</td><td><span class="pill hoy">Høy</span></td><td>Lyd på web lagres ikke varig (blob-adresse), i motsetning til bilder og video.<code>[id].tsx:674 · src/sync/persistMedia.ts:26</code></td><td>Opptak kan forsvinne ved omlasting før opplasting.</td><td>S · IndexedDB som for bilder</td></tr>
+        <tr data-sev="hoy"><td class="n">12</td><td><span class="pill hoy">Høy</span></td><td>Ingen status eller nytt forsøk per bilde og lyd; banneret lover automatisk retry som ikke finnes; synk-pillen på saksskjermen kan ikke trykkes.<code>src/components/MediaUploadErrorBanner.tsx:173‑174 · projectSync.ts · [id].tsx:3074</code></td><td>Feil oppdages for sent, på feil skjerm.</td><td>M · status per medie; retry ved forgrunn/nett</td></tr>
+        <tr data-sev="hoy"><td class="n">13</td><td><span class="pill hoy">Høy</span></td><td>Rapport kan lages på ufullstendig grunnlag: ikke-opplastede medier og utranskribert lyd varsles ikke.<code>[id].tsx:1488‑1520 · reportService.js:181</code></td><td>Dårligere utkast, bortkastet generering.</td><td>S · «Før du drar»-sjekk</td></tr>
+        <tr data-sev="hoy"><td class="n">14</td><td><span class="pill hoy">Høy</span></td><td>Veiviserens steg 2 fester aldri filene og bruker et web-element på native.<code>index.tsx:740‑758, 746‑748</code></td><td>Blindvei på web; trolig krasj på iOS/Android.</td><td>S · fjern steget</td></tr>
+        <tr data-sev="hoy"><td class="n">15</td><td><span class="pill hoy">Høy</span></td><td>«Beskriv automatisk» sender bildet i et format bare native støtter; serveren krever filopplasting. Guiden anbefaler funksjonen.<code>[id].tsx:1010‑1018 · index.js:592‑593 · explore.tsx:158‑163</code></td><td>Feiler trolig alltid på web.</td><td>S · webvei som for transkripsjon</td></tr>
+        <tr data-sev="hoy"><td class="n">16</td><td><span class="pill hoy">Høy</span></td><td>Stempelnavn er en klientstreng; motorens autentisering feiler åpent når <code>TESTER_TOKEN</code> mangler.<code>routes/share.js:139‑144 · ai-engine/server.py:171‑174</code></td><td>Godkjenning uten identitet; en feilkonfigurert motor godtar alle.</td><td>S–M · bind til token; fail-closed</td></tr>
+        <tr data-sev="middels"><td class="n">17</td><td><span class="pill middels">Middels</span></td><td>Genereringsoverlegg med falsk fremdrift og uten avbryt.<code>src/features/projects/ReportGeneratingOverlay.tsx:25‑30, 230</code></td><td>Opplevd ventetid uten informasjon.</td><td>M · ekte steg fra motoren</td></tr>
+        <tr data-sev="middels"><td class="n">18</td><td><span class="pill middels">Middels</span></td><td>Modellen merkes «gemini‑3.8‑flash», kallet går til 2.5; ingen pris for 3.8.<code>ai-engine/main.py:202, 303 · apps/api/src/costTracking.js:14‑17</code></td><td>Kostnad per rapport logges som NULL.</td><td>S</td></tr>
+        <tr data-sev="middels"><td class="n">19</td><td><span class="pill middels">Middels</span></td><td>Guide-fanen beskriver en flyt uten godkjenning, oppgir 50 MB der appen stopper på 20, lover forhåndsutfylling som ikke skjer; ikonet er blankt på web/Android; «AI» og «KI» blandes; engelske strenger i video-opplastingen.<code>app/(tabs)/explore.tsx:117‑119, 164‑175, 184 · (tabs)/_layout.tsx:31 · [id].tsx:110‑134</code></td><td>Første inntrykk motsier produktet.</td><td>S</td></tr>
+        <tr data-sev="middels"><td class="n">20</td><td><span class="pill middels">Middels</span></td><td>Skadedato og befaringsdato er fritekst; nedbøroppslag krever stille ÅÅÅÅ‑MM‑DD.<code>src/features/projects/ReportDetailsSection.tsx:120‑121 · [id].tsx:1789</code></td><td>Frost-oppslaget feiler uten forklaring.</td><td>S · <code>DateField</code></td></tr>
+        <tr data-sev="middels"><td class="n">21</td><td><span class="pill middels">Middels</span></td><td>Saksunderlag (byggeår, nedbør, terreng) sendes ikke til motoren selv om prompten har blokker for det.<code>reportService.js:176‑202 · ai-engine/prompt.py:79‑142</code></td><td>Analysen får ikke signalene vi allerede henter.</td><td>S–M</td></tr>
+        <tr data-sev="middels"><td class="n">22</td><td><span class="pill middels">Middels</span></td><td>UU: knapper uten rolle og disabled/busy-tilstand; etiketter ikke koblet til felt; små mål (filterchips, «⋯» 34 px, romchips 36 px); gult banner bare i lys modus.<code>src/ui/Buttons.tsx:41‑53 · src/ui/TextField.tsx:36‑62 · index.tsx:996, 1095‑1107</code></td><td>Skjermleser og store skrifter faller av.</td><td>M</td></tr>
+        <tr data-sev="middels"><td class="n">23</td><td><span class="pill middels">Middels</span></td><td>Rapportfanen begraver hovedhandlingen: ~30-felts skjema åpner over «Lag rapport», «Tilbakestill» står over «Lag», delingskortet vises før det finnes rapport.<code>[id].tsx:449‑450, 2362‑2385, 2559‑2616, 3324‑3333</code></td><td>Lett å trykke feil; mye rulling.</td><td>M</td></tr>
+        <tr data-sev="middels"><td class="n">24</td><td><span class="pill middels">Middels</span></td><td>Fangst kan ikke rettes: notattekst, rom på notat, romnavn kan ikke endres eller slettes; importerte bilder stemples med importtid og nåværende posisjon.<code>[id].tsx:1195‑1209, 1330‑1332</code></td><td>Feil bevismetadata uten mulighet til å rette.</td><td>M</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="count" id="funncount">24 funn vist</p>
+</section>
+
+<!-- ───────────────────────────── WENN ───────────────────────────── -->
+<section id="wenn">
+  <div class="sec-head">
+    <div class="eyebrow">Konkurrent · lest i deres hjelpesenter</div>
+    <h2>Lært av Wenn</h2>
+    <p>Alt under er hentet fra Wenns egne hjelpeartikler (juli–august 2026) og fra det repoet allerede har verifisert om selskapet. Det er deres ord om eget produkt; styrkene er reelle, og svakhetene har de skrevet selv.</p>
+  </div>
+
+  <div class="list" style="margin-bottom:1rem">
+    <h4>Faktaboks</h4>
+    <div class="fact">
+      <div><b>Selskap</b><span>Wenn Property AS, Stavanger, org.nr 931 480 758, stiftet 2023 (Brønnøysund, verifisert)</span></div>
+      <div><b>2025-tall</b><span>Omsetning 541 kkr, resultat −3,3 MNOK, egenkapital 12,9 MNOK</span></div>
+      <div><b>Selvrapportert</b><span>ARR > 2 MNOK, > 180 lisenser, 100+ betalende, 4 % churn (april 2026, ikke tredjepartsverifisert)</span></div>
+      <div><b>Pris</b><span>Basis 350 kr/mnd, Max 999 kr/mnd (LiDAR + mengder), Enterprise; «betal for ti, få tolv» (sjekket 14.08)</span></div>
+      <div><b>Hos Ocab</b><span>~300 kr per prosjekt når 3D brukes (Sigurd, annenhånds, uverifisert)</span></div>
+      <div><b>FoU</b><span>CliVa = klimarisiko på bygningsnivå, ikke skadevurdering (rettet 29.09). Trusselen i dag er distribusjon hos Ocab, ikke FoU; vurderingen «middels–høy» i <code>konkurrentanalyse.md</code> bør skrives om med det.</span></div>
+    </div>
+  </div>
+
+  <div class="two">
+    <div class="list">
+      <h3>Ta med</h3>
+      <p class="small muted">Mønstre som koster lite og passer vårt produkt.</p>
+      <ul>
+        <li><strong>Veiledning i selve fangsten.</strong> «Ett rom om gangen», «fullfør før du går», «lukk dører». Vi har «Fullfør rom»; legg til «Før du drar». <small>Tips til scanning · Scanne flere rom</small></li>
+        <li><strong>Én setning til kunden før opptak.</strong> De skriver hva kunden skal få vite om lydopptaket. Vår setning må være annerledes: lyden <em>lagres</em> som bevis. <small>Befaringsassistenten · Personvern</small></li>
+        <li><strong>Lenkelogg og utløp.</strong> «Hvem har tilgang» viser hvem som åpnet og når; utløpsdato velges per lenke; velg hvilke kategorier mottaker ser. <small>Share project</small></li>
+        <li><strong>Tydelig om enheter.</strong> Hver artikkel åpner med hva som gjelder iPhone/iPad, Android og nettleser. Vår Guide trenger den linja: hva virker på web, hva krever app. <small>Which devices · Android</small></li>
+        <li><strong>Merk det automatiske.</strong> Manuelle bilder merkes «manuelt». Vi har <code>aiGenerated</code> på bildetekster, men viser det ikke. <small>Ta bilder under scanning</small></li>
+        <li><strong>Ydmykhet som styrke.</strong> «Til centimeteren, ikke millimeteren. Ta kontrollmål.» Vår versjon finnes allerede: «AI foreslår, du avgjør». Behold den overalt. <small>Nøyaktighet og begrensninger</small></li>
+        <li><strong>Oppsummeringsstiler.</strong> Samme opptak → befaringsnotat, e-post til kunde, takbefaring; kan byttes i ettertid. For oss på lang sikt: «melding til beboer» og «melding til forsikring» fra den godkjente rapporten. <small>Velg oppsummeringsstil</small></li>
+        <li><strong>Hjelpesenter som produkt.</strong> AI-assistent som svarer fra artiklene, videoguider, kundewebinarer, «vurder oss i App Store». Vi har øvingssaken og Guide-fanen. Resten etter pilot. <small>Video guides · How to get help</small></li>
+        <li><strong>MCP/API inkludert i lisensen.</strong> Kunder kobler Claude eller ChatGPT til egne prosjektdata. Logg som idé; bygg bare hvis Ocab ber om det. <small>MCP og API</small></li>
+      </ul>
+    </div>
+    <div class="list">
+      <h3>Åpninger</h3>
+      <p class="small muted">Det deres produkt ikke gjør, og det deres hjelpesenter innrømmer.</p>
+      <ul>
+        <li><strong>Ingen årsak, ingen akutt/gradvis, ingen forsikringsstruktur.</strong> Produktet er skrevet for «oppussing, tilbygg eller prosjektet»; arbeidsbeskrivelsen er rom × fag for tilbud. Hele skadedomenet er tomt. <small>Befaringsassistenten · Work description</small></li>
+        <li><strong>Ingen godkjenningsport.</strong> AI-utfyllingen er BETA, kan overskrive eksisterende tekst, og rapporten går ut uten stempel. <small>Fyll inn automatisk</small></li>
+        <li><strong>Enveis synk og overskrivingsrisiko.</strong> På iPhone må befaringen lastes opp manuelt med appen åpen; «ikke last opp flere ganger – du risikerer å overskrive». Vår synk er automatisk, når vi får rettet den. <small>Laste opp befaring · Sync</small></li>
+        <li><strong>3D er ikke sannhet.</strong> Dørslag registreres ikke, lister er ikke måleobjekt, skråtak og åpne konstruksjoner gir feil, speil leses som døråpning, frittstående bygg mangler. Mengder er bra for tilbud, ikke for årsak. <small>Door handles · Nøyaktighet · Speil og glass</small></li>
+        <li><strong>LiDAR krever iPhone Pro / iPad Pro.</strong> Android kan ikke skanne. Spør Sigurd hvilke telefoner Ocab-folk har. <small>Which devices</small></li>
+        <li><strong>Maks 90 minutter opptak, lyd slettes.</strong> Bra for personvern, ubrukelig som bevis i en tvist. Vår lyd er bevis med hash og tidspunkt. <small>Befaringsassistenten</small></li>
+        <li><strong>Rapporten har fast design.</strong> Farger kan ikke endres; «last ned PDF og rediger i Acrobat». <small>Customising the report</small></li>
+        <li><strong>Ingen Holte SmartKalk-integrasjon, ingen In4mo.</strong> Eksport er PDF, IFC, Excel/CSV. Ingen av dem er forsikringsselskapets skinne. <small>FAQ</small></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:1rem">
+    <h4>Kopierer ikke</h4>
+    <p>LiDAR-skanning med mengdeuttak, tegneeditor 2D→3D, utvendig 3D fra adresse, IFC-eksport. Dette er Wenns kjerne og håndverkerens tilbudsfase. Nei-lista i <code>CLAUDE.md</code> står: ikke eget tegneverktøy, ikke egen skinne, ikke estimatmotor. Trenger en sak en planskisse, er <em>import</em> av en skisse (også en Wenn-eksport) nivå 1 i BIM-studien, og det er fortsatt ikke et tegneverktøy.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────────── VEIKART ───────────────────────────── -->
+<section id="veikart">
+  <div class="sec-head">
+    <div class="eyebrow">Veikart</div>
+    <h2>Kort sikt, mellomlang, lang sikt</h2>
+    <p>Rekkefølgen er prinsippet: først rett det som bryter løftet, så gjør det usynlige synlig, så test med Ocab, og bygg nytt bare på det testen viser. Portene er dem repoet allerede bruker: Port 0 «lov å ta inn ekte data», Port 1 «utkastet er til å stole på», Port 2 «noen betaler».</p>
+  </div>
+  <div class="roadmap">
+    <div class="col">
+      <header>
+        <h3>Kort sikt</h3>
+        <span class="when">Uke 40–43 · før Port 1 · rett løftet og gjør det synlig</span>
+      </header>
+      <ol class="items">
+        <li><span class="t">Motoren kompilerer og CI vokter den</span><span class="why">Funn 1. Uten dette finnes ikke produktet etter neste deploy.</span><span class="tags"><span class="pill kritisk">P0</span><span class="pill kort">S</span></span></li>
+        <li><span class="t">Bildene når motoren</span><span class="why">Funn 2. Fotosakene er pilotsakene. E2E-test med appens payload.</span><span class="tags"><span class="pill kritisk">P0</span><span class="pill kort">S</span></span></li>
+        <li><span class="t">Ingen datatap ved nytt prosjekt</span><span class="why">Funn 3. «Null datatap» er et PMF-krav vi har skrevet selv.</span><span class="tags"><span class="pill kritisk">P0</span><span class="pill kort">M</span></span></li>
+        <li><span class="t">Gjennomgangen viser alt motoren fant</span><span class="why">Funn 5: bevispunkter med hopp til bilde/ramme, Byggforsk etter sitatport, velgere, beboelig. Egen vurdering først.</span><span class="tags"><span class="pill kort">M</span></span></li>
+        <li><span class="t">Mottakeren ser akutt/gradvis, kildekategori og Byggforsk; payload hvitelistes</span><span class="why">Funn 4 og 9. Gjør salgsteksten sann og stopper lekkasjen.</span><span class="tags"><span class="pill kort">S–M</span></span></li>
+        <li><span class="t">Stempelet blir vanntett</span><span class="why">Funn 6, 7, 16: dialog før ny generering, server-side nulling, navn bundet til kode, synk før deling, fail-closed motor.</span><span class="tags"><span class="pill kort">S</span></span></li>
+        <li><span class="t">«Før du drar»-sjekk før rapport</span><span class="why">Funn 13. Billig; dataene finnes. Språket fra øvingssaken.</span><span class="tags"><span class="pill kort">S</span></span></li>
+        <li><span class="t">Fangst som holder på web</span><span class="why">Funn 11, 12, 15: lyd i IndexedDB, status per medie, ærlig banner, «Beskriv automatisk» på web.</span><span class="tags"><span class="pill kort">S–M</span></span></li>
+        <li><span class="t">Delingslenker i appen, på docrai.io</span><span class="why">Funn 8. Liste, utløp, tilbakekall; rett <code>API_BASE_URL</code>.</span><span class="tags"><span class="pill kort">M</span></span></li>
+        <li><span class="t">Rydd veiviser og Guide</span><span class="why">Funn 14, 19, 20: fjern steg 2, åpne prosjektet, datovelgere, Guide som stemmer, ett navn på AI.</span><span class="tags"><span class="pill kort">S</span></span></li>
+        <li><span class="t">Validering, ikke bygging</span><span class="why">Port 0-baseline hos Ocab (tid per rapport, retur fra forsikring). Kjør de 11 valideringssakene (55 sjekker). Test øvingssaken med Sigurd, Lars Erik og én ny. Sigurd-debrief om Wenn (lista under).</span><span class="tags"><span class="pill port">Port 0</span></span></li>
+      </ol>
+    </div>
+
+    <div class="col">
+      <header>
+        <h3>Mellomlang</h3>
+        <span class="when">Uke 44–50 · Port 1 → Port 2 · bare det evidensen peker på</span>
+      </header>
+      <ol class="items">
+        <li><span class="t">PDF av godkjent tekst, med stempel og bevisliste</span><span class="why">Funn 10. Forsikringsselskapet arkiverer filer, ikke lenker. Motoren fyller dokumentet med <code>reportFinal</code>. Revurder 28.09-vedtaket om nedlasting før godkjenning.</span><span class="tags"><span class="pill port">Port 2</span><span class="pill lang">M</span></span></li>
+        <li><span class="t">Fuktmåling som data</span><span class="why">Per rom og målepunkt, med profil etter høyde. Går inn bare hvis øvingssak-testen viser at takstfolk vil taste tall i felt. Sigurd: «avgjort av fuktmåling».</span><span class="tags"><span class="pill port">Port 1</span><span class="pill lang">M</span></span></li>
+        <li><span class="t">Øyeblikksbilde ved deling og versjonslogg</span><span class="why">Scene 9–10. En bevislenke uten versjon er halv. Dette er «bevispakken» (C2) i mindre format.</span><span class="tags"><span class="pill lang">M</span></span></li>
+        <li><span class="t">Kildemerke per setning, [MANGLER], kandidatårsaker</span><span class="why">Port 1-kandidater fra <code>verdens-beste-losning.md</code>. Bygges først etter feilanalyse på 20–50 ekte feil med Sigurd som fasit.</span><span class="tags"><span class="pill port">Port 1</span><span class="pill lang">M–L</span></span></li>
+        <li><span class="t">Saksunderlag inn i analysen</span><span class="why">Funn 21. Byggeår, nedbør, terreng til prompt-blokkene som venter.</span><span class="tags"><span class="pill lang">S–M</span></span></li>
+        <li><span class="t">Port 2-test i oktober/november</span><span class="why">Én oppdragsgiver hos et forsikringsselskap ser en AI-assistert, godkjent rapport uten å sende den tilbake. Via Ocab.</span><span class="tags"><span class="pill port">Port 2</span></span></li>
+        <li><span class="t">Pris per sak, testet mot ankeret</span><span class="why">Wenn hos Ocab: ~300 kr per prosjekt (uverifisert). Vårt prisvedtak mangler; bruk pilotens forhåndsforpliktelse til å teste per sak mot per lisens.</span><span class="tags"><span class="pill port">Port 2</span></span></li>
+        <li><span class="t">In4mo-samtale</span><span class="why">Sigurds forslag. Finn ut om et API finnes og hvem hos Ocab som eier relasjonen. Ingen kode før svaret.</span><span class="tags"><span class="pill lang">Avtale</span></span></li>
+      </ol>
+    </div>
+
+    <div class="col">
+      <header>
+        <h3>Lang sikt</h3>
+        <span class="when">2027 · etter Port 2 · distribusjon og dybde</span>
+      </header>
+      <ol class="items">
+        <li><span class="t">In4mo-eksport (B1), spike først</span><span class="why">Strukturert eksport som speiler In4mos felt, sjekklister og medier, kartlagt med en pilotbruker. Måltall: tid fra befaring ferdig til levert i In4mo. Komplement, aldri erstatning.</span><span class="tags"><span class="pill lang">L</span></span></li>
+        <li><span class="t">Modellvalg etter WER</span><span class="why">NB‑Whisper mot Gemini på 20–30 feltklipp med Sigurds fasit. Regelen er skrevet: likt → behold; klart bedre på fagtermer → bytt og få tidsstempel og konfidens.</span><span class="tags"><span class="pill lang">M</span></span></li>
+        <li><span class="t">Planskisse som import, romforankring</span><span class="why">Nivå 1 i BIM-studien: typet romkategori, etasje, valgfri plassering på funn. Import av skisse, også fra Wenn-eksport. Ikke et tegneverktøy.</span><span class="tags"><span class="pill lang">M</span></span></li>
+        <li><span class="t">LiDAR, enkel og nøyaktig, bare på evidens</span><span class="why">Sigurd målte ~3 mm avvik over 5 m og rapportmalen har et skisse-felt. Krever native iOS-app (RoomPlan). Bygges bare hvis Ocabs Wenn-test viser at 3D verdsettes i <em>skadesaker</em>, og flere enn én ber om det. Ellers «kjøp ikke bygg».</span><span class="tags"><span class="pill lang">L</span></span></li>
+        <li><span class="t">Video først, briller senere</span><span class="why">Pilotsakene var kun foto. Test video som primærkilde i ti saker før noen kjøper hardware. Hardware-leasing står på nei-lista.</span><span class="tags"><span class="pill lang">Test</span></span></li>
+        <li><span class="t">Innlogging per person og signert godkjenning</span><span class="why">Stempel = identitet. Forutsetning for alt som heter revisjon.</span><span class="tags"><span class="pill lang">L</span></span></li>
+        <li><span class="t">EU/Vertex og utfasing av Google Docs</span><span class="why">Rekkefølgen fra <code>inkorporering.md</code>: B1 → B3 → B2 → dette.</span><span class="tags"><span class="pill lang">L</span></span></li>
+        <li><span class="t">Hjelpesenter, webinar, «melding til beboer/forsikring»</span><span class="why">Lært av Wenn. Etter at det finnes kunder å hjelpe.</span><span class="tags"><span class="pill lang">M</span></span></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="no">
+    <h4 style="margin-bottom:.6rem">Bygger ikke</h4>
+    <ul class="items" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+      <li><span class="t">Tegneverktøy og mengdeuttak</span><span class="why">Wenns kjerne. Nei-lista.</span></li>
+      <li><span class="t">Egen forsikringsskinne / erstatning for In4mo eller MEPS</span><span class="why">Alle som gikk utenom skinnen tapte (USA-analysen). Vi leverer inn i den.</span></li>
+      <li><span class="t">Estimatmotor</span><span class="why">Norsk oppgjør er årsaksdrevet; pris eies av forsikringsselskap og håndverker.</span></li>
+      <li><span class="t">Hardware (briller, 360-kamera, leasing)</span><span class="why">Dreper «appen i lomma». Ikke fundbart i Oppstartstilskudd 1.</span></li>
+      <li><span class="t">Trening på kundedata</span><span class="why">Ingen rettsgrunnlag uten egen DPIA.</span></li>
+      <li><span class="t">Tall på salgssidene</span><span class="why">Ikke før Port 0-baseline og ti godkjente saker med samtykke.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ───────────────────────────── SIGURD ───────────────────────────── -->
+<section id="sigurd">
+  <div class="sec-head">
+    <div class="eyebrow">Evidens · Wenn-testen hos Ocab</div>
+    <h2>Spørsmål til Sigurd</h2>
+    <p>Sigurd sitter i Ocabs testgruppe og skal rapportere til ledelsen. Det gjør ham til den eneste som kan skaffe oss svar på det vi ikke kan lese oss til. Lista er laget for å kopieres rett inn i Messenger.</p>
+  </div>
+  <div class="qs">
+    <div class="qgroup">
+      <h4>Om Ocabs bruk</h4>
+      <ol>
+        <li>Hva bruker dere 3D-modellen til i en <em>skadesak</em>: skisse i rapportmalen, mengder til sanering, dokumentasjon til forsikring, eller noe annet? <small>Skiller mengder (Wenns kjerne) fra bevis (vår).</small></li>
+        <li>Hvem leser rapporten hos forsikringsselskapet, og hva spør de etter: årsak, akutt/gradvis, omfang, mengder, bilder? <small>Dette er Port 2-kriteriet.</small></li>
+        <li>Hvor mange av sakene deres er foto-bare, hvor mange har video? <small>Avgjør om video eller briller er verdt noe.</small></li>
+        <li>Hvordan registreres fuktmålinger i dag, og i Wenn: sies de inn, skrives de, eller tastes de? <small>Avgjør om fukt-som-data er verdt å bygge.</small></li>
+      </ol>
+    </div>
+    <div class="qgroup">
+      <h4>Om Wenn-opplevelsen</h4>
+      <ol start="5">
+        <li>Hvor lang tid tar en befaring med Wenn mot uten, og rapporten etterpå? <small>Første tidstall vi får fra felt. Det er Wenns, men det er en baseline.</small></li>
+        <li>Hvilke telefoner har takstfolkene? LiDAR krever iPhone Pro eller iPad Pro. <small>Hvis flåten er Android, er 3D-testen allerede avgjort.</small></li>
+        <li>Har noen i testgruppa fått «Missing information in the input data», måttet laste opp på nytt, eller mistet noe? <small>Deres kjente svakhet; vår synk må være bedre.</small></li>
+        <li>Bruker dere AI-oppsummeringen deres? Hva retter dere oftest? <small>Forteller hvor mye en takstperson aksepterer å rette.</small></li>
+        <li>Hva mangler i Wenn-rapporten for at den skal duge som skaderapport? <small>Ordene han bruker her er ordene vi skal bruke på /om.</small></li>
+      </ol>
+    </div>
+    <div class="qgroup">
+      <h4>Om beslutningen</h4>
+      <ol start="10">
+        <li>Hva vil få ledelsen til å si ja etter testperioden, og hva vil få dem til å si nei? <small>Beslutningskriteriet, før de bestemmer seg.</small></li>
+        <li>De 300 kronene: per prosjekt eller per lisens, hvem betaler, og hva regnes som «3D brukt»? <small>Prisankeret vårt, verifisert.</small></li>
+        <li>Hvis DocrAI og Wenn begge lå på telefonen: når ville du åpnet hvilken? <small>Svaret er posisjoneringen.</small></li>
+      </ol>
+    </div>
+    <div class="qgroup">
+      <h4>Om In4mo</h4>
+      <ol start="13">
+        <li>Hvem hos Ocab eier In4mo-relasjonen, og kan du introdusere oss? <small>Hans eget forslag; samtalen avgjør om B1 er mulig.</small></li>
+        <li>Hva i In4mo tar mest tid i dag: feltene, bildene, sjekklistene? <small>Det første eksporten må fylle.</small></li>
+      </ol>
+    </div>
+    <div class="copybar">
+      <button type="button" class="btn" id="kopier">Kopier spørsmålene</button>
+      <span class="copystatus" id="kopistatus" aria-live="polite"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 14 DAGER ───────────────────────────── -->
+<section id="plan">
+  <div class="sec-head">
+    <div class="eyebrow">Handling</div>
+    <h2>Neste 14 dager</h2>
+    <p>Fart, i riktig rekkefølge. Eier er forslag; dere fordeler.</p>
+  </div>
+  <div class="tablewrap">
+    <table class="plan">
+      <thead><tr><th>Når</th><th>Hva</th><th>Eier</th><th>Ferdig når</th></tr></thead>
+      <tbody>
+        <tr><td>Dag 1–2</td><td>Rett motoren (funn 1) og bildeflyten (funn 2); Python-jobb i CI; e2e med appens payload</td><td>Kode</td><td><code>py_compile</code> grønn i CI; en testrapport med bilde viser bildenummer i bevispunktene</td></tr>
+        <tr><td>Dag 1–3</td><td>Send spørsmålslista til Sigurd; avtal 30 minutter</td><td>Fredrik</td><td>Svar notert i <code>docs/pilotlogg-ocab.md</code>, uke 40</td></tr>
+        <tr><td>Dag 2–4</td><td>Datatap ved nytt prosjekt (funn 3); synk før deling (7); dialog og server-nulling av stempel (6)</td><td>Kode</td><td>Reprodusert før, ikke etter; e2e-share utvidet</td></tr>
+        <tr><td>Dag 3–6</td><td>Gjennomgangen viser bevispunkter, Byggforsk, velgere, beboelig (5); mottakersiden viser akutt/gradvis og Byggforsk, payload hvitelistet (4, 9)</td><td>Kode</td><td>Skjermbilde av begge med en ekte testsak; regel 6-grep oppdatert</td></tr>
+        <tr><td>Dag 4–7</td><td>Port 0-baseline hos Ocab: tid per rapport i dag, hvor ofte den kommer tilbake fra forsikring; samtykke til feltklipp (Anders); fasit (Sigurd)</td><td>Fredrik · Anders · Sigurd</td><td>To tall og to ja i beslutningsloggen</td></tr>
+        <tr><td>Dag 5–8</td><td>Øvingssaken testes med Sigurd, Lars Erik og én ny; tenk høyt, ingen hjelp</td><td>Fredrik</td><td>Tid, feil funnet første forsøk, SEQ, «hva var uklart» for tre personer</td></tr>
+        <tr><td>Dag 6–9</td><td>Kjør de 11 valideringssakene mot rettet motor; fyll resultatarket</td><td>Kode · Sigurd som fasit</td><td>Poeng av 55 skrevet inn; under 44 utløser promptendring</td></tr>
+        <tr><td>Dag 7–10</td><td>«Før du drar»-sjekk (13); lyd i IndexedDB og status per medie (11, 12); delingslenker i app (8); rydd veiviser og Guide (14, 19)</td><td>Kode</td><td>Testet på web i lys og mørk modus, 390 px</td></tr>
+        <tr><td>Dag 8–12</td><td>In4mo: finn eier hos Ocab via Sigurd; be om API-dokumentasjon</td><td>Fredrik</td><td>Ett møte avtalt, eller et skriftlig nei</td></tr>
+        <tr><td>Dag 10–14</td><td>Skriv om Wenn-vurderingen i <code>konkurrentanalyse.md</code> (distribusjon hos Ocab, ikke FoU); logg beslutningene fra denne gjennomgangen i <code>beslutninger.md</code></td><td>Fredrik</td><td>Begge filer oppdatert i samme PR som kodefiksene</td></tr>
+        <tr><td>Hele perioden</td><td>DNS: pek docrai.io på Express-sidene (stegene står i <code>DEPLOYMENT.md</code> → Domener)</td><td>Fredrik</td><td>docrai.io/om svarer 200</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <h4>Hva dette dokumentet ikke påstår</h4>
+  <p>Ingen tidsbesparelse, ingen prosenttall, ingen «forsikringsklar»; ingenting er målt hos kunde ennå (Port 0). Wenns tall er Wenns egne. «300 kr per prosjekt» er Sigurds forståelse, ikke en faktura. Funn 3 (datatap) og 14 (krasj på native) er lest i kode, ikke reprodusert i kjøring; alt annet i funntabellen er bekreftet i kode eller mot produksjon 01.10.2026. Regel 6 i <code>CLAUDE.md</code> gjelder: ingen setning publiseres før den kan belegges med en kodelinje eller en signert avtale.</p>
+  <p>Kilder: repoet på <code>main</code> (3301451) og grenen <code>claude/docrai-agent-readiness-fu7b0b</code> (06d0caf); <code>docs/pilotlogg-ocab.md</code>, <code>docs/verdens-beste-losning.md</code>, <code>docs/beslutninger.md</code>, <code>docs/inkorporering.md</code>, <code>docs/bim-revit-potensial.md</code>, <code>docs/konkurrent-selskapsanalyse.md</code>; support.wennproperty.com (artikler sist oppdatert juli–august 2026); teamchat 30.09.2026.</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  // Filter på funntabellen
+  var buttons = document.querySelectorAll('.filter button');
+  var rows = document.querySelectorAll('#funntabell tbody tr');
+  var count = document.getElementById('funncount');
+  function apply(f) {
+    var n = 0;
+    rows.forEach(function (r) {
+      var show = f === 'alle' || r.getAttribute('data-sev') === f;
+      r.hidden = !show;
+      if (show) n++;
+    });
+    count.textContent = n + (n === 1 ? ' funn vist' : ' funn vist');
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-filter') === f)); });
+  }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { apply(b.getAttribute('data-filter')); }); });
+
+  // Aktiv seksjon i navigasjonen
+  var links = document.querySelectorAll('.toc a');
+  var sections = Array.prototype.map.call(links, function (a) { return document.querySelector(a.getAttribute('href')); });
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id); });
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    sections.forEach(function (s) { if (s) io.observe(s); });
+  }
+
+  // Kopier spørsmålene til Sigurd som ren tekst
+  var btn = document.getElementById('kopier');
+  var status = document.getElementById('kopistatus');
+  function questionsText() {
+    var out = ['Spørsmål om Wenn-testen hos Ocab (DocrAI, 01.10.2026)', ''];
+    document.querySelectorAll('#sigurd .qgroup').forEach(function (g) {
+      out.push(g.querySelector('h4').textContent.toUpperCase());
+      var ol = g.querySelector('ol');
+      var start = parseInt(ol.getAttribute('start') || '1', 10);
+      ol.querySelectorAll('li').forEach(function (li, i) {
+        var clone = li.cloneNode(true);
+        var sm = clone.querySelector('small'); if (sm) sm.remove();
+        out.push((start + i) + '. ' + clone.textContent.replace(/\s+/g, ' ').trim());
+      });
+      out.push('');
+    });
+    return out.join('\n');
+  }
+  function selectFallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.left = '-9999px';
+    document.body.appendChild(ta); ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+  btn.addEventListener('click', function () {
+    var text = questionsText();
+    var done = function (ok) { status.textContent = ok ? 'Kopiert. Lim inn i Messenger.' : 'Kunne ikke kopiere. Marker teksten over og kopier manuelt.'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(selectFallback(text)); });
+    } else {
+      done(selectFallback(text));
+    }
+  });
+})();
+</script>
