@@ -19,6 +19,15 @@ export type AppTheme = {
      * godkjenningsstempel og nøkkeltall — aldri på knapper eller flater.
      */
     copper: string;
+    /** Tekst og ikon på aksentflater (primærknapper). */
+    onAccent: string;
+    /** Varsel: tekst, flate og kant (oker/gult i «Glass og stål»). Aldri gult som tekst på lys flate. */
+    warn: string;
+    warnBg: string;
+    warnBorder: string;
+    /** Signalgult for det kritiske, med mørk tekst oppå (onSignal). */
+    signal: string;
+    onSignal: string;
     shadow: string;
     glassOverlay: string;
     overlay: string;
@@ -53,6 +62,12 @@ const lightTheme: AppTheme = {
     danger: '#B63B32',
     // Stålblått som stempel og nøkkeltall: 8,3:1 på bakgrunnen #E8F5F8.
     copper: '#2F4A5E',
+    onAccent: '#FFFFFF',
+    warn: '#6D5900',
+    warnBg: '#FFF0BF',
+    warnBorder: '#DECA89',
+    signal: '#FFD84D',
+    onSignal: '#072227',
     shadow: 'rgba(7, 34, 39, 0.10)',
     glassOverlay: 'rgba(255,255,255,0.5)',
     overlay: 'rgba(7, 34, 39, 0.30)',
@@ -80,6 +95,12 @@ const darkTheme: AppTheme = {
     accentStrong: '#B4D2EB',
     danger: '#DF695C',
     copper: '#97B5CD',
+    onAccent: '#051214',
+    warn: '#E6D088',
+    warnBg: '#2E2607',
+    warnBorder: '#524723',
+    signal: '#ECC745',
+    onSignal: '#051214',
     shadow: 'rgba(0, 0, 0, 0.35)',
     glassOverlay: 'rgba(9, 21, 23, 0.5)',
     overlay: 'rgba(0,0,0,0.5)',

@@ -20,6 +20,7 @@ export const TextField = ({
   onFocus,
   onBlur,
   onPressIn,
+  accessibilityLabel,
   ...props
 }: TextFieldProps) => {
   const theme = useAppTheme();
@@ -38,6 +39,11 @@ export const TextField = ({
         <View>
           <TextInput
             {...props}
+            // Etiketten må være koblet til feltet, ellers leser skjermleseren
+            // bare plassholderen (eller ingenting). Feil og hjelpetekst følger med.
+            accessibilityLabel={accessibilityLabel ?? label ?? props.placeholder}
+            accessibilityHint={error || helperText}
+            aria-invalid={!!error}
             placeholderTextColor={theme.colors.muted}
             onFocus={(event) => {
               setIsFocused(true);
@@ -63,7 +69,11 @@ export const TextField = ({
           {rightIcon && <View style={[styles.icon, { right: theme.spacing.sm }]}>{rightIcon}</View>}
         </View>
       </Pressable>
-      {!!error && <Caption style={{ color: theme.colors.danger }}>{error}</Caption>}
+      {!!error && (
+        <Caption style={{ color: theme.colors.danger }} accessibilityRole="alert" accessibilityLiveRegion="polite">
+          {error}
+        </Caption>
+      )}
       {!error && helperText && <Caption style={{ color: theme.colors.muted }}>{helperText}</Caption>}
     </View>
   );
@@ -73,6 +83,8 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     fontSize: 16,
+    // 44 px: minste trykkflate (Apple HIG), også for felt.
+    minHeight: 44,
   },
   icon: {
     position: 'absolute',
