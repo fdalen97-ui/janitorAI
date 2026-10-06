@@ -10,7 +10,6 @@ import { useAppTheme } from './theme';
 
 // Native-only — not used on web
 let DateTimePicker: any = null;
-let DateTimePickerEvent: any = null;
 if (Platform.OS !== 'web') {
   const pkg = require('@react-native-community/datetimepicker');
   DateTimePicker = pkg.default;
@@ -30,6 +29,12 @@ export function localDateString(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/** 'YYYY-MM-DD' som lokal dato (new Date('YYYY-MM-DD') er UTC-midnatt = gårsdagen vest for UTC). */
+function parseLocalDate(value: string): Date {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(value);
+}
+
 export const DateField = ({ value, onChange, label }: DateFieldProps) => {
   const [showPicker, setShowPicker] = useState(false);
   const theme = useAppTheme();
@@ -46,10 +51,13 @@ export const DateField = ({ value, onChange, label }: DateFieldProps) => {
           {/* @ts-ignore — <input> is valid JSX in React Native Web */}
           <input
             type="date"
+            // Etiketten over er bare tekst — uten aria-label leser skjermleseren «dato» uten kontekst.
+            aria-label={label ?? 'Dato'}
             value={effectiveValue}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
             style={{
               width: '100%',
+              minHeight: 44,
               border: `1px solid ${theme.colors.border}`,
               borderRadius: theme.radii.md,
               backgroundColor: theme.colors.surface,
@@ -78,7 +86,7 @@ export const DateField = ({ value, onChange, label }: DateFieldProps) => {
       setShowPicker(false);
     }
     if (selected) {
-      onChange(selected.toISOString().split('T')[0]);
+      onChange(localDateString(selected));
     }
   };
 
@@ -94,7 +102,7 @@ export const DateField = ({ value, onChange, label }: DateFieldProps) => {
       />
       {showPicker && (
         <DateTimePicker
-          value={new Date(effectiveValue)}
+          value={parseLocalDate(effectiveValue)}
           mode="date"
           display="default"
           onChange={handleChange}

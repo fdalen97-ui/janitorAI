@@ -23,10 +23,13 @@ export default function RootLayout() {
     console.log('[Navigation] Root layout mounted with stack background', stackBackground);
   }, [stackBackground]);
 
-  // Set browser tab title on web
+  // Fanetittel og språk på web. lang="nb" gjør at skjermlesere uttaler teksten
+  // som norsk (uten den leses alt med engelsk stemme).
+  // SafeAreaProvider trengs ikke her: expo-router (ExpoRoot) legger den rundt appen.
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
       document.title = 'DocrAI';
+      document.documentElement.lang = 'nb';
     }
   }, []);
 

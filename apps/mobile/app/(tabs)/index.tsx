@@ -8,10 +8,12 @@ import {
   Modal,
   Platform,
   Pressable,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import apiFetch, {
   clearTesterToken,
@@ -30,24 +32,6 @@ import {
   createTestProjectCopy,
   hasPendingProjectMedia,
 } from '@/src/features/projects/testProject';
-
-// Treff fra Kartverkets adresse-API, via /api/underlag/adresse.
-type AddressHit = {
-  adressetekst: string;
-  postnummer?: string;
-  poststed?: string;
-  kommunenavn?: string;
-  kommunenummer?: string;
-  gnr?: number;
-  bnr?: number;
-  lat?: number;
-  lon?: number;
-};
-
-function tidyPlace(value?: string): string {
-  if (!value) return '';
-  return value.charAt(0) + value.slice(1).toLowerCase();
-}
 import { loadProfile } from '@/src/storage/profileStorage';
 import {
   loadProjects,
@@ -76,11 +60,30 @@ import {
   Screen,
   SecondaryButton,
   StatusChip,
+  statusChipColors,
   TextField,
   Title,
   useAppTheme,
   useToast,
 } from '@/src/ui';
+
+// Treff fra Kartverkets adresse-API, via /api/underlag/adresse.
+type AddressHit = {
+  adressetekst: string;
+  postnummer?: string;
+  poststed?: string;
+  kommunenavn?: string;
+  kommunenummer?: string;
+  gnr?: number;
+  bnr?: number;
+  lat?: number;
+  lon?: number;
+};
+
+function tidyPlace(value?: string): string {
+  if (!value) return '';
+  return value.charAt(0) + value.slice(1).toLowerCase();
+}
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
@@ -92,15 +95,6 @@ function getProjectStatus(project: Project): ProjectStatus {
   if (project.reportStatus === 'failed') return 'failed';
   return 'draft';
 }
-
-// Kun til filterchips (kant/bakgrunn) — selve statusvisningen på kortet
-// bruker StatusChip med WCAG AA-fargepar (B20).
-const STATUS_COLOR: Record<ProjectStatus, string> = {
-  draft: '#7C8A96',
-  processing: '#2F4A5E',
-  ready: '#2E7D4F',
-  failed: '#A6453A',
-};
 
 const UNKNOWN_INSPECTOR_LABEL = nb.projects.unknownInspector;
 
@@ -122,11 +116,14 @@ export default function Index() {
   const theme = useAppTheme();
   const router = useRouter();
   const toast = useToast();
+  const insets = useSafeAreaInsets();
 
   // Projects
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [duplicatingProjectId, setDuplicatingProjectId] = useState<string | null>(null);
+  // Prosjektmenyen på web (Alert med flere valg er en no-op i nettleseren).
+  const [menuProject, setMenuProject] = useState<Project | null>(null);
 
   // Filter & search (ephemeral — resets on navigation)
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
@@ -161,7 +158,7 @@ export default function Index() {
   const handleUnauthorized = async (showModal = true) => {
     await clearTesterToken();
     setTokenStatus('invalid');
-    setTokenError('Ugyldig tilgangskode. Skriv inn en gyldig kode for å fortsette.');
+    setTokenError(nb.projects.invalidAccessCode);
     if (showModal) setShowTokenModal(true);
   };
 
@@ -327,7 +324,7 @@ export default function Index() {
     } catch {
       console.warn('Failed to save projects');
       saved = false;
-      toast.show({ message: 'Kunne ikke lagre prosjektene på enheten', variant: 'error', durationMs: 4200 });
+      toast.show({ message: nb.projects.saveFailed, variant: 'error' });
     }
     if (touched) {
       schedulePush(touched);
@@ -420,7 +417,7 @@ export default function Index() {
 
     if (!name) {
       setWizardStep(1);
-      setWizardNameError('Gi prosjektet et navn');
+      setWizardNameError(nb.projects.nameRequired);
       return;
     }
 
@@ -526,18 +523,93 @@ export default function Index() {
     );
   };
 
-  // B15: diskret meny på kortet — valg-dialog via Alert er OK.
+  // B15: diskret meny på kortet — valg-dialog via Alert er OK på mobil.
   const showProjectMenu = (project: Project) => {
-    // På web er Alert med flere valg en no-op — gå rett til slettebekreftelsen.
+    // På web er Alert med flere valg en no-op — vis samme valg i en egen meny.
     if (Platform.OS === 'web') {
-      confirmDeleteProject(project);
+      setMenuProject(project);
       return;
     }
     Alert.alert(nb.projects.projectMenu, project.name, [
       { text: nb.common.cancel, style: 'cancel' },
-      { text: nb.common.delete, style: 'destructive', onPress: () => confirmDeleteProject(project) },
+      ...(!project.isTestProject
+        ? [{ text: nb.projects.createTestCopy, onPress: () => void duplicateAsTestProject(project) }]
+        : []),
+      { text: nb.common.delete, style: 'destructive' as const, onPress: () => confirmDeleteProject(project) },
     ]);
   };
+
+  // ── Render: prosjektmeny (web) ───────────────────────────────────────────────
+
+  const closeProjectMenu = () => setMenuProject(null);
+
+  const renderProjectMenuModal = () => (
+    <Modal
+      visible={menuProject !== null}
+      transparent
+      animationType="fade"
+      onRequestClose={closeProjectMenu}
+    >
+      <View style={{
+        flex: 1,
+        backgroundColor: theme.colors.overlay,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: theme.spacing.lg,
+      }}>
+        {/* Trykk utenfor menyen lukker den */}
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={closeProjectMenu}
+          accessibilityRole="button"
+          accessibilityLabel={nb.common.close}
+        />
+        {menuProject && (
+          <View style={{ width: '100%', maxWidth: 420 }}>
+            <GlassCard style={{ gap: theme.spacing.sm }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.sm }}>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Caption muted>{nb.projects.projectMenu}</Caption>
+                  <Title accessibilityRole="header" numberOfLines={2} style={{ fontSize: 18 }}>
+                    {menuProject.name}
+                  </Title>
+                </View>
+                <IconButton onPress={closeProjectMenu} accessibilityLabel={nb.common.close}>
+                  <Ionicons name="close" size={20} color={theme.colors.muted} />
+                </IconButton>
+              </View>
+              {!menuProject.isTestProject && (
+                <SecondaryButton
+                  icon={<Ionicons name="copy-outline" size={18} />}
+                  disabled={duplicatingProjectId !== null}
+                  onPress={() => {
+                    const project = menuProject;
+                    closeProjectMenu();
+                    void duplicateAsTestProject(project);
+                  }}
+                >
+                  {nb.projects.createTestCopy}
+                </SecondaryButton>
+              )}
+              {/* Destruktivt valg: rød, og bekreftes fortsatt før sletting. */}
+              <SecondaryButton
+                tone="danger"
+                icon={<Ionicons name="trash-outline" size={18} />}
+                onPress={() => {
+                  const project = menuProject;
+                  closeProjectMenu();
+                  confirmDeleteProject(project);
+                }}
+              >
+                {nb.projects.menuDelete}
+              </SecondaryButton>
+              <SecondaryButton onPress={closeProjectMenu}>{nb.common.cancel}</SecondaryButton>
+            </GlassCard>
+          </View>
+        )}
+      </View>
+    </Modal>
+  );
 
   // ── Render: token modal ─────────────────────────────────────────────────────
 
@@ -552,21 +624,21 @@ export default function Index() {
       }}>
         <GlassCard style={{ width: '100%', gap: theme.spacing.sm }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Title>{nb.auth.accessTitle}</Title>
-            <TouchableOpacity
+            <Title accessibilityRole="header">{nb.auth.accessTitle}</Title>
+            <IconButton
               onPress={() => setShowTokenModal(false)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               disabled={isValidatingToken}
               accessibilityLabel={nb.common.close}
             >
-              <Ionicons name="close" size={22} color={theme.colors.muted} />
-            </TouchableOpacity>
+              <Ionicons name="close" size={20} color={theme.colors.muted} />
+            </IconButton>
           </View>
           <Body muted>{nb.auth.accessMessage}</Body>
           {tokenError && <Caption style={{ color: theme.colors.danger }}>{tokenError}</Caption>}
           <TextField
             value={tokenInput}
             onChangeText={(value) => { setTokenInput(value); setTokenError(null); }}
+            accessibilityLabel={nb.auth.accessTitle}
             placeholder={nb.auth.accessPlaceholder}
             autoCapitalize="none"
             autoCorrect={false}
@@ -575,7 +647,7 @@ export default function Index() {
             {nb.auth.accessSave}
           </PrimaryButton>
           <SecondaryButton onPress={handleRemoveToken} disabled={isValidatingToken}>
-            Fjern koden
+            {nb.auth.accessRemove}
           </SecondaryButton>
         </GlassCard>
       </View>
@@ -603,19 +675,25 @@ export default function Index() {
           borderTopLeftRadius: theme.radii.lg,
           borderTopRightRadius: theme.radii.lg,
           padding: theme.spacing.lg,
-          paddingBottom: theme.spacing.xl * 2,
+          // Over hjemindikator/navigasjonslinje (kant-til-kant på Android).
+          paddingBottom: theme.spacing.xl + Math.max(insets.bottom, theme.spacing.xl),
           gap: theme.spacing.md,
         }}>
           {/* Step label + close */}
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Caption muted style={{ fontWeight: '600' }}>{`Steg ${wizardStep} av 3`}</Caption>
+            <Caption muted style={{ fontWeight: '600' }}>{nb.wizard.step(wizardStep, 3)}</Caption>
             <IconButton onPress={resetWizard} accessibilityLabel={nb.common.close}>
               <Ionicons name="close" size={20} color={theme.colors.muted} />
             </IconButton>
           </View>
 
-          {/* Dot progress bar */}
-          <View style={{ flexDirection: 'row', gap: theme.spacing.xs, alignSelf: 'center' }}>
+          {/* Dot progress bar — pynt; «Steg X av 3» over sier det samme til skjermleser */}
+          <View
+            aria-hidden
+            importantForAccessibility="no-hide-descendants"
+            accessibilityElementsHidden
+            style={{ flexDirection: 'row', gap: theme.spacing.xs, alignSelf: 'center' }}
+          >
             {([1, 2, 3] as const).map((s) => (
               <View
                 key={s}
@@ -632,7 +710,7 @@ export default function Index() {
           {/* Step 1 — Details */}
           {wizardStep === 1 && (
             <>
-              <Title style={{ fontSize: 20 }}>Befaringsdetaljer</Title>
+              <Title accessibilityRole="header" style={{ fontSize: 20 }}>{nb.wizard.detailsTitle}</Title>
               <TextField
                 label={`${nb.projects.nameLabel} *`}
                 value={wizardName}
@@ -689,23 +767,24 @@ export default function Index() {
               {/* B17: inline duplikatvarsel — ikke blokkerende */}
               {isDuplicateName && !wizardNameError && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
-                  <Ionicons name="alert-circle-outline" size={14} color={theme.colors.danger} />
-                  <Caption style={{ color: theme.colors.danger }}>{nb.projects.duplicateName}</Caption>
+                  {/* Varsel, ikke feil: oker (warn), ikke rødt — opprettelsen er ikke blokkert. */}
+                  <Ionicons name="alert-circle-outline" size={14} color={theme.colors.warn} />
+                  <Caption style={{ color: theme.colors.warn }}>{nb.projects.duplicateName}</Caption>
                 </View>
               )}
-              <DateField label="Befaringsdato" value={wizardDate} onChange={setWizardDate} />
+              <DateField label={nb.wizard.dateLabel} value={wizardDate} onChange={setWizardDate} />
               <TextField
                 label={nb.projects.inspectorLabel}
                 value={wizardInspector}
                 onChangeText={setWizardInspector}
-                placeholder="Navnet ditt"
+                placeholder={nb.wizard.inspectorPlaceholder}
               />
               <PrimaryButton
                 style={{ minHeight: 56 }}
-                icon={<Ionicons name="arrow-forward" size={18} color="#fff" />}
+                icon={<Ionicons name="arrow-forward" size={18} color={theme.colors.onAccent} />}
                 onPress={() => {
                   if (!wizardName.trim()) {
-                    setWizardNameError('Gi prosjektet et navn');
+                    setWizardNameError(nb.projects.nameRequired);
                     return;
                   }
                   setWizardStep(2);
@@ -719,16 +798,21 @@ export default function Index() {
           {/* Step 2 — Media Upload */}
           {wizardStep === 2 && (
             <>
-              <Title style={{ fontSize: 20 }}>Legg til medier</Title>
-              <Caption muted>
-                Velg bilder og videoer fra befaringen. Du kan legge til flere etter at prosjektet er opprettet.
-              </Caption>
+              <Title accessibilityRole="header" style={{ fontSize: 20 }}>{nb.wizard.mediaTitle}</Title>
+              <Caption muted>{nb.wizard.mediaHint}</Caption>
 
               {Platform.OS === 'web' ? (
                 <>
                   {/* Drop zone — triggers the hidden file input */}
                   <Pressable
                     onPress={() => fileInputRef.current?.click()}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      wizardMediaFiles.length > 0
+                        ? nb.wizard.changeFilesA11y(wizardMediaFiles.length)
+                        : nb.wizard.pickFilesA11y
+                    }
+                    accessibilityHint={nb.wizard.fileTypesHint}
                     style={{
                       borderWidth: 2,
                       borderStyle: 'dashed',
@@ -749,9 +833,9 @@ export default function Index() {
                       color={wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.muted}
                     />
                     <Body style={{ color: wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.muted, fontWeight: '600' }}>
-                      {wizardMediaFiles.length > 0 ? 'Trykk for å endre utvalget' : 'Trykk for å velge filer'}
+                      {wizardMediaFiles.length > 0 ? nb.wizard.changeFiles : nb.wizard.pickFiles}
                     </Body>
-                    <Caption muted>Bilder og videoer · Valgfritt</Caption>
+                    <Caption muted>{nb.wizard.fileTypesHint}</Caption>
                   </Pressable>
 
                   {/* Hidden file input (web only) */}
@@ -781,7 +865,7 @@ export default function Index() {
                   {wizardMediaFiles.length > 0 && (
                     <GlassCard style={{ gap: theme.spacing.xs }}>
                       <Caption muted style={{ fontWeight: '600' }}>
-                        {wizardMediaFiles.length === 1 ? '1 fil valgt' : `${wizardMediaFiles.length} filer valgt`}
+                        {nb.wizard.filesSelected(wizardMediaFiles.length)}
                       </Caption>
                       {wizardMediaFiles.map((f, i) => (
                         <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
@@ -798,9 +882,7 @@ export default function Index() {
                   )}
                 </>
               ) : (
-                <Caption muted>
-                  På mobil legger du til bilder og video inne i prosjektet etter at det er opprettet.
-                </Caption>
+                <Caption muted>{nb.wizard.nativeMediaHint}</Caption>
               )}
 
               <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
@@ -813,7 +895,7 @@ export default function Index() {
                 </SecondaryButton>
                 <PrimaryButton
                   style={{ flex: 1, minHeight: 56 }}
-                  icon={<Ionicons name="arrow-forward" size={18} color="#fff" />}
+                  icon={<Ionicons name="arrow-forward" size={18} color={theme.colors.onAccent} />}
                   onPress={() => setWizardStep(3)}
                 >
                   {nb.common.next}
@@ -825,11 +907,11 @@ export default function Index() {
           {/* Step 3 — Notes & Review */}
           {wizardStep === 3 && (
             <>
-              <Title style={{ fontSize: 20 }}>Notater og oppsummering</Title>
+              <Title accessibilityRole="header" style={{ fontSize: 20 }}>{nb.wizard.summaryTitle}</Title>
 
-              {/* Initial notes / description */}
+              {/* Prosjektbeskrivelse (lagres som projectDescriptionText) */}
               <TextField
-                label="Innledende notater (valgfritt)"
+                label={nb.wizard.descriptionLabel}
                 multiline
                 value={wizardDescription}
                 onChangeText={setWizardDescription}
@@ -844,8 +926,8 @@ export default function Index() {
                   <Body>{wizardName}</Body>
                 </View>
                 <View style={{ gap: theme.spacing.xs }}>
-                  <Caption muted>Befaringsdato</Caption>
-                  <Body>{formatDate(wizardDate) || 'Ikke angitt'}</Body>
+                  <Caption muted>{nb.wizard.dateLabel}</Caption>
+                  <Body>{formatDate(wizardDate) || nb.projects.dateNotSet}</Body>
                 </View>
                 <View style={{ gap: theme.spacing.xs }}>
                   <Caption muted>{nb.projects.inspectorLabel}</Caption>
@@ -853,8 +935,8 @@ export default function Index() {
                 </View>
                 {wizardMediaFiles.length > 0 && (
                   <View style={{ gap: theme.spacing.xs }}>
-                    <Caption muted>Valgte medier</Caption>
-                    <Body>{wizardMediaFiles.length === 1 ? '1 fil' : `${wizardMediaFiles.length} filer`}</Body>
+                    <Caption muted>{nb.wizard.selectedFiles}</Caption>
+                    <Body>{nb.wizard.fileCount(wizardMediaFiles.length)}</Body>
                   </View>
                 )}
               </GlassCard>
@@ -873,7 +955,7 @@ export default function Index() {
                   loading={isCreatingProject}
                   disabled={isCreatingProject}
                 >
-                  Opprett prosjekt
+                  {nb.wizard.create}
                 </PrimaryButton>
               </View>
             </>
@@ -939,7 +1021,7 @@ export default function Index() {
         onPress={() => setWizardStep(1)}
         width={260}
         style={{ minHeight: 56 }}
-        icon={<Ionicons name="add" size={20} color="#fff" />}
+        icon={<Ionicons name="add" size={20} color={theme.colors.onAccent} />}
       >
         {nb.projects.newProject}
       </PrimaryButton>
@@ -981,7 +1063,7 @@ export default function Index() {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: theme.spacing.sm }}>
               <View style={{ flex: 1, gap: theme.spacing.xs }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs, flexWrap: 'wrap' }}>
-                  <Title numberOfLines={1} style={{ flexShrink: 1 }}>{item.name}</Title>
+                  <Title numberOfLines={2} style={{ flexShrink: 1 }}>{item.name}</Title>
                   {item.isTestProject ? (
                     <View
                       style={{
@@ -1022,9 +1104,10 @@ export default function Index() {
                 <Caption muted>{metaText}</Caption>
               </View>
               <IconButton
-                accessibilityLabel={nb.projects.projectMenu}
+                accessibilityLabel={`${nb.projects.projectMenu}: ${item.name}`}
                 onPress={() => showProjectMenu(item)}
-                style={{ width: 34, height: 34, backgroundColor: theme.colors.surfaceSecondary }}
+                // 48 px (standard) — 34 px var for lite for hansker og under 44 px-kravet.
+                style={{ backgroundColor: theme.colors.surfaceSecondary }}
               >
                 <Ionicons name="ellipsis-horizontal" size={18} color={theme.colors.muted} />
               </IconButton>
@@ -1044,13 +1127,14 @@ export default function Index() {
                 accessibilityRole="button"
                 accessibilityLabel={`${nb.projects.createTestCopy}: ${item.name}`}
                 disabled={duplicatingProjectId !== null}
+                accessibilityState={{ disabled: duplicatingProjectId !== null, busy: duplicatingProjectId === item.id }}
                 onPress={(event) => {
                   event.stopPropagation();
                   void duplicateAsTestProject(item);
                 }}
                 style={{
                   alignSelf: 'flex-start',
-                  minHeight: 40,
+                  minHeight: 44,
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: 6,
@@ -1091,13 +1175,13 @@ export default function Index() {
         <GlassCard style={{ gap: theme.spacing.xs }}>
           <Title muted>{nb.auth.accessTitle}</Title>
           <Body muted>{nb.auth.accessMessage}</Body>
-          <PrimaryButton onPress={() => setShowTokenModal(true)}>Skriv inn kode</PrimaryButton>
+          <PrimaryButton onPress={() => setShowTokenModal(true)}>{nb.auth.accessEnter}</PrimaryButton>
         </GlassCard>
       )}
 
       <PrimaryButton
         style={{ minHeight: 56 }}
-        icon={<Ionicons name="add" size={20} color="#fff" />}
+        icon={<Ionicons name="add" size={20} color={theme.colors.onAccent} />}
         onPress={() => setWizardStep(1)}
       >
         {nb.projects.newProject}
@@ -1107,6 +1191,7 @@ export default function Index() {
       <TextField
         value={searchQuery}
         onChangeText={setSearchQuery}
+        accessibilityLabel={nb.projects.searchPlaceholder}
         placeholder={nb.projects.searchPlaceholder}
         autoCapitalize="none"
         autoCorrect={false}
@@ -1114,43 +1199,39 @@ export default function Index() {
       />
 
       {/* Filter chips */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.xs }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {FILTER_CHIPS.map((chip) => {
           const active = filterStatus === chip.value;
           const count = statusCounts[chip.value];
-          const empty = count === 0;
-          const chipColor = chip.value === 'all'
-            ? theme.colors.accent
-            : STATUS_COLOR[chip.value as ProjectStatus];
+          // Tekstfarger med ≥ 4,5:1 i begge temaer: StatusChips AA-par for
+          // statusene, aksent på flate for «Alle» (de gamle STATUS_COLOR-ene ga ~2:1 i mørk modus).
+          const colors = chip.value === 'all'
+            ? { fg: theme.colors.accent, bg: theme.colors.surface, border: theme.colors.accent }
+            : statusChipColors(theme.mode, chip.value);
+          const textStyle = {
+            color: active ? colors.fg : theme.colors.muted,
+            fontWeight: active ? ('700' as const) : ('400' as const),
+          };
           return (
             <Pressable
               key={chip.value}
               onPress={() => setFilterStatus(chip.value)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={nb.projects.filterA11y(chip.label, count)}
               style={{
+                minHeight: 44,
+                justifyContent: 'center',
                 paddingHorizontal: theme.spacing.md,
                 paddingVertical: theme.spacing.xs,
                 borderRadius: theme.radii.pill,
                 borderWidth: 1.5,
-                borderColor: active ? chipColor : theme.colors.border,
-                backgroundColor: active ? `${chipColor}22` : theme.colors.surfaceSecondary,
-                opacity: empty && !active ? 0.45 : 1,
+                borderColor: active ? colors.fg : theme.colors.border,
+                backgroundColor: active ? colors.bg : theme.colors.surfaceSecondary,
               }}
             >
-              <Caption
-                style={{
-                  color: active ? chipColor : theme.colors.muted,
-                  fontWeight: active ? '700' : '400',
-                }}
-              >
-                {chip.label}{' '}
-                <Caption
-                  style={{
-                    color: active ? chipColor : theme.colors.muted,
-                    fontWeight: active ? '700' : '400',
-                  }}
-                >
-                  ({count})
-                </Caption>
+              <Caption style={textStyle}>
+                {chip.label} ({count})
               </Caption>
             </Pressable>
           );
@@ -1165,6 +1246,7 @@ export default function Index() {
     <Screen scrollable={false} style={{ flex: 1 }}>
       {renderTokenModal()}
       {renderWizardModal()}
+      {renderProjectMenuModal()}
 
       {/* B16: fast topprad som ikke scroller — tittel, synk-status og medievarsel */}
       <View style={{ gap: theme.spacing.sm, marginBottom: theme.spacing.md }}>
@@ -1202,10 +1284,10 @@ export default function Index() {
                 }}>
                   <Ionicons name="search-outline" size={40} color={theme.colors.muted} />
                   <Body muted style={{ textAlign: 'center' }}>
-                    Ingen prosjekter samsvarer med filteret.
+                    {nb.projects.noMatches}
                   </Body>
                   <SecondaryButton onPress={() => { setFilterStatus('all'); setSearchQuery(''); }}>
-                    Nullstill filtrene
+                    {nb.projects.resetFilters}
                   </SecondaryButton>
                 </View>
               )

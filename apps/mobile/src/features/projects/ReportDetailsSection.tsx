@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, TextInputProps, TouchableOpacity, View } from 'react-native';
 
 import { nb } from '@/src/i18n/nb';
 import {
@@ -13,6 +13,61 @@ import {
 } from '@/src/ui';
 
 import { ReportBuilding, ReportContributor, ReportMeta } from './types';
+
+// Rapporten og værdata-oppslaget krever ÅÅÅÅ-MM-DD (se skadedato-effekten i
+// app/projects/[id].tsx). Tomt felt er lov.
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const dateError = (value: string | undefined) => {
+  const v = (value ?? '').trim();
+  if (!v) return undefined;
+  // Ikke mas mens datoen skrives: vurder først når den er komplett lang,
+  // eller straks den inneholder tegn som aldri hører hjemme i ÅÅÅÅ-MM-DD.
+  const stillTyping = v.length < 10 && /^[\d-]*$/.test(v);
+  if (stillTyping) return undefined;
+  if (!ISO_DATE.test(v) || Number.isNaN(new Date(v).getTime())) {
+    return 'Skriv datoen som ÅÅÅÅ-MM-DD, f.eks. 2026-03-14.';
+  }
+  return undefined;
+};
+
+type FieldOptions = {
+  placeholder: string;
+  multiline?: boolean;
+  keyboardType?: TextInputProps['keyboardType'];
+  autoComplete?: TextInputProps['autoComplete'];
+  textContentType?: TextInputProps['textContentType'];
+  autoCapitalize?: TextInputProps['autoCapitalize'];
+  error?: string;
+  helperText?: string;
+};
+
+const PHONE: Partial<FieldOptions> = {
+  keyboardType: 'phone-pad',
+  autoComplete: 'tel',
+  textContentType: 'telephoneNumber',
+};
+const EMAIL: Partial<FieldOptions> = {
+  keyboardType: 'email-address',
+  autoComplete: 'email',
+  textContentType: 'emailAddress',
+  autoCapitalize: 'none',
+};
+const DATE: Partial<FieldOptions> = {
+  keyboardType: 'numbers-and-punctuation',
+  autoComplete: 'off',
+};
+
+/** Bekreft destruktive valg — Alert.alert med flere knapper er no-op på web. */
+const confirmRemove = (title: string, message: string, onConfirm: () => void) => {
+  if (Platform.OS === 'web') {
+    if (window.confirm(`${title}\n\n${message}`)) onConfirm();
+    return;
+  }
+  Alert.alert(title, message, [
+    { text: nb.common.cancel, style: 'cancel' },
+    { text: 'Fjern', style: 'destructive', onPress: onConfirm },
+  ]);
+};
 
 type Props = {
   meta: ReportMeta;
@@ -61,22 +116,22 @@ export function ReportDetailsSection({ meta, onChange, isOpen, onToggle, saveSta
 
   // ----- render helpers -----
 
+  // Etiketten sendes til TextField, så den både vises og kobles til feltet for
+  // skjermleser. Plassholderen er et eksempel — aldri «–», som leses som «strek».
   const inputField = (
     label: string,
     value: string | undefined,
     onChangeText: (v: string) => void,
-    multiline = false,
+    { multiline = false, ...opts }: FieldOptions,
   ) => (
-    <View style={{ gap: 4 }}>
-      <Caption muted>{label}</Caption>
-      <TextField
-        value={value ?? ''}
-        onChangeText={onChangeText}
-        placeholder="–"
-        multiline={multiline}
-        style={multiline ? { minHeight: 64, textAlignVertical: 'top' } : undefined}
-      />
-    </View>
+    <TextField
+      label={label}
+      value={value ?? ''}
+      onChangeText={onChangeText}
+      multiline={multiline}
+      style={multiline ? { minHeight: 64, textAlignVertical: 'top' } : undefined}
+      {...opts}
+    />
   );
 
   const sectionLabel = (title: string) => (
@@ -91,7 +146,9 @@ export function ReportDetailsSection({ meta, onChange, isOpen, onToggle, saveSta
       <TouchableOpacity
         onPress={onToggle}
         activeOpacity={0.7}
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: isOpen }}
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 44 }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
           <Ionicons name="clipboard-outline" size={18} color={theme.colors.accent} />
@@ -115,28 +172,33 @@ export function ReportDetailsSection({ meta, onChange, isOpen, onToggle, saveSta
 
           {/* ── Saksinfo ── */}
           {sectionLabel('Saksinfo')}
-          {inputField('Saksnummer', meta.caseNumber, v => setField('caseNumber', v))}
-          {inputField('Arbeidsnummer', meta.workingNumber, v => setField('workingNumber', v))}
-          {inputField('Skadedato', meta.damageDate, v => setField('damageDate', v))}
-          {inputField('Befaringsdato', meta.inspectionDate, v => setField('inspectionDate', v))}
-          {inputField('Befaringsobjekt / romtype', meta.pictureObject, v => setField('pictureObject', v))}
+          {inputField('Saksnummer', meta.caseNumber, v => setField('caseNumber', v), { placeholder: 'Forsikringsselskapets saksnummer' })}
+          {inputField('Arbeidsnummer', meta.workingNumber, v => setField('workingNumber', v), { placeholder: 'Ditt interne arbeidsnummer' })}
+          {inputField('Skadedato', meta.damageDate, v => setField('damageDate', v), {
+            ...DATE,
+            placeholder: 'ÅÅÅÅ-MM-DD',
+            error: dateError(meta.damageDate),
+            helperText: 'Brukes også til å hente nedbør rundt skadedatoen.',
+          })}
+          {inputField('Befaringsdato', meta.inspectionDate, v => setField('inspectionDate', v), { ...DATE, placeholder: 'ÅÅÅÅ-MM-DD' })}
+          {inputField('Befaringsobjekt / romtype', meta.pictureObject, v => setField('pictureObject', v), { placeholder: 'F.eks. bad i 2. etasje' })}
 
           {/* ── Takstperson ── */}
           {sectionLabel(nb.projects.inspectorLabel)}
-          {inputField(nb.guide.nameLabel, meta.inspectionDoneByName, v => setField('inspectionDoneByName', v))}
-          {inputField(nb.guide.phoneLabel, meta.inspectionDoneByPhone, v => setField('inspectionDoneByPhone', v))}
-          {inputField(nb.guide.companyLabel, meta.inspectionDoneByCompany, v => setField('inspectionDoneByCompany', v))}
+          {inputField(nb.guide.nameLabel, meta.inspectionDoneByName, v => setField('inspectionDoneByName', v), { placeholder: 'Fornavn og etternavn', autoComplete: 'name', textContentType: 'name' })}
+          {inputField(nb.guide.phoneLabel, meta.inspectionDoneByPhone, v => setField('inspectionDoneByPhone', v), { ...PHONE, placeholder: 'F.eks. 912 34 567' })}
+          {inputField(nb.guide.companyLabel, meta.inspectionDoneByCompany, v => setField('inspectionDoneByCompany', v), { placeholder: 'Firmanavn', autoComplete: 'organization', textContentType: 'organizationName' })}
 
           {/* ── Forsikring ── */}
           {sectionLabel('Forsikring')}
-          {inputField('Forsikringsselskap', meta.insuranceCompany, v => setField('insuranceCompany', v))}
-          {inputField('Skadebehandler', meta.insuranceAgent, v => setField('insuranceAgent', v))}
+          {inputField('Forsikringsselskap', meta.insuranceCompany, v => setField('insuranceCompany', v), { placeholder: 'Navn på forsikringsselskapet' })}
+          {inputField('Skadebehandler', meta.insuranceAgent, v => setField('insuranceAgent', v), { placeholder: 'Navn på skadebehandleren' })}
 
           {/* ── Kunde ── */}
           {sectionLabel('Kunde')}
-          {inputField('Kundenavn', meta.customerName, v => setField('customerName', v))}
-          {inputField('Gateadresse', meta.addressStreet, v => setField('addressStreet', v))}
-          {inputField('Postnummer og sted', meta.addressPostcodeCity, v => setField('addressPostcodeCity', v))}
+          {inputField('Kundenavn', meta.customerName, v => setField('customerName', v), { placeholder: 'Fornavn og etternavn' })}
+          {inputField('Gateadresse', meta.addressStreet, v => setField('addressStreet', v), { placeholder: 'F.eks. Storgata 1' })}
+          {inputField('Postnummer og sted', meta.addressPostcodeCity, v => setField('addressPostcodeCity', v), { placeholder: 'F.eks. 0155 Oslo' })}
 
           {/* ── Medvirkende ── */}
           {sectionLabel('Medvirkende')}
@@ -153,15 +215,26 @@ export function ReportDetailsSection({ meta, onChange, isOpen, onToggle, saveSta
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Caption style={{ fontWeight: '600' }}>Medvirkende {i + 1}</Caption>
                 {contributors.length > 1 && (
-                  <SecondaryButton onPress={() => removeContributor(i)} width={80}>
+                  <SecondaryButton
+                    tone="danger"
+                    accessibilityLabel={`Fjern medvirkende ${i + 1}`}
+                    onPress={() =>
+                      confirmRemove(
+                        `Fjerne medvirkende ${i + 1}?`,
+                        'Feltene for denne medvirkende slettes fra rapportdetaljene.',
+                        () => removeContributor(i),
+                      )
+                    }
+                    width={96}
+                  >
                     Fjern
                   </SecondaryButton>
                 )}
               </View>
-              {inputField(nb.guide.nameLabel, c.name, v => updateContributor(i, 'name', v))}
-              {inputField('Rolle', c.role, v => updateContributor(i, 'role', v))}
-              {inputField(nb.guide.phoneLabel, c.phone, v => updateContributor(i, 'phone', v))}
-              {inputField('E-post (valgfritt)', c.email, v => updateContributor(i, 'email', v))}
+              {inputField(nb.guide.nameLabel, c.name, v => updateContributor(i, 'name', v), { placeholder: 'Fornavn og etternavn' })}
+              {inputField('Rolle', c.role, v => updateContributor(i, 'role', v), { placeholder: 'F.eks. rørlegger' })}
+              {inputField(nb.guide.phoneLabel, c.phone, v => updateContributor(i, 'phone', v), { ...PHONE, placeholder: 'F.eks. 912 34 567' })}
+              {inputField('E-post (valgfritt)', c.email, v => updateContributor(i, 'email', v), { ...EMAIL, placeholder: 'navn@firma.no' })}
             </View>
           ))}
           <SecondaryButton onPress={addContributor}>Legg til medvirkende</SecondaryButton>
@@ -181,42 +254,71 @@ export function ReportDetailsSection({ meta, onChange, isOpen, onToggle, saveSta
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Caption style={{ fontWeight: '600' }}>Bygning {i + 1}</Caption>
                 {buildings.length > 1 && (
-                  <SecondaryButton onPress={() => removeBuilding(i)} width={80}>
+                  <SecondaryButton
+                    tone="danger"
+                    accessibilityLabel={`Fjern bygning ${i + 1}`}
+                    onPress={() =>
+                      confirmRemove(
+                        `Fjerne bygning ${i + 1}?`,
+                        'Feltene for denne bygningen slettes fra rapportdetaljene.',
+                        () => removeBuilding(i),
+                      )
+                    }
+                    width={96}
+                  >
                     Fjern
                   </SecondaryButton>
                 )}
               </View>
-              {inputField('Bygningstype', b.type, v => updateBuilding(i, 'type', v))}
-              {inputField('Areal (m²)', b.size, v => updateBuilding(i, 'size', v))}
-              {inputField('Byggeår', b.buildingYear, v => updateBuilding(i, 'buildingYear', v))}
-              {inputField('Utførte oppgraderinger', b.renovationsDone, v => updateBuilding(i, 'renovationsDone', v), true)}
-              {inputField('Annen informasjon', b.otherInfo, v => updateBuilding(i, 'otherInfo', v), true)}
-              {inputField('Skadet område – beskrivelse', b.damagedAreaDescription, v => updateBuilding(i, 'damagedAreaDescription', v), true)}
-              {inputField('Skadet område – anslått verdi', b.damagedAreaEstimatedValue, v => updateBuilding(i, 'damagedAreaEstimatedValue', v))}
+              {inputField('Bygningstype', b.type, v => updateBuilding(i, 'type', v), { placeholder: 'F.eks. enebolig' })}
+              {inputField('Areal (m²)', b.size, v => updateBuilding(i, 'size', v), { keyboardType: 'decimal-pad', placeholder: 'F.eks. 120,5' })}
+              {inputField('Byggeår', b.buildingYear, v => updateBuilding(i, 'buildingYear', v), { keyboardType: 'number-pad', placeholder: 'F.eks. 1978' })}
+              {inputField('Utførte oppgraderinger', b.renovationsDone, v => updateBuilding(i, 'renovationsDone', v), { multiline: true, placeholder: 'F.eks. nytt bad i 2015' })}
+              {inputField('Annen informasjon', b.otherInfo, v => updateBuilding(i, 'otherInfo', v), { multiline: true, placeholder: 'Andre forhold ved bygningen' })}
+              {inputField('Skadet område – beskrivelse', b.damagedAreaDescription, v => updateBuilding(i, 'damagedAreaDescription', v), { multiline: true, placeholder: 'Hvor er skaden, og hva er skadet' })}
+              {inputField('Skadet område – anslått verdi', b.damagedAreaEstimatedValue, v => updateBuilding(i, 'damagedAreaEstimatedValue', v), { keyboardType: 'numeric', placeholder: 'Beløp i kroner' })}
             </View>
           ))}
           <SecondaryButton onPress={addBuilding}>Legg til bygning</SecondaryButton>
 
           {/* ── Skade og status ── */}
           {sectionLabel('Skade og status')}
-          {inputField('Mulig regress', meta.possibleRecourse, v => setField('possibleRecourse', v), true)}
-          {inputField('Tiltak for å hindre fremtidig skade', meta.measuresToPreventFutureDamage, v => setField('measuresToPreventFutureDamage', v), true)}
-          {inputField('Påbegynte utbedringer', meta.startedRepairs, v => setField('startedRepairs', v), true)}
-          {inputField('Verditap per måned (kr)', meta.habitableValueLossPerMonth, v => setField('habitableValueLossPerMonth', v))}
-          {inputField('Beboelighet – annen info', meta.habitableOtherInfo, v => setField('habitableOtherInfo', v), true)}
-          {inputField('Sammendrag', meta.summaryText, v => setField('summaryText', v), true)}
+          {inputField('Mulig regress', meta.possibleRecourse, v => setField('possibleRecourse', v), { multiline: true, placeholder: 'Hvem kan eventuelt holdes ansvarlig' })}
+          {inputField('Tiltak for å hindre fremtidig skade', meta.measuresToPreventFutureDamage, v => setField('measuresToPreventFutureDamage', v), { multiline: true, placeholder: 'Hva bør gjøres for å unngå ny skade' })}
+          {inputField('Påbegynte utbedringer', meta.startedRepairs, v => setField('startedRepairs', v), { multiline: true, placeholder: 'Hva er allerede gjort' })}
+          {inputField('Verditap per måned (kr)', meta.habitableValueLossPerMonth, v => setField('habitableValueLossPerMonth', v), { keyboardType: 'numeric', placeholder: 'Beløp i kroner' })}
+          {inputField('Beboelighet – annen info', meta.habitableOtherInfo, v => setField('habitableOtherInfo', v), { multiline: true, placeholder: 'F.eks. badet kan ikke brukes' })}
+          {inputField('Sammendrag', meta.summaryText, v => setField('summaryText', v), { multiline: true, placeholder: 'Kort oppsummering av saken' })}
 
           {/* Pilotfunn (aug 2026): lagre-knappen ble glemt — feltene autolagres. */}
           {saveError ? (
-            <Caption style={{ color: theme.colors.danger, textAlign: 'center' }}>{saveError}</Caption>
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+              accessibilityRole="alert"
+            >
+              <View aria-hidden importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+                <Ionicons name="alert-circle-outline" size={14} color={theme.colors.danger} />
+              </View>
+              <Caption style={{ color: theme.colors.danger, textAlign: 'center', flexShrink: 1 }}>{saveError}</Caption>
+            </View>
           ) : (
-            <Caption muted style={{ textAlign: 'center' }}>
-              {saveStatus === 'saving'
-                ? 'Lagrer …'
-                : saveStatus === 'saved'
-                  ? 'Lagret ✓ — feltene lagres automatisk mens du skriver'
-                  : 'Feltene lagres automatisk mens du skriver'}
-            </Caption>
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}
+              accessibilityLiveRegion="polite"
+            >
+              {saveStatus === 'saved' && (
+                <View aria-hidden importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+                  <Ionicons name="checkmark-circle-outline" size={14} color={theme.colors.muted} />
+                </View>
+              )}
+              <Caption muted style={{ textAlign: 'center', flexShrink: 1 }}>
+                {saveStatus === 'saving'
+                  ? 'Lagrer …'
+                  : saveStatus === 'saved'
+                    ? 'Lagret – feltene lagres automatisk mens du skriver'
+                    : 'Feltene lagres automatisk mens du skriver'}
+              </Caption>
+            </View>
           )}
         </View>
       )}
