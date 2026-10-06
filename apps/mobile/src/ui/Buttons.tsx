@@ -57,8 +57,8 @@ const PressableScale = ({ children, style, ...props }: ButtonProps & { backgroun
 
 export const PrimaryButton = ({ children, style, loading, disabled, icon, width, ...props }: ButtonProps) => {
   const theme = useAppTheme();
-  // Hvit på mørk modus-accent (#8FC2CB) er 1,95:1 — under WCAG AA. Mørk tekst
-  // (bakgrunnsfargen #11181B) gir 9,2:1; i lys modus er hvit på #23545C 8,4:1.
+  // Hvit på mørk modus-accent (#A1BFD7) er 1,9:1 — under WCAG AA. Mørk tekst
+  // (bakgrunnsfargen #091517) gir 9,7:1; i lys modus er hvit på #2F4A5E 9,3:1.
   const onAccent = theme.mode === 'dark' ? theme.colors.background : '#fff';
   const baseStyle: ViewStyle = {
     backgroundColor: theme.colors.accent,
