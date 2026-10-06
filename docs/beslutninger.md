@@ -6,6 +6,7 @@ Nyeste øverst. En beslutning som endres, får en ny linje; den gamle blir ståe
 
 | Dato | Beslutning | Hvem | Grunnlag |
 |---|---|---|---|
+| 05.10.2026 | Fargeprofil «Glass og stål» (tema 17 i fargebiblioteket) for nettside og app: stålblå aksent, gult bare for varsel og det kritiske, stålblått godkjenningsstempel. Valgt på skjermbilder, slik 01.10-raden krevde. Rapportmalen i Drive følger eget valg (iVerdi/WPbefaring som referanse). | Sigurd (forslag), teamet i chat | PR #31 |
 | 01.10.2026 | Sigurd eier rapportmalen: ny, generaliserbar vannskademal med eksempeltekster, bildeplasser og importfelter, levert innen søndag 05.10 (Trello). Koden tilpasses malen etterpå. | Fredrik, William, Sigurd (teammøte) | `docs/pilotlogg-ocab.md` 01.10 |
 | 01.10.2026 | Roller: Fredrik produkt (CPO) og støtte til teknisk; William CEO/CTO; Sigurd kunde- og brukerreise, mal og testing; Anders finans og salg. Trello er prosjektstyring. | Fredrik, William, Sigurd (teammøte) | samme |
 | 01.10.2026 | Neste testsak filmes med Meta-briller av Sigurd (denne eller neste uke) og kjøres gjennom pipelinen som første videosak. Pipelinen må gi tidsstempler i transkripsjonen for å hente riktig ramme. | Sigurd, William | samme; `docs/taleteknologi-laerdommer.md` |
