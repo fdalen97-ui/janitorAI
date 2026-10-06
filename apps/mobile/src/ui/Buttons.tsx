@@ -39,6 +39,10 @@ const PressableScale = ({ children, style, ...props }: ButtonProps & { backgroun
 
   return (
     <Pressable
+      // Uten rolle ble alle knapper en rolleløs <div> på web og ble ikke
+      // annonsert som knapper i VoiceOver/TalkBack (UX-revisjon 10.2026).
+      // Kallere kan overstyre via props.
+      accessibilityRole="button"
       {...props}
       onPressIn={(event) => {
         props.onPressIn?.(event);

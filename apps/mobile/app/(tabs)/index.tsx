@@ -24,6 +24,7 @@ import { getApiBaseUrl } from '@/src/config/api';
 import { fetchReportStatus, resolveStuckReport } from '@/src/sync/reportRecovery';
 import { newId } from '@/src/lib/ids';
 import { CaseFile, NO_DATE_SET, Project, UNKNOWN_INSPECTOR } from '@/src/features/projects/types';
+import { describeSkippedWizardFiles, notesFromWizardFiles } from '@/src/features/projects/wizardMedia';
 import { formatMinutes, minutesToApproved } from '@/src/features/projects/metrics';
 import {
   createTestProjectCopy,
@@ -151,6 +152,9 @@ export default function Index() {
   const [wizardDescription, setWizardDescription] = useState('');
   const [wizardMediaFiles, setWizardMediaFiles] = useState<{ name: string; size: number; type: string }[]>([]);
   const fileInputRef = useRef<any>(null);
+  // Selve File-objektene (web). wizardMediaFiles holder bare visningsdata.
+  const wizardFilesRef = useRef<File[]>([]);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
 
   // ── Token management ────────────────────────────────────────────────────────
 
@@ -341,6 +345,7 @@ export default function Index() {
     setWizardInspector('');
     setWizardDescription('');
     setWizardMediaFiles([]);
+    wizardFilesRef.current = [];
     setWizardCaseFile(null);
     setAddressHits([]);
     pickedAddressRef.current = null;
@@ -405,6 +410,9 @@ export default function Index() {
   };
 
   const createProject = async () => {
+    // Lagring av store videoer i IndexedDB tar tid; et dobbelttrykk skal
+    // ikke gi to prosjekter.
+    if (isCreatingProject) return;
     const name = wizardName.trim();
     const date = wizardDate.trim();
     const inspector = wizardInspector.trim();
@@ -416,36 +424,45 @@ export default function Index() {
       return;
     }
 
-    const profile = await loadProfile();
+    setIsCreatingProject(true);
+    try {
+      const profile = await loadProfile();
+      const { notes: wizardNotes, skipped: skippedFiles } = await notesFromWizardFiles(wizardFilesRef.current);
 
-    const newProject: Project = {
-      id: newId(),
-      name,
-      inspectionDate: date || NO_DATE_SET,
-      inspector: inspector || UNKNOWN_INSPECTOR,
-      notes: [],
-      ...(description ? { projectDescriptionText: description } : {}),
-      ...(wizardCaseFile ? { caseFile: wizardCaseFile } : {}),
-      reportMeta: {
-        contributors: [{}],
-        buildings: [{}],
-        // Saksunderlaget forhåndsutfyller rapportskjemaet (B17-sporet).
-        addressStreet: wizardCaseFile?.addressText || undefined,
-        addressPostcodeCity: wizardCaseFile
-          ? [wizardCaseFile.postCode, wizardCaseFile.postPlace].filter(Boolean).join(' ') || undefined
-          : undefined,
-        inspectionDoneByName: profile.name || undefined,
-        inspectionDoneByPhone: profile.phone || undefined,
-        inspectionDoneByCompany: profile.company || undefined,
-      },
-    };
+      const newProject: Project = {
+        id: newId(),
+        name,
+        inspectionDate: date || NO_DATE_SET,
+        inspector: inspector || UNKNOWN_INSPECTOR,
+        notes: wizardNotes,
+        ...(description ? { projectDescriptionText: description } : {}),
+        ...(wizardCaseFile ? { caseFile: wizardCaseFile } : {}),
+        reportMeta: {
+          contributors: [{}],
+          buildings: [{}],
+          // Saksunderlaget forhåndsutfyller rapportskjemaet (B17-sporet).
+          addressStreet: wizardCaseFile?.addressText || undefined,
+          addressPostcodeCity: wizardCaseFile
+            ? [wizardCaseFile.postCode, wizardCaseFile.postPlace].filter(Boolean).join(' ') || undefined
+            : undefined,
+          inspectionDoneByName: profile.name || undefined,
+          inspectionDoneByPhone: profile.phone || undefined,
+          inspectionDoneByCompany: profile.company || undefined,
+        },
+      };
 
-    const newProjects = [newProject, ...projects];
-    const saved = await saveProjectsToStorage(newProjects, newProject);
-    resetWizard();
-    // Ikke overskriv lagringsfeil-toasten med en suksessmelding (én toast vises om gangen).
-    if (saved) {
-      toast.show({ message: nb.projects.created, variant: 'success' });
+      const newProjects = [newProject, ...projects];
+      const saved = await saveProjectsToStorage(newProjects, newProject);
+      resetWizard();
+      // Ikke overskriv lagringsfeil-toasten med en suksessmelding (én toast vises om gangen).
+      const skippedMessage = describeSkippedWizardFiles(skippedFiles);
+      if (saved && skippedMessage) {
+        toast.show({ message: skippedMessage, variant: 'info', durationMs: 6000 });
+      } else if (saved) {
+        toast.show({ message: nb.projects.created, variant: 'success' });
+      }
+    } finally {
+      setIsCreatingProject(false);
     }
   };
 
@@ -707,74 +724,83 @@ export default function Index() {
                 Velg bilder og videoer fra befaringen. Du kan legge til flere etter at prosjektet er opprettet.
               </Caption>
 
-              {/* Drop zone — triggers the hidden file input */}
-              <Pressable
-                onPress={() => fileInputRef.current?.click()}
-                style={{
-                  borderWidth: 2,
-                  borderStyle: 'dashed',
-                  borderColor: wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.border,
-                  borderRadius: theme.radii.md,
-                  paddingVertical: theme.spacing.xl,
-                  paddingHorizontal: theme.spacing.lg,
-                  alignItems: 'center',
-                  gap: theme.spacing.sm,
-                  backgroundColor: wizardMediaFiles.length > 0
-                    ? `${theme.colors.accent}10`
-                    : theme.colors.surfaceSecondary,
-                }}
-              >
-                <Ionicons
-                  name="cloud-upload-outline"
-                  size={40}
-                  color={wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.muted}
-                />
-                <Body style={{ color: wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.muted, fontWeight: '600' }}>
-                  {wizardMediaFiles.length > 0 ? 'Trykk for å endre utvalget' : 'Trykk for å velge filer'}
-                </Body>
-                <Caption muted>Bilder og videoer · Valgfritt</Caption>
-              </Pressable>
+              {Platform.OS === 'web' ? (
+                <>
+                  {/* Drop zone — triggers the hidden file input */}
+                  <Pressable
+                    onPress={() => fileInputRef.current?.click()}
+                    style={{
+                      borderWidth: 2,
+                      borderStyle: 'dashed',
+                      borderColor: wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.border,
+                      borderRadius: theme.radii.md,
+                      paddingVertical: theme.spacing.xl,
+                      paddingHorizontal: theme.spacing.lg,
+                      alignItems: 'center',
+                      gap: theme.spacing.sm,
+                      backgroundColor: wizardMediaFiles.length > 0
+                        ? `${theme.colors.accent}10`
+                        : theme.colors.surfaceSecondary,
+                    }}
+                  >
+                    <Ionicons
+                      name="cloud-upload-outline"
+                      size={40}
+                      color={wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.muted}
+                    />
+                    <Body style={{ color: wizardMediaFiles.length > 0 ? theme.colors.accent : theme.colors.muted, fontWeight: '600' }}>
+                      {wizardMediaFiles.length > 0 ? 'Trykk for å endre utvalget' : 'Trykk for å velge filer'}
+                    </Body>
+                    <Caption muted>Bilder og videoer · Valgfritt</Caption>
+                  </Pressable>
 
-              {/* Hidden file input (web only) */}
-              {/* @ts-ignore */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*,video/*"
-                style={{ display: 'none' }}
-                onChange={(e: any) => {
-                  const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
-                  setWizardMediaFiles(files.map((f) => ({ name: f.name, size: f.size, type: f.type })));
-                  // Warn immediately if any selected file exceeds its media-type cap.
-                  const exceedsMediaLimit = (f: File) =>
-                    f.size > (f.type.startsWith('video')
-                      ? 500 * 1024 * 1024
-                      : 50 * 1024 * 1024);
-                  if (files.some(exceedsMediaLimit)) {
-                    recordOversizedFile();
-                  }
-                }}
-              />
+                  {/* Hidden file input (web only) */}
+                  {/* @ts-ignore */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*,video/*"
+                    style={{ display: 'none' }}
+                    onChange={(e: any) => {
+                      const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
+                      wizardFilesRef.current = files;
+                      setWizardMediaFiles(files.map((f) => ({ name: f.name, size: f.size, type: f.type })));
+                      // Warn immediately if any selected file exceeds its media-type cap.
+                      const exceedsMediaLimit = (f: File) =>
+                        f.size > (f.type.startsWith('video')
+                          ? 500 * 1024 * 1024
+                          : 50 * 1024 * 1024);
+                      if (files.some(exceedsMediaLimit)) {
+                        recordOversizedFile();
+                      }
+                    }}
+                  />
 
-              {/* Selected file list */}
-              {wizardMediaFiles.length > 0 && (
-                <GlassCard style={{ gap: theme.spacing.xs }}>
-                  <Caption muted style={{ fontWeight: '600' }}>
-                    {wizardMediaFiles.length === 1 ? '1 fil valgt' : `${wizardMediaFiles.length} filer valgt`}
-                  </Caption>
-                  {wizardMediaFiles.map((f, i) => (
-                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
-                      <Ionicons
-                        name={f.type.startsWith('video') ? 'videocam-outline' : 'image-outline'}
-                        size={15}
-                        color={theme.colors.accent}
-                      />
-                      <Caption numberOfLines={1} style={{ flex: 1 }}>{f.name}</Caption>
-                      <Caption muted>{(f.size / 1024 / 1024).toFixed(1)} MB</Caption>
-                    </View>
-                  ))}
-                </GlassCard>
+                  {/* Selected file list */}
+                  {wizardMediaFiles.length > 0 && (
+                    <GlassCard style={{ gap: theme.spacing.xs }}>
+                      <Caption muted style={{ fontWeight: '600' }}>
+                        {wizardMediaFiles.length === 1 ? '1 fil valgt' : `${wizardMediaFiles.length} filer valgt`}
+                      </Caption>
+                      {wizardMediaFiles.map((f, i) => (
+                        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs }}>
+                          <Ionicons
+                            name={f.type.startsWith('video') ? 'videocam-outline' : 'image-outline'}
+                            size={15}
+                            color={theme.colors.accent}
+                          />
+                          <Caption numberOfLines={1} style={{ flex: 1 }}>{f.name}</Caption>
+                          <Caption muted>{(f.size / 1024 / 1024).toFixed(1)} MB</Caption>
+                        </View>
+                      ))}
+                    </GlassCard>
+                  )}
+                </>
+              ) : (
+                <Caption muted>
+                  På mobil legger du til bilder og video inne i prosjektet etter at det er opprettet.
+                </Caption>
               )}
 
               <View style={{ flexDirection: 'row', gap: theme.spacing.sm }}>
@@ -841,7 +867,12 @@ export default function Index() {
                 >
                   {nb.common.back}
                 </SecondaryButton>
-                <PrimaryButton style={{ flex: 1, minHeight: 56 }} onPress={createProject}>
+                <PrimaryButton
+                  style={{ flex: 1, minHeight: 56 }}
+                  onPress={createProject}
+                  loading={isCreatingProject}
+                  disabled={isCreatingProject}
+                >
                   Opprett prosjekt
                 </PrimaryButton>
               </View>
