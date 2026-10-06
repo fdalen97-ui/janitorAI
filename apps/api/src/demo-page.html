@@ -17,18 +17,18 @@
 <meta name="twitter:card" content="summary_large_image" />
 <style>
   :root {
-    --paper: #FFFFFF; --surface: #F1F3F3; --ink: #1B262B; --muted: #566670;
-    --border: #D8DEDF; --accent: #23545C; --accent-strong: #1A4148; --accent-pale: #E0ECEE;
-    --ok: #14532D; --ok-bg: #DCEFE3; --ok-border: #8FC9A0;
-    --warn: #7F5A1D; --warn-bg: #FCF3DC; --warn-border: #E3C98A;
+    --paper: #FBFEFF; --surface: #E8F5F8; --ink: #072227; --muted: #596D71;
+    --border: #C7D9DC; --accent: #2F4A5E; --accent-strong: #1D374B; --accent-pale: #E5ECF3;
+    --ok: #0D4A22; --ok-bg: #D7F4DC; --ok-border: #8FC9A0;
+    --warn: #6D5900; --warn-bg: #FFF0BF; --warn-border: #DECA89;
     --bad: #7F1D1D; --bad-bg: #FCE5E1;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #1A2327; --surface: #11181B; --ink: #E4EAEC; --muted: #9AA8AE;
-      --border: #324047; --accent: #8FC2CB; --accent-strong: #B3D8DE; --accent-pale: #16262C;
-      --ok: #8FC9A0; --ok-bg: #103524; --ok-border: #166534;
-      --warn: #E3C08A; --warn-bg: #2B2214; --warn-border: #4A3A20;
+      --paper: #132022; --surface: #091517; --ink: #E6ECEE; --muted: #9FAEB1;
+      --border: #2F3D40; --accent: #A1BFD7; --accent-strong: #B4D2EB; --accent-pale: #242C33;
+      --ok: #A1E4AE; --ok-bg: #1A3520; --ok-border: #166534;
+      --warn: #E6D088; --warn-bg: #2E2607; --warn-border: #524723;
       --bad: #EFAF9F; --bad-bg: #3B1513;
     }
   }
@@ -40,7 +40,7 @@
   }
   .page { max-width: 560px; margin: 0 auto; padding: 36px 16px 56px; display: flex; flex-direction: column; gap: 18px; }
   .brand { display: flex; align-items: center; gap: 10px; }
-  .brand .sq { width: 20px; height: 20px; background: #23545C; flex: none;  display:flex; align-items:center; justify-content:center; color:#F1F3F3; font-weight:700; font-size:13px; line-height:1; }
+  .brand .sq { width: 20px; height: 20px; background: #2F4A5E; flex: none;  display:flex; align-items:center; justify-content:center; color:#FBFEFF; font-weight:700; font-size:13px; line-height:1; }
   .brand b { font-size: 15px; letter-spacing: 0.01em; }
   h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
   .lede { margin: 0; color: var(--muted); font-size: 14.5px; }
@@ -77,9 +77,9 @@
   .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: r 0.8s linear infinite; vertical-align: -2px; }
   @keyframes r { to { transform: rotate(360deg); } }
   @media (prefers-color-scheme: dark) {
-    /* Hvit tekst på --accent #8FC2CB er 1,95:1 — under WCAG AA (4,5:1). Mørk tekst gir 9,2:1. */
-    button { color: #11181B; }
-    .spin { border-color: rgba(17, 24, 27, 0.35); border-top-color: #11181B; }
+    /* Hvit tekst på mørk modus-aksenten #A1BFD7 er under WCAG AA (4,5:1). Mørk tekst gir 9,9:1. */
+    button { color: #051214; }
+    .spin { border-color: rgba(5, 18, 20, 0.35); border-top-color: #051214; }
   }
   /* Visuelt skjult, men lest av skjermleser (WCAG 1.3.1). */
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
