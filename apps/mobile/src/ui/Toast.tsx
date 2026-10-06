@@ -40,12 +40,12 @@ const COLORS: Record<'light' | 'dark', Record<ToastVariant, { bg: string; fg: st
   light: {
     success: { bg: '#DCEFE3', fg: '#14532D', border: '#8FC9A0' },
     error: { bg: '#FCE5E1', fg: '#7F1D1D', border: '#EFAF9F' },
-    info: { bg: '#E0ECEE', fg: '#1A4148', border: '#9FC4CA' },
+    info: { bg: '#E5ECF3', fg: '#1D374B', border: '#A8C2D6' },
   },
   dark: {
     success: { bg: '#0F2E1D', fg: '#8FC9A0', border: '#166534' },
     error: { bg: '#3B1513', fg: '#EFAF9F', border: '#7F1D1D' },
-    info: { bg: '#16262B', fg: '#A5CBD3', border: '#23545C' },
+    info: { bg: '#192834', fg: '#B4D2EB', border: '#3C596F' },
   },
 };
 

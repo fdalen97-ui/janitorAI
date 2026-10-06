@@ -28,19 +28,19 @@
 -->
 <style>
   :root {
-    --paper: #FFFFFF; --surface: #F1F3F3; --ink: #1B262B; --muted: #566670;
-    --border: #D8DEDF; --accent: #23545C; --accent-pale: #E0ECEE;
-    --ok: #14532D; --ok-bg: #DCEFE3; --ok-border: #8FC9A0;
-    --warn: #7F5A1D; --warn-bg: #FCF3DC; --warn-border: #E3C98A;
-    --copper: #9F5A2C; --stamp-ink: #7F4A22; --stamp-bg: #F7ECE1; --stamp-border: #C98B5A;
+    --paper: #FBFEFF; --surface: #E8F5F8; --ink: #072227; --muted: #596D71;
+    --border: #C7D9DC; --accent: #2F4A5E; --accent-pale: #E5ECF3;
+    --ok: #0D4A22; --ok-bg: #D7F4DC; --ok-border: #8FC9A0;
+    --warn: #6D5900; --warn-bg: #FFF0BF; --warn-border: #DECA89;
+    --copper: #2F4A5E; --stamp-ink: #2F4A5E; --stamp-bg: #E7F0F7; --stamp-border: #2F4A5E;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #1A2327; --surface: #11181B; --ink: #E4EAEC; --muted: #9AA8AE;
-      --border: #324047; --accent: #8FC2CB; --accent-pale: #16262C;
-      --ok: #8FC9A0; --ok-bg: #103524; --ok-border: #166534;
-      --warn: #E3C08A; --warn-bg: #2B2214; --warn-border: #4A3A20;
-      --copper: #C98B5A; --stamp-ink: #DBA173; --stamp-bg: #2A2019; --stamp-border: #7F4A22;
+      --paper: #132022; --surface: #091517; --ink: #E6ECEE; --muted: #9FAEB1;
+      --border: #2F3D40; --accent: #A1BFD7; --accent-pale: #242C33;
+      --ok: #A1E4AE; --ok-bg: #1A3520; --ok-border: #166534;
+      --warn: #E6D088; --warn-bg: #2E2607; --warn-border: #524723;
+      --copper: #97B5CD; --stamp-ink: #A4C2DA; --stamp-bg: #1F282E; --stamp-border: #627E94;
     }
   }
   * { box-sizing: border-box; }
@@ -51,7 +51,7 @@
   }
   .page { max-width: 840px; margin: 0 auto; padding: 32px 18px 64px; display: flex; flex-direction: column; gap: 20px; }
   .brand { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .brand .sq { width: 20px; height: 20px; background: #23545C; flex: none; display: flex; align-items: center; justify-content: center; color: #F1F3F3; font-weight: 700; font-size: 13px; line-height: 1; }
+  .brand .sq { width: 20px; height: 20px; background: #2F4A5E; flex: none; display: flex; align-items: center; justify-content: center; color: #FBFEFF; font-weight: 700; font-size: 13px; line-height: 1; }
   .brand b { font-size: 15px; letter-spacing: 0.02em; }
   .brand a { margin-left: auto; color: var(--accent); font-size: 14px; font-weight: 600; text-decoration: none; }
   .pill {
@@ -87,7 +87,7 @@
   .btn { display: inline-block; text-decoration: none; font-weight: 700; font-size: 15px; border-radius: 10px; padding: 13px 22px; min-height: 48px; }
   .btn.primary { background: var(--accent); color: #fff; }
   .btn.ghost { border: 1.5px solid var(--border); color: var(--ink); background: var(--paper); }
-  @media (prefers-color-scheme: dark) { .btn.primary { color: #11181B; } }
+  @media (prefers-color-scheme: dark) { .btn.primary { color: #051214; } }
   footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
   a { color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -149,8 +149,8 @@
         <svg viewBox="0 0 160 100" role="img" aria-label="B1 · Kjellervegg bak sofa: fuktmerker 0–30 cm">
           <rect width="160" height="100" fill="#E9E4DA"/><rect y="86" width="160" height="14" fill="#C9C2B4"/>
           <defs><linearGradient id="st1" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#8A4B2E" stop-opacity=".55"/><stop offset="1" stop-color="#8A4B2E" stop-opacity="0"/></linearGradient></defs>
-          <rect x="0" y="58" width="160" height="28" fill="url(#st1)"/><rect x="34" y="60" width="92" height="26" rx="6" fill="#566670" opacity=".55"/>
-          <text x="6" y="12" font-size="8" font-family="monospace" fill="#1B262B">KJELLER · VEGG BAK SOFA</text>
+          <rect x="0" y="58" width="160" height="28" fill="url(#st1)"/><rect x="34" y="60" width="92" height="26" rx="6" fill="#596D71" opacity=".55"/>
+          <text x="6" y="12" font-size="8" font-family="monospace" fill="#072227">KJELLER · VEGG BAK SOFA</text>
         </svg>
         <div class="meta"><div class="cap">B1 · Kjellervegg bak sofa: fuktmerker 0–30 cm</div><div class="muted">Tatt 28.09.2026 · Kjeller</div></div>
       </div>
@@ -158,14 +158,14 @@
         <svg viewBox="0 0 160 100" role="img" aria-label="B2 · Saltutslag nederst på grunnmuren">
           <rect width="160" height="100" fill="#B9B6AE"/><rect y="70" width="160" height="30" fill="#A7A39A"/>
           <circle cx="1" cy="74" r="1" fill="#FFF" opacity=".85"/><circle cx="38" cy="87" r="2" fill="#FFF" opacity=".85"/><circle cx="75" cy="76" r="3" fill="#FFF" opacity=".85"/><circle cx="112" cy="89" r="1" fill="#FFF" opacity=".85"/><circle cx="149" cy="78" r="2" fill="#FFF" opacity=".85"/><circle cx="28" cy="91" r="3" fill="#FFF" opacity=".85"/><circle cx="65" cy="80" r="1" fill="#FFF" opacity=".85"/><circle cx="102" cy="93" r="2" fill="#FFF" opacity=".85"/><circle cx="139" cy="82" r="3" fill="#FFF" opacity=".85"/><circle cx="18" cy="95" r="1" fill="#FFF" opacity=".85"/><circle cx="55" cy="84" r="2" fill="#FFF" opacity=".85"/><circle cx="92" cy="97" r="3" fill="#FFF" opacity=".85"/><circle cx="129" cy="86" r="1" fill="#FFF" opacity=".85"/><circle cx="8" cy="75" r="2" fill="#FFF" opacity=".85"/><circle cx="45" cy="88" r="3" fill="#FFF" opacity=".85"/><circle cx="82" cy="77" r="1" fill="#FFF" opacity=".85"/><circle cx="119" cy="90" r="2" fill="#FFF" opacity=".85"/><circle cx="156" cy="79" r="3" fill="#FFF" opacity=".85"/>
-          <text x="6" y="12" font-size="8" font-family="monospace" fill="#1B262B">GRUNNMUR · SALTUTSLAG</text>
+          <text x="6" y="12" font-size="8" font-family="monospace" fill="#072227">GRUNNMUR · SALTUTSLAG</text>
         </svg>
         <div class="meta"><div class="cap">B2 · Saltutslag nederst på grunnmuren</div><div class="muted">Tatt 28.09.2026 · Kjeller</div></div>
       </div>
       <div class="ev">
         <svg viewBox="0 0 160 100" role="img" aria-label="B3 · Rørgjennomføring til utekran: tørr">
-          <rect width="160" height="100" fill="#E9E4DA"/><circle cx="80" cy="42" r="12" fill="none" stroke="#566670" stroke-width="3"/><rect x="92" y="38" width="68" height="8" fill="#566670"/>
-          <text x="6" y="12" font-size="8" font-family="monospace" fill="#1B262B">RØR TIL UTEKRAN · 1 M</text><text x="6" y="92" font-size="8" font-family="monospace" fill="#1B262B">TØRT RUNDT GJENNOMFØRING</text>
+          <rect width="160" height="100" fill="#E9E4DA"/><circle cx="80" cy="42" r="12" fill="none" stroke="#596D71" stroke-width="3"/><rect x="92" y="38" width="68" height="8" fill="#596D71"/>
+          <text x="6" y="12" font-size="8" font-family="monospace" fill="#072227">RØR TIL UTEKRAN · 1 M</text><text x="6" y="92" font-size="8" font-family="monospace" fill="#072227">TØRT RUNDT GJENNOMFØRING</text>
         </svg>
         <div class="meta"><div class="cap">B3 · Rørgjennomføring til utekran: tørr</div><div class="muted">Tatt 28.09.2026 · Kjeller</div></div>
       </div>
@@ -173,9 +173,9 @@
         <svg viewBox="0 0 160 100" role="img" aria-label="B4 · Terreng faller mot mur, ubeskyttet grunnmursplast">
           <rect width="160" height="100" fill="#A9C4D0"/><rect x="0" y="18" width="92" height="60" fill="#D8D2C4"/><rect x="0" y="64" width="92" height="16" fill="#2B2B2B"/>
           <polygon points="0,86 160,62 160,100 0,100" fill="#7A6A55"/>
-          <defs><marker id="ar" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#1B262B"/></marker></defs>
-          <path d="M150 70 L112 76" stroke="#1B262B" stroke-width="2" marker-end="url(#ar)"/>
-          <text x="96" y="12" font-size="8" font-family="monospace" fill="#1B262B">UTVENDIG</text><text x="96" y="56" font-size="7" font-family="monospace" fill="#1B262B">FALL MOT MUR</text>
+          <defs><marker id="ar" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#072227"/></marker></defs>
+          <path d="M150 70 L112 76" stroke="#072227" stroke-width="2" marker-end="url(#ar)"/>
+          <text x="96" y="12" font-size="8" font-family="monospace" fill="#072227">UTVENDIG</text><text x="96" y="56" font-size="7" font-family="monospace" fill="#072227">FALL MOT MUR</text>
         </svg>
         <div class="meta"><div class="cap">B4 · Terreng faller mot mur, ubeskyttet grunnmursplast</div><div class="muted">Tatt 28.09.2026 · Utvendig</div></div>
       </div>

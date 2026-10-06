@@ -80,6 +80,13 @@ pitcher og store valg:
 - `/10xthis` — bygg idéen på nytt med 10x ambisjon.
 - `/eli5` — forklar kontrakt/jus/fagterm enkelt (+ flagg risiko).
 
+## UX-skill (`.claude/skills/ui-ux-pro-max`)
+Kjernen av nextlevelbuilder/ui-ux-pro-max-skill (MIT), lagt inn 06.10.2026. Bruk den
+til **UX-kontroll**: `--domain ux` og `--stack react-native` / `html-tailwind`.
+**Ikke** til farger, fonter eller stil (`--design-system`, `--domain color|typography|style`):
+designsystemet er «Glass og stål» i `apps/mobile/src/ui/theme.tsx` og salgssidenes `:root`,
+og det vinner over skillens forslag. Siste revisjon: `docs/ux-revisjon-2026-10.md`.
+
 ## Branch & commit
 Utvikle på `claude/visualisering-losning-xa7udi`. Commit + push når arbeid er
 verifisert. Ikke opprett PR uten at det er bedt om.
