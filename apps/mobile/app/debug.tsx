@@ -1,22 +1,34 @@
 /**
- * Debug Screen
- * 
- * Shows runtime configuration and API health status.
- * Only accessible in development builds (__DEV__ === true).
+ * Feilsøkingsskjerm
+ *
+ * Viser kjøretidskonfigurasjon og helsestatus for API-et.
+ * Bare tilgjengelig i utviklingsbygg (isDevelopment()).
  */
 
+import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Pressable, SafeAreaView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { ActivityIndicator, Platform, View } from 'react-native';
+
 import { getApiBaseUrl, getApiHealthUrl, getBuildProfile, isDevelopment } from '../src/config/api';
+import { Body, Caption, GlassCard, PrimaryButton, Screen, SecondaryButton, Title, useAppTheme } from '../src/ui';
 
 interface HealthCheckResponse {
   status: string;
   [key: string]: unknown;
 }
 
+const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' });
+
+const Row = ({ label, value }: { label: string; value: string }) => (
+  <View style={{ gap: 2 }}>
+    <Caption muted style={{ fontWeight: '600' }}>{label}</Caption>
+    <Body selectable>{value}</Body>
+  </View>
+);
+
 export default function DebugScreen() {
   const router = useRouter();
+  const theme = useAppTheme();
   const [healthStatus, setHealthStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const [healthData, setHealthData] = useState<HealthCheckResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -50,207 +62,97 @@ export default function DebugScreen() {
     }
   };
 
-  // Prevent access in production builds
+  const header = <Stack.Screen options={{ title: 'Feilsøking' }} />;
+
+  // Ikke tilgjengelig i produksjonsbygg
   if (!isDevelopment()) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Debug screen not available in production builds</Text>
-          <Pressable style={styles.button} onPress={() => router.back()}>
-            <Text style={styles.buttonText}>Go Back</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
+      <>
+        {header}
+        <Screen scrollable={false}>
+          <View style={{ flex: 1, justifyContent: 'center', gap: theme.spacing.md }}>
+            <Title accessibilityRole="header">Feilsøking er ikke tilgjengelig</Title>
+            <Body muted>Denne siden finnes bare i utviklingsbygg.</Body>
+            <PrimaryButton onPress={() => router.back()}>Gå tilbake</PrimaryButton>
+          </View>
+        </Screen>
+      </>
     );
   }
 
+  const codeBlockStyle = {
+    backgroundColor: theme.colors.background,
+    borderRadius: theme.radii.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    padding: theme.spacing.sm,
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Debug Information</Text>
+    <>
+      {header}
+      <Screen>
+        <View style={{ gap: theme.spacing.md }}>
+          <Title accessibilityRole="header">Feilsøkingsinformasjon</Title>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Build Configuration</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Build Profile:</Text>
-            <Text style={styles.value}>{getBuildProfile() || 'Not configured'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Development Mode:</Text>
-            <Text style={styles.value}>{isDevelopment() ? 'Yes' : 'No'}</Text>
-          </View>
+          <GlassCard style={{ gap: theme.spacing.sm }}>
+            <Title accessibilityRole="header" style={{ fontSize: 18 }}>Byggkonfigurasjon</Title>
+            <Row label="Byggprofil" value={getBuildProfile() || 'Ikke konfigurert'} />
+            <Row label="Utviklingsmodus" value={isDevelopment() ? 'Ja' : 'Nei'} />
+          </GlassCard>
+
+          <GlassCard style={{ gap: theme.spacing.sm }}>
+            <Title accessibilityRole="header" style={{ fontSize: 18 }}>API-konfigurasjon</Title>
+            <Row label="Base-URL" value={getApiBaseUrl()} />
+            <Row label="Helse-URL" value={getApiHealthUrl()} />
+          </GlassCard>
+
+          <GlassCard style={{ gap: theme.spacing.sm }}>
+            <Title accessibilityRole="header" style={{ fontSize: 18 }}>Helsesjekk av API-et</Title>
+
+            {healthStatus === 'loading' && (
+              <View style={{ alignItems: 'center', gap: theme.spacing.sm }} accessibilityLiveRegion="polite">
+                <ActivityIndicator size="large" color={theme.colors.accent} />
+                <Body muted>Sjekker API-et …</Body>
+              </View>
+            )}
+
+            {healthStatus === 'ok' && (
+              <View style={{ gap: theme.spacing.sm }} accessibilityLiveRegion="polite">
+                <Body style={{ color: theme.colors.accentStrong, fontWeight: '600' }}>API-et svarer.</Body>
+                {healthData && (
+                  <View style={codeBlockStyle}>
+                    <Caption selectable style={{ fontFamily: MONO }}>
+                      {JSON.stringify(healthData, null, 2)}
+                    </Caption>
+                  </View>
+                )}
+              </View>
+            )}
+
+            {healthStatus === 'error' && (
+              <View style={{ gap: theme.spacing.sm }} accessibilityLiveRegion="polite">
+                <Body style={{ color: theme.colors.danger, fontWeight: '600' }}>
+                  API-et svarer ikke. Sjekk adressen over og at serveren kjører, og prøv igjen.
+                </Body>
+                {!!errorMessage && (
+                  <View style={codeBlockStyle}>
+                    <Caption selectable style={{ fontFamily: MONO, color: theme.colors.danger }}>
+                      {errorMessage}
+                    </Caption>
+                  </View>
+                )}
+              </View>
+            )}
+
+            <PrimaryButton onPress={checkHealth} loading={healthStatus === 'loading'}>
+              Sjekk på nytt
+            </PrimaryButton>
+          </GlassCard>
+
+          <SecondaryButton onPress={() => router.back()}>Gå tilbake</SecondaryButton>
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>API Configuration</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Base URL:</Text>
-            <Text style={styles.value}>{getApiBaseUrl()}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Health URL:</Text>
-            <Text style={styles.value}>{getApiHealthUrl()}</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>API Health Check</Text>
-          
-          {healthStatus === 'loading' && (
-            <View style={styles.statusContainer}>
-              <ActivityIndicator size="large" color="#2F4A5E" />
-              <Text style={styles.statusText}>Checking health...</Text>
-            </View>
-          )}
-
-          {healthStatus === 'ok' && (
-            <View style={styles.statusContainer}>
-              <Text style={styles.statusSuccess}>API-et svarer</Text>
-              {healthData && (
-                <View style={styles.codeBlock}>
-                  <Text style={styles.codeText}>{JSON.stringify(healthData, null, 2)}</Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {healthStatus === 'error' && (
-            <View style={styles.statusContainer}>
-              <Text style={styles.statusError}>✗ Health check failed</Text>
-              {errorMessage && (
-                <View style={styles.codeBlock}>
-                  <Text style={styles.errorDetailText}>{errorMessage}</Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          <Pressable style={styles.button} onPress={checkHealth}>
-            <Text style={styles.buttonText}>Refresh Health Check</Text>
-          </Pressable>
-        </View>
-
-        <Pressable style={[styles.button, styles.backButton]} onPress={() => router.back()}>
-          <Text style={styles.buttonText}>Go Back</Text>
-        </Pressable>
-      </ScrollView>
-    </SafeAreaView>
+      </Screen>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E8F5F8',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#2F4A5E',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    width: 140,
-  },
-  value: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-  },
-  statusContainer: {
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  statusText: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 10,
-  },
-  statusSuccess: {
-    fontSize: 16,
-    color: '#2E7D4F',
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  statusError: {
-    fontSize: 16,
-    color: '#A6453A',
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  codeBlock: {
-    backgroundColor: '#E8F5F8',
-    borderRadius: 5,
-    padding: 10,
-    marginTop: 10,
-    width: '100%',
-  },
-  codeText: {
-    fontFamily: 'monospace',
-    fontSize: 12,
-    color: '#333',
-  },
-  errorDetailText: {
-    fontFamily: 'monospace',
-    fontSize: 12,
-    color: '#A6453A',
-  },
-  button: {
-    backgroundColor: '#2F4A5E',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 15,
-  },
-  backButton: {
-    backgroundColor: '#596D71',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#A6453A',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-});

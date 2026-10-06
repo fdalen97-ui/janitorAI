@@ -15,7 +15,7 @@ export default function NotFoundScreen() {
           <Caption style={{ color: theme.colors.muted, letterSpacing: 1.5, textTransform: 'uppercase' }}>
             {nb.notFound.code}
           </Caption>
-          <Title>{nb.notFound.title}</Title>
+          <Title accessibilityRole="header">{nb.notFound.title}</Title>
           <Body muted>{nb.notFound.hint}</Body>
           <Link href="/" asChild>
             <PrimaryButton style={{ alignSelf: 'flex-start', marginTop: 6 }}>{nb.notFound.goHome}</PrimaryButton>

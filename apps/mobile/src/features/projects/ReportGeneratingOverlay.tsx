@@ -5,6 +5,7 @@ import Animated, {
   FadeIn,
   FadeInDown,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withRepeat,
   withSequence,
@@ -12,9 +13,12 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { nb } from '@/src/i18n/nb';
-import { Body, Caption, useAppTheme } from '@/src/ui';
+import { Body, Caption, SecondaryButton, useAppTheme, useToast } from '@/src/ui';
 
 // ─── Step definitions ─────────────────────────────────────────────────────────
+// NB: trinnene går videre på faste tidsur — klienten får ingen fremdrift fra
+// serveren. Derfor merkes listen som et anslag i UI-et (UX-revisjon 10.2026),
+// og siste trinn blir stående aktivt til svaret faktisk kommer.
 
 type Step = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -33,10 +37,12 @@ const STEPS: Step[] = [
 
 function PulsingOrb() {
   const theme = useAppTheme();
+  const reduceMotion = useReducedMotion();
   const scale = useSharedValue(1);
-  const opacity = useSharedValue(0.55);
+  const opacity = useSharedValue(reduceMotion ? 1 : 0.55);
 
   useEffect(() => {
+    if (reduceMotion) return;
     scale.value = withRepeat(
       withSequence(
         withTiming(1.18, { duration: 900 }),
@@ -53,7 +59,7 @@ function PulsingOrb() {
       -1,
       false,
     );
-  }, [opacity, scale]);
+  }, [opacity, scale, reduceMotion]);
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -95,7 +101,7 @@ function PulsingOrb() {
               justifyContent: 'center',
             }}
           >
-            <Ionicons name="document-text-outline" size={18} color="#fff" />
+            <Ionicons name="document-text-outline" size={18} color={theme.colors.onAccent} />
           </View>
         </View>
       </Animated.View>
@@ -107,15 +113,27 @@ function PulsingOrb() {
 
 function AnimatedDots() {
   const theme = useAppTheme();
+  const reduceMotion = useReducedMotion();
   const [count, setCount] = useState(1);
 
   useEffect(() => {
+    // Redusert bevegelse: ingen blinkende prikker, bare statisk tekst.
+    if (reduceMotion) return;
     const id = setInterval(() => setCount(c => (c % 3) + 1), 500);
     return () => clearInterval(id);
-  }, []);
+  }, [reduceMotion]);
+
+  if (reduceMotion) {
+    return <Caption muted>Pågår</Caption>;
+  }
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+    <View
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}
+      aria-hidden
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+    >
       {[0, 1, 2].map(i => (
         <View
           key={i}
@@ -144,6 +162,9 @@ function StepRow({ step, state, index }: { step: Step; state: StepState; index: 
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 70).springify()}
+      accessible
+      focusable={false}
+      accessibilityLabel={`${step.label}: ${isDone ? 'antatt ferdig' : isActive ? 'antatt pågående' : 'venter'}`}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -197,13 +218,27 @@ type Props = {
 
 export function ReportGeneratingOverlay({ visible }: Props) {
   const theme = useAppTheme();
+  const toast = useToast();
   const steps = STEPS;
   const [currentStep, setCurrentStep] = useState(0);
+  // «Skjul» lukker bare visningen — genereringen eies av kalleren og løper
+  // videre; suksess-/feilmeldingen kommer som toast når den er ferdig.
+  const [hidden, setHidden] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const hide = () => {
+    setHidden(true);
+    toast.show({
+      message: 'Rapporten lages videre i bakgrunnen. Du får en melding når den er klar.',
+      variant: 'info',
+      durationMs: 5000,
+    });
+  };
 
   useEffect(() => {
     if (!visible) {
       setCurrentStep(0);
+      setHidden(false);
       if (timerRef.current) clearTimeout(timerRef.current);
       return;
     }
@@ -224,10 +259,17 @@ export function ReportGeneratingOverlay({ visible }: Props) {
     };
   }, [visible, steps]);
 
-  if (!visible) return null;
+  if (!visible || hidden) return null;
 
   return (
-    <Modal transparent animationType="fade" visible={visible} statusBarTranslucent>
+    <Modal
+      transparent
+      animationType="fade"
+      visible={visible && !hidden}
+      statusBarTranslucent
+      // Android-tilbakeknappen (og Esc på web) skjuler bare overlegget.
+      onRequestClose={hide}
+    >
       <View
         style={{
           flex: 1,
@@ -260,9 +302,11 @@ export function ReportGeneratingOverlay({ visible }: Props) {
             {nb.report.generating}
           </Body>
           <Caption muted style={{ textAlign: 'center', marginBottom: 22 }}>
-            KI-en jobber med rapporten — dette kan ta litt tid.
+            KI-en jobber med rapporten. Det kan ta noen minutter. Trinnene under er et anslag,
+            ikke målt fremdrift.
           </Caption>
 
+          <Caption muted style={{ fontWeight: '600', marginBottom: 4 }}>Typiske trinn (anslag)</Caption>
           <View style={{ gap: 2 }}>
             {steps.map((step, i) => (
               <StepRow
@@ -273,6 +317,10 @@ export function ReportGeneratingOverlay({ visible }: Props) {
               />
             ))}
           </View>
+
+          <SecondaryButton onPress={hide} style={{ marginTop: 20 }}>
+            Skjul – rapporten lages videre i bakgrunnen
+          </SecondaryButton>
         </Animated.View>
       </View>
     </Modal>
