@@ -21,30 +21,30 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'apps/api/src/assets/og-bilde.png');
 const COPY = join(ROOT, 'explainer/og-bilde.png');
 
-// Samme palett som salgssidene (Skifer og kobber, lys modus).
+// Samme palett som salgssidene («Glass og stål», lys modus).
 const HTML = `<!DOCTYPE html>
 <html lang="nb"><head><meta charset="utf-8"><style>
   * { box-sizing: border-box; margin: 0; }
   html, body { width: 1200px; height: 630px; }
   body {
-    background: #F1F3F3; color: #1B262B; position: relative; overflow: hidden;
+    background: #E8F5F8; color: #072227; position: relative; overflow: hidden;
     font-family: 'Inter', 'DejaVu Sans', 'Liberation Sans', sans-serif;
   }
-  .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: #23545C; }
+  .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 20px; background: #2F4A5E; }
   .wrap { position: absolute; left: 92px; right: 80px; top: 50px; bottom: 56px;
           display: flex; flex-direction: column; }
   .brand { display: flex; align-items: center; gap: 14px; }
-  .brand .sq { width: 47px; height: 47px; background: #23545C; color: #F1F3F3;
+  .brand .sq { width: 47px; height: 47px; background: #2F4A5E; color: #FBFEFF;
                font-weight: 700; font-size: 26px; display: flex; align-items: center;
                justify-content: center; }
   .brand b { font-size: 30px; font-weight: 700; }
   h1 { margin-top: 38px; font-size: 56px; line-height: 1.12; font-weight: 700;
        letter-spacing: -0.01em; }
-  h1 .accent { color: #23545C; display: block; margin-top: 6px; }
+  h1 .accent { color: #2F4A5E; display: block; margin-top: 6px; }
   .foot { margin-top: auto; display: flex; align-items: center; gap: 22px; }
-  .stamp { border: 2px solid #C98B5A; background: #F7ECE1; color: #7F4A22;
+  .stamp { border: 2px solid #2F4A5E; background: #E7F0F7; color: #2F4A5E;
            font-weight: 700; font-size: 20px; padding: 8px 18px; border-radius: 8px; }
-  .facts { font-size: 21px; color: #566670; }
+  .facts { font-size: 21px; color: #596D71; }
 </style></head><body>
   <div class="bar"></div>
   <div class="wrap">
