@@ -11,11 +11,26 @@ import {
 } from '@/src/sync/syncStatus';
 import { Caption, useAppTheme } from '@/src/ui';
 
-// Amber palette for the "file too large" banner — distinct from the red danger
-// colour used for the generic connectivity-failure banner.
-const AMBER_BG = '#F59E0B22';
-const AMBER_BORDER = '#F59E0B88';
-const AMBER_TEXT = '#92400E';
+// Varselbannerne («fil for stor», «tapte bilder») bruker temaets warn-farger,
+// som har egne mørk-modus-varianter — de hardkodede ravfargene hadde ikke det
+// (UX-revisjon 10.2026). Rødt (danger) er forbeholdt synkfeil.
+
+/**
+ * Lukkeknapp med 44×44 trykkflate (padding, ikke hitSlop — hitSlop virker
+ * ikke pålitelig på web). Ikonet er pynt; etiketten bærer betydningen.
+ */
+function DismissButton({ onPress, label, color }: { onPress: () => void; label: string; color: string }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center', margin: -8 }}
+    >
+      <Ionicons name="close-outline" size={20} color={color} />
+    </Pressable>
+  );
+}
 
 /**
  * Renders up to two inline banners:
@@ -84,13 +99,11 @@ export default function MediaUploadErrorBanner() {
             Et prosjekt er for stort til å synkroniseres til serveren, og nye endringer i det blir
             bare lagret på denne enheten. Ta kontakt med oss, så løser vi det.
           </Caption>
-          <Pressable
+          <DismissButton
             onPress={() => setTooLargeDismissed(true)}
-            accessibilityLabel="Lukk varsel om prosjektstørrelse"
-            hitSlop={8}
-          >
-            <Ionicons name="close-outline" size={18} color={theme.colors.danger} />
-          </Pressable>
+            label="Lukk varsel om prosjektstørrelse"
+            color={theme.colors.danger}
+          />
         </View>
       )}
       {showLost && lostMedia && (
@@ -101,26 +114,24 @@ export default function MediaUploadErrorBanner() {
             gap: theme.spacing.sm,
             paddingHorizontal: theme.spacing.md,
             paddingVertical: theme.spacing.sm,
-            backgroundColor: AMBER_BG,
+            backgroundColor: theme.colors.warnBg,
             borderRadius: theme.radii.md,
             borderWidth: 1,
-            borderColor: AMBER_BORDER,
+            borderColor: theme.colors.warnBorder,
             marginBottom: theme.spacing.sm,
           }}
         >
-          <Ionicons name="image-outline" size={18} color={AMBER_TEXT} />
-          <Caption style={{ flex: 1, color: AMBER_TEXT }}>
+          <Ionicons name="image-outline" size={18} color={theme.colors.warn} />
+          <Caption style={{ flex: 1, color: theme.colors.warn }}>
             {lostMedia.count === 1
               ? 'Ett bilde gikk tapt fordi appen ble lukket før opplastingen var ferdig. Legg det til på nytt fra kamerarullen.'
               : `${lostMedia.count} bilder gikk tapt fordi appen ble lukket før opplastingen var ferdig. Legg dem til på nytt fra kamerarullen.`}
           </Caption>
-          <Pressable
+          <DismissButton
             onPress={() => clearLostMedia()}
-            accessibilityLabel="Lukk varsel om tapte bilder"
-            hitSlop={8}
-          >
-            <Ionicons name="close-outline" size={18} color={AMBER_TEXT} />
-          </Pressable>
+            label="Lukk varsel om tapte bilder"
+            color={theme.colors.warn}
+          />
         </View>
       )}
       {showOversized && (
@@ -131,25 +142,23 @@ export default function MediaUploadErrorBanner() {
             gap: theme.spacing.sm,
             paddingHorizontal: theme.spacing.md,
             paddingVertical: theme.spacing.sm,
-            backgroundColor: AMBER_BG,
+            backgroundColor: theme.colors.warnBg,
             borderRadius: theme.radii.md,
             borderWidth: 1,
-            borderColor: AMBER_BORDER,
+            borderColor: theme.colors.warnBorder,
             marginBottom: theme.spacing.sm,
           }}
         >
-          <Ionicons name="alert-circle-outline" size={18} color={AMBER_TEXT} />
-          <Caption style={{ flex: 1, color: AMBER_TEXT }}>
+          <Ionicons name="alert-circle-outline" size={18} color={theme.colors.warn} />
+          <Caption style={{ flex: 1, color: theme.colors.warn }}>
             Én eller flere filer er for store til å lastes opp (bilder maks 50 MB, videoer maks
             500 MB). Kort ned videoene eller eksporter i lavere oppløsning.
           </Caption>
-          <Pressable
+          <DismissButton
             onPress={() => setOversizedDismissed(true)}
-            accessibilityLabel="Lukk varsel om filstørrelse"
-            hitSlop={8}
-          >
-            <Ionicons name="close-outline" size={18} color={AMBER_TEXT} />
-          </Pressable>
+            label="Lukk varsel om filstørrelse"
+            color={theme.colors.warn}
+          />
         </View>
       )}
 
@@ -173,13 +182,11 @@ export default function MediaUploadErrorBanner() {
             Bilder og videoer ble ikke synkronisert til serveren. Dataene er lagret på denne
             enheten. Vi prøver igjen automatisk i bakgrunnen.
           </Caption>
-          <Pressable
+          <DismissButton
             onPress={() => setGenericDismissed(true)}
-            accessibilityLabel="Lukk varsel om medieopplasting"
-            hitSlop={8}
-          >
-            <Ionicons name="close-outline" size={18} color={theme.colors.danger} />
-          </Pressable>
+            label="Lukk varsel om medieopplasting"
+            color={theme.colors.danger}
+          />
         </View>
       )}
     </>
