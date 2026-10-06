@@ -6,6 +6,10 @@ Nyeste øverst. En beslutning som endres, får en ny linje; den gamle blir ståe
 
 | Dato | Beslutning | Hvem | Grunnlag |
 |---|---|---|---|
+| 01.10.2026 | Sigurd eier rapportmalen: ny, generaliserbar vannskademal med eksempeltekster, bildeplasser og importfelter, levert innen søndag 05.10 (Trello). Koden tilpasses malen etterpå. | Fredrik, William, Sigurd (teammøte) | `docs/pilotlogg-ocab.md` 01.10 |
+| 01.10.2026 | Roller: Fredrik produkt (CPO) og støtte til teknisk; William CEO/CTO; Sigurd kunde- og brukerreise, mal og testing; Anders finans og salg. Trello er prosjektstyring. | Fredrik, William, Sigurd (teammøte) | samme |
+| 01.10.2026 | Neste testsak filmes med Meta-briller av Sigurd (denne eller neste uke) og kjøres gjennom pipelinen som første videosak. Pipelinen må gi tidsstempler i transkripsjonen for å hente riktig ramme. | Sigurd, William | samme; `docs/taleteknologi-laerdommer.md` |
+| 01.10.2026 | Ikke avgjort: fargeretning for nettsiden. Sigurd og William ønsker mørk blå med gult for det kritiske; dagens «Skifer og kobber» ble valgt mot blått. Avgjøres på skjermbilder, ikke i diskusjon. | — | `presentation/fargealternativer.html` |
 | 29.09.2026 | Resten av regel 6-ryddingen på salgsflatene: ingen tids- eller besparelsestall, ingen «forsikringsklar» og ingen «Byggforsk-henvisninger» som leveranse før det er målt eller vises i produktet. Grep-sjekkes i `e2e-headere.sh`. | Fredrik | `docs/nettside-masterplan.md` §1, §5.7 |
 | 29.09.2026 | Dokumentgjelden i `docs/verdens-beste-losning.md` vedlegg A rettes nå (CliVa, valideringscaser 55, rate-limit, UU-status, modellflater, DDIA-status). | Fredrik | samme vedlegg |
 | 28.09.2026 | docrai.io skal peke på Express-salgssidene (`/om` m.fl.), ikke `explainer/`. Stegene står i `docs/DEPLOYMENT.md` → «Domener»; DNS-byttet gjøres utenfor repoet. | Fredrik | `docs/nettside-masterplan.md` §0 |
