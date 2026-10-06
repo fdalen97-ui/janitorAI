@@ -51,31 +51,40 @@ export default function SyncStatusIndicator({ onSyncNow }: Props) {
   // Pilotfunn (aug 2026): uten teller vet ikke takstpersonen om opplastingen
   // jobber eller henger — vis «Laster opp X av Y» mens batchen pågår.
   const label = batchProgress
-    ? `Laster opp ${batchProgress.done} av ${batchProgress.total} …`
+    ? nb.sync.uploadingProgress(batchProgress.done, batchProgress.total)
     : hasMediaError && status === 'synced'
       ? nb.sync.mediaNotSynced
       : LABELS[status];
 
+  const canSync = !!onSyncNow && status !== 'syncing';
+  // Skjermleseren må høre selve statusen («Venter på nett …») — ikke bare
+  // handlingen. Handlingen legges etter, og bare når den faktisk er mulig.
+  const a11yLabel = canSync ? `${label}. ${nb.sync.tapToSync}` : label;
+
   return (
     <Pressable
       onPress={onSyncNow}
-      disabled={!onSyncNow || status === 'syncing'}
-      accessibilityLabel={nb.sync.syncNow}
+      disabled={!canSync}
+      accessibilityRole={onSyncNow ? 'button' : 'text'}
+      accessibilityLabel={a11yLabel}
+      accessibilityState={{ disabled: !canSync, busy: status === 'syncing' }}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         gap: theme.spacing.xs,
-        paddingHorizontal: theme.spacing.sm,
+        // 44 px trykkflate (var ~28 px).
+        minHeight: 44,
+        paddingHorizontal: theme.spacing.md,
         paddingVertical: theme.spacing.xs,
         backgroundColor: theme.colors.surfaceSecondary,
         borderRadius: theme.radii.pill,
       }}
     >
-      <Ionicons name={icon} size={14} color={color} />
-      <Caption style={{ color }}>{label}</Caption>
-      {onSyncNow && status !== 'syncing' && (
+      <Ionicons name={icon} size={16} color={color} />
+      <Caption style={{ color, flexShrink: 1 }}>{label}</Caption>
+      {canSync && (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Ionicons name="refresh-outline" size={13} color={theme.colors.foreground} />
+          <Ionicons name="refresh-outline" size={15} color={theme.colors.foreground} />
         </View>
       )}
     </Pressable>

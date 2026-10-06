@@ -1,5 +1,11 @@
 import React, { PropsWithChildren, createContext, useContext, useMemo } from 'react';
-import { ColorSchemeName, useColorScheme } from 'react-native';
+import { ColorSchemeName } from 'react-native';
+
+// Hydreringsbevisst variant: på web er HTML-en statisk rendret i lys modus.
+// Leste temaet mørk modus direkte, ble bare komponentene som rendret på nytt
+// mørke, og resten ble stående lyse (blandet tema, usynlig tekst). Denne
+// returnerer «light» til siden er hydrert og bytter så hele treet samlet.
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export type AppTheme = {
   mode: ColorSchemeName;

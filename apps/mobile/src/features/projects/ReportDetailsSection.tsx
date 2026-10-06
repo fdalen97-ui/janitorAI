@@ -271,7 +271,7 @@ export function ReportDetailsSection({ meta, onChange, isOpen, onToggle, saveSta
                 )}
               </View>
               {inputField('Bygningstype', b.type, v => updateBuilding(i, 'type', v), { placeholder: 'F.eks. enebolig' })}
-              {inputField('Areal (m²)', b.size, v => updateBuilding(i, 'size', v), { keyboardType: 'number-pad', placeholder: 'F.eks. 120' })}
+              {inputField('Areal (m²)', b.size, v => updateBuilding(i, 'size', v), { keyboardType: 'decimal-pad', placeholder: 'F.eks. 120,5' })}
               {inputField('Byggeår', b.buildingYear, v => updateBuilding(i, 'buildingYear', v), { keyboardType: 'number-pad', placeholder: 'F.eks. 1978' })}
               {inputField('Utførte oppgraderinger', b.renovationsDone, v => updateBuilding(i, 'renovationsDone', v), { multiline: true, placeholder: 'F.eks. nytt bad i 2015' })}
               {inputField('Annen informasjon', b.otherInfo, v => updateBuilding(i, 'otherInfo', v), { multiline: true, placeholder: 'Andre forhold ved bygningen' })}

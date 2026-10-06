@@ -31,6 +31,9 @@ const Step = ({ number, title, description, icon }: StepProps) => {
     <GlassCard style={{ gap: theme.spacing.xs }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
         <View
+          aria-hidden
+          importantForAccessibility="no-hide-descendants"
+          accessibilityElementsHidden
           style={{
             width: 36,
             height: 36,
@@ -40,11 +43,11 @@ const Step = ({ number, title, description, icon }: StepProps) => {
             justifyContent: 'center',
           }}
         >
-          <Ionicons name={icon} size={18} color="#fff" />
+          <Ionicons name={icon} size={18} color={theme.colors.onAccent} />
         </View>
         <View style={{ flex: 1 }}>
           <Caption muted>{`Steg ${number}`}</Caption>
-          <Title style={{ fontSize: 16 }}>{title}</Title>
+          <Title accessibilityRole="header" style={{ fontSize: 16 }}>{title}</Title>
         </View>
       </View>
       <Body muted>{description}</Body>
@@ -85,7 +88,7 @@ export default function GuideScreen() {
     try {
       await saveProfile(profile);
       toast.show({
-        message: 'Profilen ble lagret. Nye prosjekter fylles ut med disse opplysningene.',
+        message: 'Profilen er lagret. Nye prosjekter fylles ut med disse opplysningene.',
         variant: 'success',
       });
     } catch {
@@ -101,10 +104,10 @@ export default function GuideScreen() {
         {/* Header */}
         <View style={{ gap: theme.spacing.xs }}>
           <Caption muted>{nb.tabs.guide}</Caption>
-          <Title>{nb.guide.title}</Title>
+          <Title accessibilityRole="header">{nb.guide.title}</Title>
           <Body muted>
-            DocrAI gjør observasjonene dine fra befaringen om til profesjonelle rapporter på få
-            minutter.
+            DocrAI gjør notatene, bildene og lydopptakene fra befaringen om til et rapportutkast.
+            Du kontrollerer og godkjenner rapporten før den deles.
           </Body>
         </View>
 
@@ -112,11 +115,11 @@ export default function GuideScreen() {
         <GlassCard style={{ gap: theme.spacing.sm }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
             <Ionicons name="person-circle-outline" size={22} color={theme.colors.accent} />
-            <Title style={{ fontSize: 16 }}>{nb.guide.profileTitle}</Title>
+            <Title accessibilityRole="header" style={{ fontSize: 16 }}>{nb.guide.profileTitle}</Title>
           </View>
           <Body muted>
-            Lagre opplysningene dine én gang — de fyller ut takstperson-feltene automatisk når du
-            oppretter et nytt prosjekt.
+            Lagre opplysningene dine én gang. De fylles inn under Takstperson i rapportdetaljene når
+            du oppretter et nytt prosjekt, og navnet brukes når du godkjenner en rapport.
           </Body>
           <TextField
             label={nb.guide.nameLabel}
@@ -137,8 +140,8 @@ export default function GuideScreen() {
             onChangeText={(text) => setProfile((p) => ({ ...p, company: text }))}
             placeholder="Takst AS"
           />
-          <SecondaryButton onPress={handleSave} disabled={isSaving}>
-            {isSaving ? 'Lagrer …' : 'Lagre profil'}
+          <SecondaryButton onPress={handleSave} loading={isSaving}>
+            Lagre profilen
           </SecondaryButton>
         </GlassCard>
 
@@ -146,31 +149,37 @@ export default function GuideScreen() {
         <Step
           number="1"
           title="Opprett et prosjekt"
-          description="Trykk «Nytt prosjekt» på startsiden og fyll inn prosjektnavn, befaringsdato og navnet ditt."
+          description="Trykk «Nytt prosjekt» på prosjektsiden. Skriv adressen (velg gjerne forslaget fra Kartverket), befaringsdato og navnet ditt."
           icon="folder-open-outline"
         />
         <Step
           number="2"
-          title="Samle observasjoner"
-          description="Åpne prosjektet og legg til notater mens du går befaringen. Skriv observasjoner, ta opp lydnotater, ta bilder eller legg ved korte videoklipp."
+          title="Dokumenter befaringen"
+          description="Åpne prosjektet og legg til notater mens du går befaringen: skriv observasjoner, ta lydopptak, ta bilder eller legg ved korte videoklipp."
           icon="create-outline"
         />
         <Step
           number="3"
-          title="Berik med KI"
-          description="Trykk «Beskriv automatisk» på et bilde for en umiddelbar KI-beskrivelse. Trykk «Transkriber» på et lydnotat for å gjøre tale om til tekst automatisk."
+          title="Beskriv og transkriber"
+          description="Trykk «Beskriv automatisk» på et bilde for å få et forslag til bildetekst. Trykk «Transkriber» på et lydnotat for å gjøre tale om til tekst."
           icon="sparkles-outline"
         />
         <Step
           number="4"
           title="Lag rapporten"
-          description="Gå til Rapport-fanen i prosjektet og trykk «Lag rapport». KI-en analyserer notatene, bildene og transkripsjonene dine og lager en strukturert befaringsrapport."
+          description="Gå til Rapport-fanen i prosjektet og trykk «Lag rapport». KI-en bruker notatene, bildene og transkripsjonene dine til å skrive et rapportutkast. Det kan ta noen minutter."
           icon="document-text-outline"
         />
         <Step
           number="5"
-          title="Eksporter og del"
-          description="Trykk «Last ned Word» for å laste ned et Word-dokument du kan dele direkte med kunden."
+          title="Kontroller og godkjenn"
+          description="Les gjennom utkastet og rett direkte i rapporten. Kontroller årsak og om skaden er akutt eller gradvis, og trykk «Godkjenn rapport». Du står faglig ansvarlig for innholdet."
+          icon="checkmark-done-outline"
+        />
+        <Step
+          number="6"
+          title="Del rapporten"
+          description="Når rapporten er godkjent, trykker du «Lag delingslenke». Mottakeren åpner lenken uten konto og låser opp med en PIN-kode, som du sender i en annen kanal. Du kan også laste ned rapporten som PDF eller Word."
           icon="share-outline"
         />
 
@@ -178,13 +187,14 @@ export default function GuideScreen() {
         <GlassCard style={{ gap: theme.spacing.sm }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
             <Ionicons name="information-circle-outline" size={22} color={theme.colors.accent} />
-            <Title style={{ fontSize: 16 }}>Tips for best resultat</Title>
+            <Title accessibilityRole="header" style={{ fontSize: 16 }}>Tips for best resultat</Title>
           </View>
           <View style={{ gap: theme.spacing.xs }}>
-            <TipRow text="Hold bilder under 50 MB og videoer under 500 MB — appen varsler deg hvis de er for store." />
-            <TipRow text="Videoklipp må være 2 minutter eller kortere for pålitelig opplasting." />
-            <TipRow text="Legg til en prosjektbeskrivelse så KI-en fokuserer på de riktige områdene." />
+            <TipRow text="Bilder kan være opptil 50 MB og videoklipp opptil 500 MB. Appen varsler deg hvis en fil er for stor." />
+            <TipRow text="Videoklipp kan være opptil 2 minutter lange." />
+            <TipRow text="Skriv en kort prosjektbeskrivelse, så vet KI-en hva den skal se etter." />
             <TipRow text="Transkriber lydnotatene før du lager rapporten." />
+            <TipRow text="Uten nett lagres alt på enheten. Trykk på synkstatusen øverst på prosjektsiden for å synkronisere når du er på nett igjen." />
           </View>
         </GlassCard>
 
@@ -192,11 +202,11 @@ export default function GuideScreen() {
         <GlassCard style={{ gap: theme.spacing.sm }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
             <Ionicons name="key-outline" size={22} color={theme.colors.accent} />
-            <Title style={{ fontSize: 16 }}>{nb.auth.accessTitle}</Title>
+            <Title accessibilityRole="header" style={{ fontSize: 16 }}>{nb.auth.accessTitle}</Title>
           </View>
           <Body muted>
-            Du trenger en tilgangskode for å bruke KI-funksjonene. Skriv den inn ved å trykke på
-            nøkkelikonet på startsiden.
+            Du trenger en tilgangskode for å synkronisere og bruke KI-funksjonene. Skriv den inn ved å
+            trykke på nøkkelikonet øverst på prosjektsiden.
           </Body>
         </GlassCard>
 

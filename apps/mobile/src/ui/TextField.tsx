@@ -25,6 +25,8 @@ export const TextField = ({
 }: TextFieldProps) => {
   const theme = useAppTheme();
   const [isFocused, setIsFocused] = useState(false);
+  const Wrapper: React.ElementType = onPressIn ? Pressable : View;
+  const wrapperProps = onPressIn ? { onPressIn, accessible: false, tabIndex: -1 } : {};
 
   const borderColor = error
     ? theme.colors.danger
@@ -35,7 +37,9 @@ export const TextField = ({
   return (
     <View style={{ gap: theme.spacing.xs }}>
       {label && <Caption style={{ color: theme.colors.muted }}>{label}</Caption>}
-      <Pressable onPressIn={onPressIn}>
+      {/* Innpakningen er bare for onPressIn; den skal ikke være et eget
+          tabulatorstopp uten navn (react-native-web gir Pressable tabindex=0). */}
+      <Wrapper {...wrapperProps}>
         <View>
           <TextInput
             {...props}
@@ -68,7 +72,7 @@ export const TextField = ({
           />
           {rightIcon && <View style={[styles.icon, { right: theme.spacing.sm }]}>{rightIcon}</View>}
         </View>
-      </Pressable>
+      </Wrapper>
       {!!error && (
         <Caption style={{ color: theme.colors.danger }} accessibilityRole="alert" accessibilityLiveRegion="polite">
           {error}

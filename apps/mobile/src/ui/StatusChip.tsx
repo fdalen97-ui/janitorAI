@@ -25,6 +25,12 @@ const COLORS: Record<'light' | 'dark', Record<ProjectStatus, { bg: string; fg: s
   },
 };
 
+/** AA-fargeparet for en status — også for filterchips o.l. som viser status som tekst. */
+export const statusChipColors = (mode: AppThemeMode, status: ProjectStatus) =>
+  COLORS[mode === 'dark' ? 'dark' : 'light'][status];
+
+type AppThemeMode = ReturnType<typeof useAppTheme>['mode'];
+
 type Props = {
   status: ProjectStatus;
   // B20: «Feilet» skal alltid tilby en handling, ikke bare en feilmelding.
@@ -39,6 +45,7 @@ export const StatusChip = ({ status, onRetry }: Props) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
       <View
+        accessible
         accessibilityLabel={`Status: ${nb.status[status]}`}
         style={{
           flexDirection: 'row',
@@ -60,16 +67,20 @@ export const StatusChip = ({ status, onRetry }: Props) => {
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel={nb.common.retry}
-          hitSlop={8}
-          style={{
-            paddingVertical: 4,
-            paddingHorizontal: 10,
-            borderRadius: theme.radii.pill,
-            borderWidth: 1,
-            borderColor: theme.colors.accent,
-          }}
+          // 44 px trykkflate uten å gjøre selve pillen høyere enn statuschipen.
+          style={{ minHeight: 44, justifyContent: 'center' }}
         >
-          <Caption style={{ color: theme.colors.accent, fontWeight: '600' }}>{nb.common.retry}</Caption>
+          <View
+            style={{
+              paddingVertical: 4,
+              paddingHorizontal: 10,
+              borderRadius: theme.radii.pill,
+              borderWidth: 1,
+              borderColor: theme.colors.accent,
+            }}
+          >
+            <Caption style={{ color: theme.colors.accent, fontWeight: '600' }}>{nb.common.retry}</Caption>
+          </View>
         </Pressable>
       )}
     </View>

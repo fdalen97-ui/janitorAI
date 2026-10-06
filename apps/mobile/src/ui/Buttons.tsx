@@ -48,12 +48,28 @@ const PressableScale = ({ children, style, ...props }: ButtonProps & { backgroun
     scale.value = withSpring(1, { damping: 12, stiffness: 220 });
   }, [scale]);
 
-  const pressableStyle = useMemo(() => {
-    const flattenedStyle = StyleSheet.flatten(style as StyleProp<ViewStyle>);
-    return {
-      overflow: 'hidden' as const,
-      borderRadius: flattenedStyle?.borderRadius,
-    };
+  // Layout-egenskaper (flex, bredde, marg, alignSelf) må ligge på selve
+  // trykkflaten. Lå de bare på den indre animerte flaten, ble f.eks.
+  // «Tilbake»/«Neste» med flex: 1 smale knapper i stedet for å fylle raden.
+  const { pressableStyle, innerStyle } = useMemo(() => {
+    const flat = (StyleSheet.flatten(style as StyleProp<ViewStyle>) || {}) as ViewStyle;
+    const layoutKeys = [
+      'flex', 'flexGrow', 'flexShrink', 'flexBasis', 'alignSelf', 'width', 'minWidth', 'maxWidth',
+      'margin', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'marginHorizontal', 'marginVertical',
+    ] as const;
+    const outer: ViewStyle = { overflow: 'hidden', borderRadius: flat.borderRadius };
+    const inner: ViewStyle = { ...flat };
+    for (const key of layoutKeys) {
+      if (flat[key] !== undefined) {
+        (outer as Record<string, unknown>)[key] = flat[key];
+        delete (inner as Record<string, unknown>)[key];
+      }
+    }
+    // Den indre flaten (bakgrunn, kant, innhold) fyller trykkflaten.
+    if (outer.flex !== undefined || outer.flexGrow !== undefined || outer.width !== undefined) {
+      inner.flexGrow = 1;
+    }
+    return { pressableStyle: outer, innerStyle: inner };
   }, [style]);
 
   return (
@@ -73,7 +89,7 @@ const PressableScale = ({ children, style, ...props }: ButtonProps & { backgroun
       }}
       style={pressableStyle}
     >
-      <Animated.View style={[animatedStyle, style as StyleProp<ViewStyle>]}>{children}</Animated.View>
+      <Animated.View style={[animatedStyle, innerStyle]}>{children}</Animated.View>
     </Pressable>
   );
 };
