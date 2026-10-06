@@ -14,9 +14,9 @@ export type AppTheme = {
     accentStrong: string;
     danger: string;
     /**
-     * Kobber — identitetens signaturdetalj (jf. presentation/fargealternativer,
-     * valgt retning C «Skifer og kobber»). Brukes KUN på godkjenningsstempel og
-     * nøkkeltall — aldri på knapper eller flater.
+     * Signaturdetaljen (navnet er historisk: i «Skifer og kobber» var den
+     * kobber, i «Glass og stål» er den stålblå). Brukes KUN på
+     * godkjenningsstempel og nøkkeltall — aldri på knapper eller flater.
      */
     copper: string;
     shadow: string;
@@ -33,30 +33,29 @@ export type AppTheme = {
   blurIntensity: number;
 };
 
-// Fargeidentiteten deles med salgs-, demo- og delingssidene: «Skifer og
-// kobber» (retning C fra presentation/fargealternativer.html) — petrolblå-
-// grønn aksent (#23545C-familien), kjølig-nøytral skiferbakgrunn og kobber
-// (#A65E2E) som signaturdetalj på stempel og nøkkeltall. Bevisst valgt bort:
+// Fargeidentiteten deles med salgs-, demo- og delingssidene: «Glass og stål»
+// (tema 17 i fargebiblioteket, valgt av teamet 05.10.2026) — stålblå aksent
+// (#2F4A5E), kjølig glassgrå bakgrunn og gult kun for det kritiske. Stempel og
+// nøkkeltall bruker stålblått (feltet heter fortsatt `copper`). Bevisst valgt bort:
 // knallblå/neonrød «template-farger» og tung glass/blur — takstbransjen skal
 // kjenne igjen et fagverktøy, ikke en demo.
 const lightTheme: AppTheme = {
   mode: 'light',
   colors: {
-    background: '#F1F3F3',
-    surface: 'rgba(255,255,255,0.96)',
-    surfaceSecondary: 'rgba(255,255,255,0.85)',
-    foreground: '#1B262B',
-    muted: '#566670',
-    border: 'rgba(27, 38, 43, 0.16)',
-    accent: '#23545C',
-    accentStrong: '#1A4148',
-    danger: '#A6453A',
-    // Justert fra #A65E2E: består WCAG AA (4,5:1) for liten tekst også på
-    // surface-flaten #F1F3F3 (4,75:1), ikke bare på hvite kort.
-    copper: '#9F5A2C',
-    shadow: 'rgba(27, 38, 43, 0.10)',
+    background: '#E8F5F8',
+    surface: 'rgba(251,254,255,0.96)',
+    surfaceSecondary: 'rgba(251,254,255,0.85)',
+    foreground: '#072227',
+    muted: '#596D71',
+    border: 'rgba(7, 34, 39, 0.16)',
+    accent: '#2F4A5E',
+    accentStrong: '#1D374B',
+    danger: '#B63B32',
+    // Stålblått som stempel og nøkkeltall: 8,3:1 på bakgrunnen #E8F5F8.
+    copper: '#2F4A5E',
+    shadow: 'rgba(7, 34, 39, 0.10)',
     glassOverlay: 'rgba(255,255,255,0.5)',
-    overlay: 'rgba(27, 38, 43, 0.30)',
+    overlay: 'rgba(7, 34, 39, 0.30)',
   },
   spacing: { xs: 6, sm: 10, md: 14, lg: 18, xl: 24 },
   radii: { sm: 6, md: 10, lg: 16, pill: 999 },
@@ -71,18 +70,18 @@ const lightTheme: AppTheme = {
 const darkTheme: AppTheme = {
   mode: 'dark',
   colors: {
-    background: '#11181B',
-    surface: 'rgba(26, 35, 39, 0.97)',
-    surfaceSecondary: 'rgba(26, 35, 39, 0.88)',
-    foreground: '#E4EAEC',
-    muted: '#9AA8AE',
-    border: 'rgba(154, 168, 174, 0.28)',
-    accent: '#8FC2CB',
-    accentStrong: '#B3D8DE',
-    danger: '#D3766B',
-    copper: '#C98B5A',
+    background: '#091517',
+    surface: 'rgba(19, 32, 34, 0.97)',
+    surfaceSecondary: 'rgba(19, 32, 34, 0.88)',
+    foreground: '#E6ECEE',
+    muted: '#9FAEB1',
+    border: 'rgba(159, 174, 177, 0.28)',
+    accent: '#A1BFD7',
+    accentStrong: '#B4D2EB',
+    danger: '#DF695C',
+    copper: '#97B5CD',
     shadow: 'rgba(0, 0, 0, 0.35)',
-    glassOverlay: 'rgba(17, 24, 27, 0.5)',
+    glassOverlay: 'rgba(9, 21, 23, 0.5)',
     overlay: 'rgba(0,0,0,0.5)',
   },
   spacing: lightTheme.spacing,

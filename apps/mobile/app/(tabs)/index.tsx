@@ -97,7 +97,7 @@ function getProjectStatus(project: Project): ProjectStatus {
 // bruker StatusChip med WCAG AA-fargepar (B20).
 const STATUS_COLOR: Record<ProjectStatus, string> = {
   draft: '#7C8A96',
-  processing: '#23545C',
+  processing: '#2F4A5E',
   ready: '#2E7D4F',
   failed: '#A6453A',
 };

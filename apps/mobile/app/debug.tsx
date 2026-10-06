@@ -98,7 +98,7 @@ export default function DebugScreen() {
           
           {healthStatus === 'loading' && (
             <View style={styles.statusContainer}>
-              <ActivityIndicator size="large" color="#23545C" />
+              <ActivityIndicator size="large" color="#2F4A5E" />
               <Text style={styles.statusText}>Checking health...</Text>
             </View>
           )}
@@ -141,7 +141,7 @@ export default function DebugScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F1F3F3',
+    backgroundColor: '#E8F5F8',
   },
   scrollView: {
     flex: 1,
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 10,
-    color: '#23545C',
+    color: '#2F4A5E',
   },
   infoRow: {
     flexDirection: 'row',
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   codeBlock: {
-    backgroundColor: '#F1F3F3',
+    backgroundColor: '#E8F5F8',
     borderRadius: 5,
     padding: 10,
     marginTop: 10,
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     color: '#A6453A',
   },
   button: {
-    backgroundColor: '#23545C',
+    backgroundColor: '#2F4A5E',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   backButton: {
-    backgroundColor: '#566670',
+    backgroundColor: '#596D71',
   },
   buttonText: {
     color: '#fff',
