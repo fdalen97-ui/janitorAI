@@ -64,7 +64,8 @@ denne eller neste uke (i morgen står et laftet tømmerhus med en varmgang i
 strømledning til nettverksskap, altså ikke vannskade). Kravet til pipelinen
 er tidsstempler i transkripsjonen slik at riktig videoramme kan hentes, og
 en strukturert mal å fylle. Første brukersignal på video som primærkilde;
-til nå var pilotsakene kun foto.
+til nå var pilotsakene kun foto. Brilleklasser, tilgjengelighet i Europa og
+hva som stopper brillevideo i appen i dag: `docs/smartbriller-2026.md`.
 
 ### Rapportmal
 
