@@ -22,6 +22,9 @@ Språk: produkt/salgsflater på norsk (bokmål); pitch-deck på engelsk.
   sender `/` til salgssiden på tjenesten docrai.io peker på (se `docs/DEPLOYMENT.md`).
   **docrai.io serverer i dag `explainer/index.html` (Cloudflare Pages), ikke disse
   sidene** — status og byttet er beskrevet i `docs/nettside-masterplan.md` §0.
+- **brand/** — logoen «Stemmen i søkeren» (valgt 04.11.2026) som SVG-mesterfiler,
+  regler i `brand/MERKEVARE.md`, byggeskript i `brand/verktoy/`. PNG-ene i app og
+  api regenereres derfra; ikke tegn merket for hånd.
 - **ai-engine** — Python/FastAPI; Gemini-analyse → strukturert `DamageAnalysis` +
   Google Doc. Returnerer `(doc_id, analysis, token_usage, citation_stats)`;
   sitatportens telling + `prompt_version` bokføres per kjøring i
