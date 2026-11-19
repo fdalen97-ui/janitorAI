@@ -14,283 +14,281 @@
 <meta property="og:locale" content="nb_NO" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="canonical" href="/om" />
+<link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/site.css" />
 <style>
-  :root {
-    --paper: #FBFEFF; --surface: #E8F5F8; --ink: #072227; --muted: #596D71;
-    --border: #C7D9DC; --accent: #2F4A5E; --accent-strong: #1D374B; --accent-pale: #E5ECF3;
-    --ok: #0D4A22; --ok-bg: #D7F4DC; --ok-border: #8FC9A0;
-    --warn: #6D5900; --warn-bg: #FFF0BF;
-    --copper: #2F4A5E; --stamp-ink: #2F4A5E; --stamp-bg: #E7F0F7; --stamp-border: #2F4A5E;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --paper: #132022; --surface: #091517; --ink: #E6ECEE; --muted: #9FAEB1;
-      --border: #2F3D40; --accent: #A1BFD7; --accent-strong: #B4D2EB; --accent-pale: #242C33;
-      --ok: #A1E4AE; --ok-bg: #1A3520; --ok-border: #166534;
-      --warn: #E6D088; --warn-bg: #2E2607;
-      --copper: #97B5CD; --stamp-ink: #A4C2DA; --stamp-bg: #1F282E; --stamp-border: #627E94;
-    }
-  }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--surface); color: var(--ink);
-    font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    font-size: 16px; line-height: 1.6;
-  }
-  .page { max-width: 760px; margin: 0 auto; padding: 40px 18px 64px; display: flex; flex-direction: column; gap: 40px; }
-  .brand { display: flex; align-items: center; gap: 10px; }
-  .brand .merke { width: 22px; height: 22px; flex: none; color: #2F4A5E; }
-  .brand b { font-size: 16px; }
-  .brand a { margin-left: auto; color: var(--accent); font-size: 14px; font-weight: 600; text-decoration: none; }
-
-  .hero { display: flex; flex-direction: column; gap: 14px; }
-  h1 { margin: 0; font-size: clamp(28px, 5.5vw, 40px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; text-wrap: balance; }
-  .hero p { margin: 0; color: var(--muted); font-size: 17px; max-width: 58ch; }
-  .hero p strong { color: var(--ink); }
-  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
-  .btn {
-    display: inline-block; text-decoration: none; font-weight: 700; font-size: 15px;
-    border-radius: 10px; padding: 13px 22px; min-height: 48px;
-  }
-  .btn.primary { background: var(--accent); color: #fff; }
-  .btn.ghost { border: 1.5px solid var(--border); color: var(--ink); background: var(--paper); }
-
-  .stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
-  .stat { flex: 1; min-width: 150px; background: var(--paper); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-  .stat b { display: block; font-size: 22px; color: var(--copper); letter-spacing: -0.01em; overflow-wrap: anywhere; }
-  .stat span { font-size: 13px; color: var(--muted); }
-
-  h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
-  section { display: flex; flex-direction: column; gap: 16px; }
-  .reasons { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; counter-reset: r; }
-  .reasons li {
-    background: var(--paper); border: 1px solid var(--border); border-radius: 12px;
-    padding: 14px 16px 14px 54px; position: relative; font-size: 15px; color: var(--muted);
-  }
-  .reasons li b { color: var(--ink); display: block; margin-bottom: 2px; font-size: 15.5px; }
-  .reasons li::before {
-    counter-increment: r; content: counter(r);
-    position: absolute; left: 14px; top: 16px; width: 26px; height: 26px;
-    background: var(--accent-pale); color: var(--accent-strong); font-weight: 700; font-size: 13px;
-    border-radius: 8px; display: flex; align-items: center; justify-content: center;
-  }
-
-  .steps { display: flex; gap: 10px; flex-wrap: wrap; }
-  .step { flex: 1; min-width: 190px; background: var(--paper); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-  .step .n { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase; }
-  .step h3 { margin: 6px 0 4px; font-size: 16px; }
-  .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
-
-  .trust { background: var(--paper); border: 1px solid var(--border); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
-  .trust p { margin: 0; font-size: 15px; color: var(--muted); }
-  .trust p b { color: var(--ink); }
-  .stamp { align-self: flex-start; border: 1.5px solid var(--stamp-border); color: var(--stamp-ink); background: var(--stamp-bg); padding: 3px 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; font-size: 11px; border-radius: 6px; }
-
-  .tiers { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
-  .tier { flex: 1; min-width: 200px; background: var(--paper); border: 1.5px solid var(--border); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
-  .tier.hot { border-color: var(--accent); }
-  .tier h3 { margin: 0; font-size: 15px; }
-  .tier .price { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
-  .tier .price span { font-size: 13px; font-weight: 400; color: var(--muted); }
-  .tier ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
-  .tier .tag { align-self: flex-start; font-size: 11px; font-weight: 700; color: var(--warn); background: var(--warn-bg); border-radius: 999px; padding: 2px 10px; }
-  .fineprint { font-size: 12.5px; color: var(--muted); }
-
-  footer { border-top: 1px solid var(--border); padding-top: 16px; font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
-  a { color: var(--accent); }
-
-  .pilot-form { background: var(--paper); border: 1.5px solid var(--accent); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
-  .pilot-form label { font-size: 13px; font-weight: 600; display: flex; flex-direction: column; gap: 4px; }
-  .pilot-form input, .pilot-form textarea {
-    font: inherit; font-size: 15px; color: var(--ink); background: var(--surface);
-    border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; width: 100%;
-  }
-  .pilot-form textarea { resize: vertical; min-height: 64px; }
-  .pilot-form button { font: inherit; font-weight: 700; font-size: 15px; background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 13px 22px; min-height: 48px; cursor: pointer; align-self: flex-start; }
-  .pilot-form .svartid { font-size: 12.5px; color: var(--muted); }
-  .tidslinje { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 10px; counter-reset: steg; }
-  .tidslinje li { display: flex; gap: 12px; align-items: flex-start; counter-increment: steg; }
-  .tidslinje li::before { content: counter(steg); flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
-  .tidslinje b { display: block; font-size: 14.5px; }
-  .tidslinje span { font-size: 13.5px; color: var(--muted); }
-  .hp { position: absolute; left: -9999px; top: -9999px; height: 0; overflow: hidden; }
-
-  .sticky-cta { display: none; }
-  @media (max-width: 640px) {
-    .page { padding-bottom: 96px; }
-    .sticky-cta {
-      display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-      background: var(--paper); border-top: 1px solid var(--border);
-      padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); gap: 10px;
-    }
-    .sticky-cta a { flex: 1; text-align: center; text-decoration: none; font-weight: 700; font-size: 15px; border-radius: 10px; padding: 13px 0; }
-    .sticky-cta .p { background: var(--accent); color: #fff; }
-    .sticky-cta .g { border: 1.5px solid var(--border); color: var(--ink); }
-  }
-  @media (prefers-color-scheme: dark) {
-    .btn.primary, .pilot-form button, .sticky-cta .p, .tidslinje li::before { color: #051214; }
-  }
-
-  /* Tilgjengelighet (WCAG 2.4.7): tydelig fokusmarkering for tastaturbrukere. */
-  a:focus-visible, button:focus-visible, summary:focus-visible,
-  input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
-    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px;
-  }
+  body { margin: 0; background: var(--surface); color: var(--ink); font-family: var(--font); }
 </style>
 </head>
 <body>
-<main class="page">
+__SITE_HEADER__
+<main class="lp">
 
-  <div class="brand"><svg class="merke" viewBox="0 0 96 96" width="24" height="24" aria-hidden="true" focusable="false"><g><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="merke1"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#merke1)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></g></svg><b>DocrAI</b><a href="/demo">Prøv demoen →</a></div>
-
-  <div class="hero">
-    <h1>Fra befaring til skaderapport. AI‑en skriver utkastet – du godkjenner.</h1>
-    <p>
-      Rapportskriving i bilen etterpå. Notater på små knapper med våte hansker.
-      Dokumentasjon som ikke holder i oppgjøret. <strong>DocrAI snur det:</strong> snakk deg
-      gjennom befaringen, så skriver AI-en utkastet – med foreslått årsak og
-      akutt/gradvis-vurdering. Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten
-      stempelet ditt.
-    </p>
-    <div class="cta-row">
-      <a class="btn primary" href="/demo">Se saksunderlaget for din adresse</a>
-      <a class="btn ghost" href="/eksempelrapport">Se en ferdig rapport</a>
-      <a class="btn ghost" href="#pilot">Bli pilotdeltaker</a>
-      <a class="btn ghost" href="/kontakt">Book et 15-min møte</a>
-    </div>
-  </div>
-
-  <div class="stat-row">
-    <!-- Regel 6: hero-tall venter på målt baseline (Port 0, docs/verdens-beste-losning.md).
-         Til da står det bare det koden gjør: underlag fra fem åpne tjenester
-         (routes/underlag.js), delingssperre før stempel (routes/share.js, 409). -->
-    <div class="stat"><b>Før avreise</b><span>kart, gnr/bnr, bygningstype, terreng og vær hentes fra Kartverket og MET</span></div>
-    <div class="stat"><b>Stempel først</b><span>ingen delingslenke før du har stemplet rapporten – håndhevet av serveren</span></div>
-    <div class="stat"><b>SHA-256</b><span>hvert bevis får geo og tid ved fangst, og sjekksum ved opplasting</span></div>
-  </div>
-
-  <section>
-    <h2>Fem grunner til at takstpersoner velger DocrAI</h2>
-    <ol class="reasons">
-      <li><b>Saken er klar før bilen starter.</b> Skriv inn adressen – kart, matrikkel, bygningstype, terreng og vær hentes automatisk fra Kartverket og MET. Ingen avtaler, ingen manuelle oppslag.</li>
-      <li><b>Snakk – ikke tast.</b> Store knapper laget for våte hansker, og transkripsjon styrt mot norsk fagspråk: klemring, svill, diffusjonssperre. Talen din blir strukturen i rapporten.</li>
-      <li><b>AI-en skriver utkastet. Du eier konklusjonen.</b> Årsak og akutt/gradvis foreslås – aldri fastslås. Du redigerer direkte i den ferdige rapportvisningen og stempler med navn og tidspunkt.</li>
-      <li><b>Bevis med sporbarhet.</b> Geo og klokkeslett settes i fangstøyeblikket; SHA-256-sjekksummen settes av serveren ved opplasting. Mottakeren åpner en PIN-beskyttet rapport – uten konto – og kan verifisere at ingenting er endret siden opplasting.</li>
-      <li><b>Passer inn i flyten du har.</b> Uavhengig av forsikringsselskapene: rapporten deles som PIN-beskyttet lenke eller lastes ned som PDF eller Word. Gjør befaringen i DocrAI, lever som før.</li>
-    </ol>
-  </section>
-
-  <section>
-    <h2>Slik virker det</h2>
-    <div class="steps">
-      <div class="step"><span class="n">1 · Før</span><h3>Adressen inn</h3><p>Ett søk gir saksunderlaget: kart, gnr/bnr, bygningstype, terreng og vær – ferdig utfylt sak før avreise.</p></div>
-      <div class="step"><span class="n">2 · I felt</span><h3>Fang og snakk</h3><p>Video, foto og lydnotater rom for rom. Alt lagres lokalt først – appen virker uten dekning i kjelleren.</p></div>
-      <div class="step"><span class="n">3 · Etter</span><h3>Godkjenn og del</h3><p>Ett trykk, så skriver AI-en utkastet på serveren. Kontrollér, stemple – og del PIN-beskyttet med forsikringen.</p></div>
-    </div>
-  </section>
-
-  <section>
-    <div class="trust">
-      <span class="stamp">Godkjent av takstperson</span>
-      <p><b>AI foreslår. Du avgjør. Det er systemet – ikke et forbehold.</b></p>
-      <p>Rapporten er merket som utkast til du aktivt godkjenner den, og delingslenker kan ikke
-        lages før stempelet er satt – det håndheves av serveren, ikke bare av appen. Byggforsk-
-        referanser AI-en foreslår, kontrolleres mot en liste over verifiserte bladnummer –
-        uverifiserte forkastes. AI-prosesseringen skjer hos Google;
-        databehandleravtale og EU/EØS-region er ikke på plass ennå – vi sier det som det er.</p>
-    </div>
-  </section>
-
-  <section>
-    <h2>Pris – enkel og uten binding</h2>
-    <!-- Regel 6 (CLAUDE.md): bare tall og løfter med kodelinje bak seg. Tidsbruk
-         måles per sak i appen (metrics.ts); mottakerens felt-telling rendres på
-         delingssiden; «ingenting faktureres» er sant fordi det ikke finnes
-         fakturagrunnlag (db.js). Baseline-tall kommer når de er målt. -->
-    <div class="stat-row" style="margin-bottom:14px">
-      <div class="stat"><b>Tid per sak</b><span>appen måler tiden fra første bevis til godkjent rapport – sak for sak</span></div>
-      <div class="stat"><b>Utkast → godkjent</b><span>korrigerer du AI-utkastet, ser mottakeren hvor mange felt som ble endret</span></div>
-      <div class="stat"><b>Ingen bindingstid</b><span>ingenting faktureres i pilotfasen</span></div>
-    </div>
-    <div class="tiers">
-      <div class="tier">
-        <h3>Pilot</h3>
-        <div class="price">Gratis <span>· 3 måneder</span></div>
-        <ul>
-          <li>Alt inkludert, maks 8 foretak</li>
-          <li>Motytelse: ukentlig tilbakemelding</li>
-          <li>50 % rabatt første år etterpå</li>
+  <section class="hero">
+    <div class="wrap grid">
+      <div class="copy">
+        <span class="eyebrow">For takstpersoner og skadeutredere</span>
+        <h1>Fra befaring til skaderapport. AI‑en skriver utkastet – du godkjenner.</h1>
+        <p class="lede">Snakk deg gjennom befaringen, så skriver AI-en utkastet – med foreslått årsak og
+          akutt/gradvis-vurdering. <strong>Du kontrollerer, korrigerer og godkjenner.</strong> Ingenting deles uten
+          stempelet ditt.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="#pilot">Bli pilotdeltaker</a>
+          <a class="btn ghost" href="/eksempelrapport">Se en ferdig rapport</a>
+        </div>
+        <ul class="ticks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Gratis pilot i 3 måneder</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ingen bindingstid</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ingenting deles før du har stemplet</li>
         </ul>
-        <span class="tag">opptak nå</span>
+        <p class="altlink">Vil du prøve noe med en gang? <a href="/demo">Se saksunderlaget for din adresse</a> eller <a href="/kontakt">book et 15-min møte</a>.</p>
       </div>
-      <div class="tier hot">
-        <h3>Takstperson</h3>
-        <div class="price">Settes i pilotfasen <span>· ingen bindingstid</span></div>
-        <ul>
-          <li>Saksunderlag, AI-utkast, godkjenning og PIN-deling inkludert</li>
-          <li>Prisnivået bekreftes mot målt kostnad per rapport før det publiseres</li>
-          <li>Pilotdeltakere: 50 % rabatt første år</li>
-        </ul>
-      </div>
-      <div class="tier">
-        <h3>Foretak</h3>
-        <div class="price">Dialog <span>· fra 5 takstpersoner</span></div>
-        <ul>
-          <li>Samlefakturering og felles maler</li>
-          <li>Prioritert støtte</li>
-        </ul>
+      <div class="visual" role="img" aria-label="Illustrasjon: telefonen med bevis fra kjelleren, og rapporten som er godkjent av takstpersonen">
+        <div class="phone" aria-hidden="true">
+          <div class="screen">
+            <div class="rec"><i></i>Lydnotat<span>0:31</span></div>
+            <div class="room">Kjeller</div>
+            <div class="wave"><i style="height:18px"></i><i style="height:34px"></i><i style="height:52px"></i><i style="height:26px"></i><i style="height:44px"></i><i style="height:20px"></i><i style="height:38px"></i><i style="height:14px"></i><i style="height:30px"></i><i style="height:48px"></i><i style="height:22px"></i></div>
+            <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><div><b>Videoklipp</b><span>vegg bak sofa</span></div></div>
+            <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><div><b>4 bilder</b><span>tid og sted settes ved fangst</span></div></div>
+            <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg><div><b>Lydnotat</b><span>«fuktmerker nederst på veggen …»</span></div></div>
+            <div class="make">Lag rapport</div>
+          </div>
+        </div>
+        <div class="sheet" aria-hidden="true">
+          <span class="kicker">Skaderapport</span>
+          <span class="title">Øvingsveien 12, Hamar</span>
+          <span class="stamp">Faglig vurdert og godkjent av Kari Eksempel · 28.09.2026</span>
+          <dl>
+            <dt>Skadested</dt><dd>Kjeller, vegg bak sofa</dd>
+            <dt>Årsak</dt><dd>Nedbør / overvann – vann trenger inn nedenfra, gradvis</dd>
+            <dt>Omfang</dt><dd>Fuktmerker 0–30 cm over gulv på ca. 2,5 m veggflate</dd>
+          </dl>
+          <span class="note">1 felt er faglig korrigert av takstpersonen fra AI-utkastet før godkjenning.</span>
+        </div>
+        <p class="caption">Illustrasjon med oppdiktet sak – samme eksempel som i <a href="/eksempelrapport">eksempelrapporten</a>.</p>
       </div>
     </div>
-    <p class="fineprint">Prisen settes i pilotfasen sammen med pilotdeltakerne, etter at kostnaden per rapport er målt på ekte saker. Ingen bindingstid.</p>
+  </section>
+
+  <section class="paper tight">
+    <div class="wrap">
+      <div class="versus">
+        <div class="before">
+          <span class="eyebrow">Slik er det ofte i dag</span>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Rapportskriving i bilen etterpå.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Notater på små knapper med våte hansker.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Dokumentasjon som ikke holder i oppgjøret.</span></li>
+          </ul>
+        </div>
+        <div class="after">
+          <span class="eyebrow">DocrAI snur det</span>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du snakker deg gjennom befaringen.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>AI-en skriver utkastet, med foreslått årsak og akutt/gradvis-vurdering.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten stempelet ditt.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="slik">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Slik virker det</span>
+        <h2>Tre steg: før, i felt og etter</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="n"><b>1</b>Før</span><h3>Adressen inn</h3><p>Ett søk gir saksunderlaget: kart, gnr/bnr, bygningstype, terreng og vær – ferdig utfylt sak før avreise.</p></div>
+        <div class="step"><span class="n"><b>2</b>I felt</span><h3>Fang og snakk</h3><p>Video, foto og lydnotater rom for rom. Alt lagres lokalt først – appen virker uten dekning i kjelleren.</p></div>
+        <div class="step"><span class="n"><b>3</b>Etter</span><h3>Godkjenn og del</h3><p>Ett trykk, så skriver AI-en utkastet på serveren. Kontrollér, stemple – og del PIN-beskyttet med forsikringen.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Hva du får</span>
+        <h2>Fem ting DocrAI gjør for deg</h2>
+      </div>
+      <div class="features">
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><h3>Saken er klar før bilen starter.</h3><p>Skriv inn adressen – kart, matrikkel, bygningstype, terreng og vær hentes automatisk fra Kartverket og MET. Ingen avtaler, ingen manuelle oppslag.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></span><h3>Snakk – ikke tast.</h3><p>Store knapper laget for våte hansker, og transkripsjon styrt mot norsk fagspråk: klemring, svill, diffusjonssperre. Talen din blir strukturen i rapporten.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span><h3>AI-en skriver utkastet. Du eier konklusjonen.</h3><p>Årsak og akutt/gradvis foreslås – aldri fastslås. Du redigerer direkte i den ferdige rapportvisningen og stempler med navn og tidspunkt.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><h3>Bevis med sporbarhet.</h3><p>Geo og klokkeslett settes i fangstøyeblikket; SHA-256-sjekksummen settes av serveren ved opplasting. Mottakeren åpner en PIN-beskyttet rapport – uten konto – og kan verifisere at ingenting er endret siden opplasting.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg></span><h3>Passer inn i flyten du har.</h3><p>Uavhengig av forsikringsselskapene: rapporten deles som PIN-beskyttet lenke eller lastes ned som PDF eller Word. Gjør befaringen i DocrAI, lever som før.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="trust">
+    <div class="wrap grid">
+      <div class="left">
+        <span class="stamp">Godkjent av takstperson</span>
+        <h2>AI foreslår. Du avgjør. Det er systemet – ikke et forbehold.</h2>
+        <p>AI-prosesseringen skjer hos Google; databehandleravtale og EU/EØS-region er ikke på plass ennå – vi sier det som det er.</p>
+      </div>
+      <ul class="facts">
+        <li><b>Utkast til du godkjenner.</b><span>Rapporten er merket som utkast til du aktivt godkjenner den.</span></li>
+        <li><b>Ingen delingslenke uten stempel.</b><span>Delingslenker kan ikke lages før stempelet er satt – det håndheves av serveren, ikke bare av appen.</span></li>
+        <li><b>Referanser kontrolleres.</b><span>Byggforsk-referanser AI-en foreslår, kontrolleres mot en liste over verifiserte bladnummer – uverifiserte forkastes.</span></li>
+      </ul>
+    </div>
   </section>
 
   <section>
-    <h2>Prøv det på din egen adresse</h2>
-    <p style="margin:0;color:var(--muted);">Skriv inn en adresse du kjenner, og se saksunderlaget slik det ligger klart i DocrAI før hver befaring – hentet live fra åpne offentlige kilder.</p>
-    <div class="cta-row">
-      <a class="btn primary" href="/demo">Åpne demoen</a>
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Se det selv</span>
+        <h2>To måter å prøve på, uten å registrere deg</h2>
+      </div>
+      <div class="try">
+        <div>
+          <h3>Se hva forsikringen mottar</h3>
+          <p>En ferdig, godkjent rapport slik mottakeren ser den: årsak, faglig beskrivelse, bevis og notater. Saken er oppdiktet og merket som eksempel.</p>
+          <div class="cta-row"><a class="btn ghost" href="/eksempelrapport">Åpne eksempelrapporten</a></div>
+        </div>
+        <div>
+          <h3>Prøv det på din egen adresse</h3>
+          <p>Skriv inn en adresse du kjenner, og se saksunderlaget slik det ligger klart i DocrAI før hver befaring – hentet live fra åpne offentlige kilder.</p>
+          <form class="adrform" action="/demo" method="get">
+            <label for="lp-adr" style="position:absolute;left:-9999px">Adresse</label>
+            <input id="lp-adr" name="adresse" type="text" placeholder="F.eks. Solbergliveien 8, Oslo" autocomplete="street-address" required minlength="3" />
+            <button class="btn primary" type="submit">Hent saksunderlaget</button>
+          </form>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section id="pilot">
-    <h2>Bli pilotdeltaker</h2>
-    <!-- Trygghetsnett-mønsteret: vis hvordan det gratis løpet faktisk fungerer,
-         og svar på innvendingen («blir jeg fakturert?») FØR den stilles. -->
-    <ol class="tidslinje">
-      <li><div><b>I dag</b><span>Meld interesse under. Vi svarer innen én virkedag og setter opp et 15-minutters oppstartsmøte.</span></div></li>
-      <li><div><b>Underveis</b><span>3 måneder gratis med alt inkludert. Motytelsen er ukentlig tilbakemelding – dere er med og former produktet.</span></div></li>
-      <li><div><b>Før pilotslutt</b><span>Vi tar kontakt i god tid før perioden ender. Ingenting starter å løpe automatisk – dere velger selv om dere fortsetter, med 50&nbsp;% rabatt første år.</span></div></li>
-    </ol>
-    <form class="pilot-form" method="post" action="/api/pilot-interesse">
-      <label>Navn
-        <input name="navn" required autocomplete="name" maxlength="200" />
-      </label>
-      <label>E-post
-        <input name="epost" type="email" required autocomplete="email" maxlength="200" />
-      </label>
-      <label>Melding <span style="font-weight:400;color:var(--muted);">(valgfritt – f.eks. foretak og antall takstpersoner)</span>
-        <textarea name="melding" maxlength="2000"></textarea>
-      </label>
-      <div class="hp" aria-hidden="true">
-        <label>Firma<input name="firmafelt" tabindex="-1" autocomplete="off" /></label>
+  <section class="paper">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Pris</span>
+        <h2>Enkel og uten binding</h2>
+        <p>Prisen settes i pilotfasen sammen med pilotdeltakerne, etter at kostnaden per rapport er målt på ekte saker.</p>
       </div>
-      <button type="submit">Meld interesse for piloten</button>
-      <span class="svartid"><b>Uforpliktende – du takker ja eller nei etter oppstartsmøtet.</b> Vi svarer innen én virkedag. Navn og e-post brukes kun til å kontakte deg om piloten – se <a href="/personvern">personvern</a>.</span>
-    </form>
+      <!-- Regel 6 (CLAUDE.md): bare tall og løfter med kodelinje bak seg. Tidsbruk
+           måles per sak i appen (metrics.ts); mottakerens felt-telling rendres på
+           delingssiden; «ingenting faktureres» er sant fordi det ikke finnes
+           fakturagrunnlag (db.js). Baseline-tall kommer når de er målt. -->
+      <div class="tiers">
+        <div class="tier">
+          <h3>Pilot</h3>
+          <div class="price">Gratis</div>
+          <div class="sub">3 måneder</div>
+          <ul>
+            <li>Alt inkludert, maks 8 foretak</li>
+            <li>Motytelse: ukentlig tilbakemelding</li>
+            <li>50 % rabatt første år etterpå</li>
+          </ul>
+          <span class="tag">opptak nå</span>
+          <a class="btn primary" href="#pilot">Meld interesse</a>
+        </div>
+        <div class="tier hot">
+          <h3>Takstperson</h3>
+          <div class="price">Settes i pilotfasen</div>
+          <div class="sub">ingen bindingstid</div>
+          <ul>
+            <li>Saksunderlag, AI-utkast, godkjenning og PIN-deling inkludert</li>
+            <li>Prisnivået bekreftes mot målt kostnad per rapport før det publiseres</li>
+            <li>Pilotdeltakere: 50 % rabatt første år</li>
+          </ul>
+        </div>
+        <div class="tier">
+          <h3>Foretak</h3>
+          <div class="price">Dialog</div>
+          <div class="sub">fra 5 takstpersoner</div>
+          <ul>
+            <li>Samlefakturering og felles maler</li>
+            <li>Prioritert støtte</li>
+          </ul>
+          <a class="btn ghost" href="/kontakt">Snakk med oss</a>
+        </div>
+      </div>
+      <ul class="measures">
+        <li><b>Tid per sak</b>Appen måler tiden fra første bevis til godkjent rapport – sak for sak.</li>
+        <li><b>Utkast → godkjent</b>Korrigerer du AI-utkastet, ser mottakeren hvor mange felt som ble endret.</li>
+        <li><b>Ingen bindingstid</b>Ingenting faktureres i pilotfasen.</li>
+      </ul>
+    </div>
   </section>
 
-  <footer>
-    <span>Kontakt: <a href="/kontakt">book et møte</a> eller <a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a> · vi svarer innen én virkedag.</span>
-    <span><a href="/demo">Demo</a> · <a href="/eksempelrapport">Eksempelrapport</a> · <a href="/kontakt">Snakk med oss</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a> · <a href="/kundereisen">Kundereisen</a></span>
-    <span>DocrAI er under utvikling mot pilot. Kilder i demoen: Kartverket, åpen matrikkel (Geonorge) og Meteorologisk institutt.</span>
-  </footer>
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Spørsmål</span>
+        <h2>Det takstpersoner spør om først</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Hvem står ansvarlig for rapporten – AI-en eller takstpersonen?</summary>
+          <p>Alltid takstpersonen. AI-en lager et utkast med foreslått årsak og klassifisering, men
+          rapporten er merket «AI-utkast – ikke godkjent» til du aktivt godkjenner den med navn og
+          tidspunkt. Delingslenker kan ikke lages før stempelet er satt – det håndheves av serveren,
+          ikke bare av appen.</p>
+        </details>
+        <details>
+          <summary>Fungerer appen uten dekning – i kjelleren?</summary>
+          <p>Ja. Alt du fanger (video, lyd, foto, notater) lagres lokalt på enheten først, og sendes
+          til serveren neste gang du åpner appen eller saken med dekning – eller trykker synk. Du
+          mister ikke en befaring på grunn av dårlig nett.</p>
+        </details>
+        <details>
+          <summary>Hvor lagres dataene, og hva med personvern?</summary>
+          <p>Prosjektdata lagres bak tilgangskode per bruker og går over HTTPS. AI-prosessering og
+          rapportdokument skjer hos Google (Gemini, Docs/Drive); databehandleravtale og EU/EØS-region
+          er ikke på plass ennå, og vi sier det som det er. Demosidene bruker ingen cookies og skriver
+          aldri IP til databasen – se <a href="/personvern">personvernerklæringen</a>.</p>
+        </details>
+        <p style="margin-top:8px"><a href="/faq">Se alle spørsmål og svar →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper pilot" id="pilot">
+    <div class="wrap grid">
+      <div>
+        <span class="eyebrow">Pilot</span>
+        <h2 style="margin-top:12px">Bli pilotdeltaker</h2>
+        <!-- Trygghetsnett-mønsteret: vis hvordan det gratis løpet faktisk fungerer,
+             og svar på innvendingen («blir jeg fakturert?») FØR den stilles. -->
+        <ol class="tidslinje">
+          <li><div><b>I dag</b><span>Meld interesse i skjemaet. Vi svarer innen én virkedag og setter opp et 15-minutters oppstartsmøte.</span></div></li>
+          <li><div><b>Underveis</b><span>3 måneder gratis med alt inkludert. Motytelsen er ukentlig tilbakemelding – dere er med og former produktet.</span></div></li>
+          <li><div><b>Før pilotslutt</b><span>Vi tar kontakt i god tid før perioden ender. Ingenting starter å løpe automatisk – dere velger selv om dere fortsetter, med 50&nbsp;% rabatt første år.</span></div></li>
+        </ol>
+      </div>
+      <form class="pilot-form" method="post" action="/api/pilot-interesse">
+        <label>Navn
+          <input name="navn" required autocomplete="name" maxlength="200" />
+        </label>
+        <label>E-post
+          <input name="epost" type="email" required autocomplete="email" maxlength="200" />
+        </label>
+        <label>Melding <span style="font-weight:400;color:var(--muted);">(valgfritt – f.eks. foretak og antall takstpersoner)</span>
+          <textarea name="melding" maxlength="2000"></textarea>
+        </label>
+        <div class="hp" aria-hidden="true">
+          <label>Firma<input name="firmafelt" tabindex="-1" autocomplete="off" /></label>
+        </div>
+        <button class="btn primary" type="submit">Meld interesse for piloten</button>
+        <span class="svartid"><b>Uforpliktende – du takker ja eller nei etter oppstartsmøtet.</b> Vi svarer innen én virkedag. Navn og e-post brukes kun til å kontakte deg om piloten – se <a href="/personvern">personvern</a>.</span>
+      </form>
+    </div>
+  </section>
+
+  <nav class="sticky-cta" aria-label="Hurtigvalg">
+    <a class="p" href="#pilot">Bli pilot</a>
+    <a class="g" href="/eksempelrapport">Se rapport</a>
+  </nav>
 
 </main>
-
-<nav class="sticky-cta" aria-label="Hurtigvalg">
-  <a class="p" href="/demo">Prøv demoen</a>
-  <a class="g" href="#pilot">Bli pilot</a>
-</nav>
+__SITE_FOOTER__
 
 <script type="application/ld+json">
 {

@@ -18,8 +18,13 @@ Språk: produkt/salgsflater på norsk (bokmål); pitch-deck på engelsk.
   i `src/db.js` (idempotent `CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS`).
   Offentlige salgssider (`/om /demo /eksempelrapport /faq /personvern /vilkar /kontakt
   /kundereisen`) serveres herfra med `Cache-Control: public, max-age=300`.
+  Felles topp- og bunntekst settes inn av `src/siteChrome.js` fra `src/partials/`
+  (plassholderne `__SITE_HEADER__`/`__SITE_FOOTER__`); felles stil i `src/assets/site.css`,
+  font selv-hostet (`/fonts/…`) — ingen tredjepartsressurser, testet i `e2e-headere.sh`.
   `/kontakt`-bookinglenken styres av `BOOKING_URL` (e-post-fallback). `LANDING_ROOT=/om`
   sender `/` til salgssiden på tjenesten docrai.io peker på (se `docs/DEPLOYMENT.md`).
+  `explainer/index.html` er generert fra forsiden: kjør `node explainer/bygg.mjs` etter
+  endringer i `om-page.html`, `partials/` eller `site.css`.
   **docrai.io serverer i dag `explainer/index.html` (Cloudflare Pages), ikke disse
   sidene** — status og byttet er beskrevet i `docs/nettside-masterplan.md` §0.
 - **brand/** — logoen «Stemmen i søkeren» (valgt 04.11.2026) som SVG-mesterfiler,

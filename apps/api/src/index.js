@@ -12,6 +12,7 @@ const requestLogger = require("./middleware/requestLogger");
 
 const { getPool, isDbEnabled } = require("./db");
 const { publicBase, apiBase, absolutizeSeo, sitemapXml } = require("./publicBase");
+const { withChrome } = require("./siteChrome");
 const { signedMediaUrl } = require("./mediaSign");
 const { extractGeminiUsage, recordCost } = require("./costTracking");
 const {
@@ -212,7 +213,7 @@ function sendPublicPage(req, res, filename, routePath) {
   fs.readFile(path.join(__dirname, filename), "utf8", (err, html) => {
     if (err) return sendNotFound(req, res);
     res.set("Cache-Control", PUBLIC_CACHE);
-    res.type("html").send(absolutizeSeo(html, publicBase(req), routePath));
+    res.type("html").send(withChrome(absolutizeSeo(html, publicBase(req), routePath), routePath));
   });
 }
 
@@ -252,6 +253,7 @@ function sendPresentationPage(req, res, filename, routePath) {
     if (!isPublic) res.set("X-Robots-Tag", "noindex");
     if (isPublic) html = absolutizeSeo(html, publicBase(req), routePath);
     res.set("Cache-Control", PUBLIC_CACHE);
+    if (isPublic) html = withChrome(html, routePath);
     res.type("html").send('<!DOCTYPE html>\n<html lang="nb">\n' + html + "\n</html>");
   });
 }
@@ -310,7 +312,7 @@ app.get("/kontakt", (req, res) => {
           : "Knappen starter en e-post – foreslå tidspunkter, så bekrefter vi innen én virkedag."
       );
     res.set("Cache-Control", PUBLIC_CACHE);
-    res.type("html").send(absolutizeSeo(html, publicBase(req), "/kontakt"));
+    res.type("html").send(withChrome(absolutizeSeo(html, publicBase(req), "/kontakt"), "/kontakt"));
   });
 });
 
@@ -318,14 +320,27 @@ app.get("/kontakt", (req, res) => {
 app.get("/faq", (req, res) => sendPublicPage(req, res, "faq-page.html", "/faq"));
 app.get("/personvern", (req, res) => sendPublicPage(req, res, "personvern-page.html", "/personvern"));
 app.get("/takk", (req, res) => {
-  res.set("Cache-Control", PUBLIC_CACHE);
-  res.sendFile(path.join(__dirname, "takk-page.html"));
+  fs.readFile(path.join(__dirname, "takk-page.html"), "utf8", (err, html) => {
+    if (err) return sendNotFound(req, res);
+    res.set("Cache-Control", PUBLIC_CACHE);
+    res.type("html").send(withChrome(html));
+  });
 });
 app.get("/vilkar", (req, res) => sendPublicPage(req, res, "vilkar-page.html", "/vilkar"));
 app.get("/robots.txt", require("./routes/publikum").robotsHandler);
 // Sitemap (SEO): kun de offentlige, indekserbare salgssidene (publicBase.js).
 app.get("/sitemap.xml", (req, res) => {
   res.type("application/xml").send(sitemapXml(publicBase(req)));
+});
+// Felles stilark og selv-hostet font for de offentlige sidene. Ingen
+// tredjepartsforespørsler: personvernløftet («ingen tredjeparts sporing»)
+// gjelder også fonten. Stilarket følger sidenes fem minutter, fonten ukes-cachet.
+app.get("/site.css", (req, res) => {
+  res.set("Cache-Control", PUBLIC_CACHE);
+  res.type("css").sendFile(path.join(__dirname, "assets/site.css"));
+});
+app.get("/fonts/manrope-latin.woff2", (req, res) => {
+  res.sendFile(path.join(__dirname, "assets/fonts/manrope-latin.woff2"), { maxAge: ICON_MAX_AGE });
 });
 app.get("/og-bilde.png", (req, res) => {
   res.sendFile(path.join(__dirname, "assets/og-bilde.png"), { maxAge: ICON_MAX_AGE });
@@ -348,7 +363,10 @@ app.get("/apple-touch-icon-precomposed.png", (req, res) => {
 function sendNotFound(req, res) {
   const acceptsHtml = (req.get("accept") || "").includes("text/html");
   if (req.method === "GET" && acceptsHtml && !req.path.startsWith("/api/")) {
-    return res.status(404).sendFile(path.join(__dirname, "404-page.html"));
+    return fs.readFile(path.join(__dirname, "404-page.html"), "utf8", (err, html) => {
+      if (err) return res.status(404).json({ error: "Not found" });
+      res.status(404).type("html").send(withChrome(html));
+    });
   }
   res.status(404).json({ error: "Not found" });
 }
