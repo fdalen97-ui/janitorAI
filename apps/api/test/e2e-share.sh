@@ -235,6 +235,25 @@ BESOK=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0
   "SELECT sti || ':' || coalesce(kilde,'-') FROM sidevisninger ORDER BY id" 2>&1 | tr '\n' ' ')
 check "besok: /kontakt telles med kilde, ukjent sti ignoreres" "/kontakt:e2e " "$BESOK"
 
+# ── Cookiefri klikktelling + kampanjekilde på leadet ────────────────────────
+# sendBeacon sender ren tekst (ingen CORS-forhåndsspørring fra docrai.io).
+curl -s -o /dev/null -X POST "$BASE/api/hendelse" -H 'Content-Type: text/plain;charset=UTF-8' -d '{"navn":"cta_pilot","sti":"/","kilde":"gads_1_2"}'
+curl -s -o /dev/null -X POST "$BASE/api/hendelse" -H 'Content-Type: application/json' -d '{"navn":"cta_mote","sti":"/kontakt"}'
+curl -s -o /dev/null -X POST "$BASE/api/hendelse" -H 'Content-Type: application/json' -d '{"navn":"finnes_ikke","sti":"/om"}'
+curl -s -o /dev/null -X POST "$BASE/api/hendelse" -H 'Content-Type: application/json' -d '{"navn":"cta_pilot","sti":"/om","kilde":"ola@firma.no"}'
+HEND=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -tA -c \
+  "SELECT navn || ':' || sti || ':' || coalesce(kilde,'-') FROM hendelser ORDER BY id" 2>&1 | tr '\n' ' ')
+check "hendelse: godkjente knappenavn telles, ukjent navn ignoreres, ugyldig kilde lagres ikke" "cta_pilot:/:gads_1_2 cta_mote:/kontakt:- cta_pilot:/om:- " "$HEND"
+LEAD_CODE=$(curl -s -o /dev/null -w '%{http_code}|%{redirect_url}' -X POST "$BASE/api/pilot-interesse" \
+  --data-urlencode 'navn=E2E Takst' --data-urlencode 'epost=e2e@example.com' --data-urlencode 'kilde=gads_1_2')
+check "pilot-interesse: 303 til /takk" "303|$BASE/takk" "$LEAD_CODE"
+curl -s -o /dev/null -X POST "$BASE/api/pilot-interesse" --data-urlencode 'navn=Uten Kilde' --data-urlencode 'epost=u@example.com'
+LEAD=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -tA -c \
+  "SELECT navn || ':' || coalesce(kilde,'-') FROM pilot_interesse ORDER BY id" 2>&1 | tr '\n' ' ')
+check "pilot-interesse: kampanjekilden følger leadet" "E2E Takst:gads_1_2 Uten Kilde:- " "$LEAD"
+TRAKT=$(PGOPTIONS='-c client_min_messages=warning' asPg "$PGBIN/psql" -h 127.0.0.1 -p "$PGPORT" -U docrai -d docrai_e2e -q -tA -c "$(cat scripts/kampanjetrakt.sql)" 2>&1 | sort | tr '\n' ' ')
+check "kampanjetrakt.sql: besøk, klikk og leads per kilde" "(direkte)|0|1|1|1 e2e|1|0|0|0 gads_1_2|0|1|0|1 " "$TRAKT"
+
 # ── Share page shell ─────────────────────────────────────────────────────────
 PAGE=$(curl -s "$BASE/share/$SHARE_ID")
 check "share page served" "true" "$(echo "$PAGE" | grep -q 'PIN-koden' && echo true)"

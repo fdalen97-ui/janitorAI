@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
 <title>Vilkår for bruk – DocrAI</title>
 <meta name="description" content="Vilkår for bruk av DocrAI i pilotfasen: hva tjenesten er, takstpersonens ansvar for rapporten, bruk, priser og oppsigelse." />
 <link rel="canonical" href="/vilkar" />
@@ -11,26 +13,31 @@
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/site.css" />
 <style>
   :root { --paper:#FBFEFF; --surface:#E8F5F8; --ink:#072227; --muted:#596D71; --border:#C7D9DC; --accent:#2F4A5E; }
   @media (prefers-color-scheme: dark) { :root { --paper:#132022; --surface:#091517; --ink:#E6ECEE; --muted:#9FAEB1; --border:#2F3D40; --accent:#A1BFD7; } }
   * { box-sizing:border-box; } body { margin:0; background:var(--surface); color:var(--ink);
-    font-family:'Inter',-apple-system,'Segoe UI',system-ui,sans-serif; font-size:16px; line-height:1.65; }
+    font-family: var(--font); font-size:16px; line-height:1.65; }
   .page { max-width:720px; margin:0 auto; padding:36px 18px 64px; display:flex; flex-direction:column; gap:18px; }
   .crumb { font-size:13px; } .crumb a { color:var(--accent); text-decoration:none; font-weight:600; }
   .brand { display:flex; align-items:center; gap:10px; }
   .brand .merke { width: 22px; height: 22px; flex: none; color: #2F4A5E; }
   .brand b { font-size:15px; }
-  h1 { margin:0; font-size:26px; font-weight:700; letter-spacing:-0.01em; }
+  h1 { margin: 0; font-size: clamp(28px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.12; text-wrap: balance; }
   h2 { margin:12px 0 0; font-size:17px; font-weight:700; }
   p, li { color:var(--muted); font-size:14.5px; margin:0; }
   ul { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px; }
   p b, li b { color:var(--ink); }
   .datestamp { font-size:12.5px; color:var(--muted); }
-  footer { border-top:1px solid var(--border); padding-top:14px; font-size:13px; color:var(--muted); display:flex; flex-direction:column; gap:6px; }
   a { color:var(--accent); }
 
   /* Tilgjengelighet (WCAG 2.4.7): tydelig fokusmarkering for tastaturbrukere. */
@@ -41,9 +48,9 @@
 </style>
 </head>
 <body>
+__SITE_HEADER__
 <main class="page">
   <nav class="crumb" aria-label="Brødsmulesti"><a href="/om">DocrAI</a> <span aria-hidden="true">›</span> Vilkår for bruk</nav>
-  <div class="brand"><svg class="merke" viewBox="0 0 96 96" width="24" height="24" aria-hidden="true" focusable="false"><g><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="merke1"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#merke1)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></g></svg><b>DocrAI</b></div>
   <h1>Vilkår for bruk</h1>
   <p class="datestamp">Sist oppdatert: september 2026. DocrAI er i pilotfase. Disse vilkårene beskriver
   dagens bruk og oppdateres før betalt drift. En egen pilotavtale kan utfylle dem for
@@ -91,10 +98,8 @@
   <p>Spørsmål om vilkårene: <a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a> – vi
   svarer innen én virkedag.</p>
 
-  <footer>
-    <span><a href="/om">Om DocrAI</a> · <a href="/kontakt">Snakk med oss</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/demo">Prøv demoen</a></span>
-  </footer>
 </main>
+__SITE_FOOTER__
 <script>
   try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/vilkar' })], { type: 'application/json' })); } catch (e) {}
 </script>

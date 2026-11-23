@@ -225,6 +225,43 @@ for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk; do
   PAGE="$($CURL "$A$p")"
   check "UU $p: lang=nb, <main>, h1" "1|1|yes" "$(printf '%s' "$PAGE" | grep -c '<html lang="nb">')|$(printf '%s' "$PAGE" | grep -c '<main')|$([ "$(printf '%s' "$PAGE" | grep -c '<h1')" -ge 1 ] && echo yes || echo no)"
 done
+# Felles ramme (siteChrome.js): topptekst og bunntekst settes inn på serveren,
+# og ingen plassholder skal noen gang nå nettleseren.
+for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk /kundereisen; do
+  PAGE="$($CURL "$A$p")"
+  check "ramme $p: topptekst, bunntekst, ingen plassholder" "1|1|0" "$(printf '%s' "$PAGE" | grep -c '<header class="site-header">')|$(printf '%s' "$PAGE" | grep -c '<footer class="site-footer">')|$(printf '%s' "$PAGE" | grep -c '__SITE_')"
+done
+check "ramme 404: merkevare-404 har også rammen" "404|1" "$($CURL -o /dev/null -w '%{http_code}' -H 'Accept: text/html' "$A/finnes-ikke")|$($CURL -H 'Accept: text/html' "$A/finnes-ikke" | grep -c '<header class="site-header">')"
+check "ramme /faq: gjeldende side er merket i menyen" "1" "$($CURL "$A/faq" | grep -c '<a href="/faq" aria-current="page">')"
+# Stilark og font er offentlige (ingen 401 fra token-vakten) og selv-hostet.
+check "site.css: offentlig, text/css, fem minutters cache" "200|text/css; charset=utf-8|public, max-age=300" "$(status "$A/site.css")|$(header content-type "$A/site.css")|$(header cache-control "$A/site.css")"
+check "font: offentlig woff2 med ukes-cache" "200|font/woff2|public, max-age=604800" "$(status "$A/fonts/manrope-latin.woff2")|$(header content-type "$A/fonts/manrope-latin.woff2")|$(header cache-control "$A/fonts/manrope-latin.woff2")"
+# Kontaktseksjonen (partials/team.html): portrettene er offentlige, og Anders står
+# før William i kilden (venstre/høyre på skjerm, Anders først på mobil).
+for n in anders william; do
+  check "portrett $n: offentlig jpeg med ukes-cache" "200|image/jpeg|public, max-age=604800" "$(status "$A/bilder/$n.jpg")|$(header content-type "$A/bilder/$n.jpg")|$(header cache-control "$A/bilder/$n.jpg")"
+done
+check "portrett: bare den faste lista serveres" "404" "$($CURL -o /dev/null -w '%{http_code}' -H 'Accept: text/html' "$A/bilder/fredrik.jpg")"
+for p in /om /kontakt; do
+  PAGE="$($CURL "$A$p")"
+  check "kontaktseksjon $p: Anders før William, alt-tekst og mål på bildene" "1|yes|2" \
+    "$(printf '%s' "$PAGE" | grep -c 'id="kontakt-oss"')|$(printf '%s' "$PAGE" | tr '\n' ' ' | grep -q 'bilder/anders.jpg.*bilder/william.jpg' && echo yes || echo no)|$(printf '%s' "$PAGE" | grep -c '<img src="/bilder/[a-z]*.jpg" alt="Portrett av [^"]*" width="480" height="576" loading="lazy"')"
+done
+check "/kontakt: bookingkortet har ankeret kontaktseksjonen lenker til" "1" "$($CURL "$A/kontakt" | grep -c '<div class="card" id="book">')"
+check "/om: tre måter å komme i gang på" "1|3" "$($CURL "$A/om" | grep -c 'Tre måter å komme i gang på')|$($CURL "$A/om" | grep -c '<li class="way')"
+# Sporing uten cookies: eget skript fra egen vert, og ingen kjent sporingskode.
+check "site.js: offentlig, javascript, fem minutters cache" "200|text/javascript; charset=utf-8|public, max-age=300" "$(status "$A/site.js")|$(header content-type "$A/site.js")|$(header cache-control "$A/site.js")"
+check "site.js: ingen cookie og ingen nettleserlagring" "0" "$($CURL "$A/site.js" | grep -v '^ *//' | grep -ci 'document\.cookie\|localStorage\|sessionStorage\|indexedDB')"
+check "ingen tredjeparts sporingskode (GTM/GA4/Ads/Meta/LinkedIn)" "0" \
+  "$( { for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk /kundereisen /site.js; do $CURL "$A$p"; done; } | grep -Eci 'googletagmanager|google-analytics|gtag\(|doubleclick|googleadservices|connect\.facebook|snap\.licdn')"
+# SEO-vakt: tittel/beskrivelse, én h1, overskriftsnivå, canonical, og:-tagger, JSON-LD, alt.
+check "SEO: de åtte indekserbare sidene består seo-sjekk" "seo ok" "$(node test/seo-sjekk.mjs "$A" 2>&1 | head -20)"
+# Personvernløftet («ingen tredjeparts sporing»): ingen offentlig side laster
+# stilark, font, skript eller bilder fra en annen vert.
+check "ingen tredjepartsressurser på de offentlige sidene" "0" \
+  "$( { for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk /kundereisen /site.css; do $CURL "$A$p"; done; } | grep -Eci '(src|href)="https?://[^"]*\.(css|js|woff2?|png|jpe?g|svg)|fonts\.googleapis|fonts\.gstatic|url\(["'"'"']?https?://')"
+# docrai.io (statisk) genereres fra forsiden; en glemt ombygging skal felle testen.
+check "explainer/index.html er bygget fra gjeldende forside" "explainer er i synk" "$(node ../../explainer/bygg.mjs --sjekk 2>&1 | tail -1)"
 check "UU /demo: adressefeltet har label" "1" "$($CURL "$A/demo" | grep -c '<label for="adr"')"
 check "UU /kundereisen: h1 og fokusstil" "1|1" "$($CURL "$A/kundereisen" | grep -c '<h1 class="sr-only"')|$($CURL "$A/kundereisen" | grep -c 'focus-visible')"
 EKS="$($CURL "$A/eksempelrapport")"

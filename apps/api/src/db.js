@@ -137,6 +137,22 @@ CREATE TABLE IF NOT EXISTS sidevisninger (
 );
 CREATE INDEX IF NOT EXISTS sidevisninger_created_idx ON sidevisninger (created_at DESC);
 
+-- Kampanjekilden (?k= i lenken) følger leadet, så vi ser hvilken kanal en
+-- pilotinteresse kom fra. Samme kode som i sidevisninger.kilde.
+ALTER TABLE pilot_interesse ADD COLUMN IF NOT EXISTS kilde TEXT;
+
+-- Cookiefri klikktelling på handlingsknappene (data-cta på salgssidene):
+-- kun forhåndsgodkjent knappenavn + sti + valgfri kampanjekilde. Aldri IP,
+-- bruker-ID eller fingeravtrykk – kan ikke knyttes til en person.
+CREATE TABLE IF NOT EXISTS hendelser (
+  id          SERIAL      PRIMARY KEY,
+  navn        TEXT        NOT NULL,
+  sti         TEXT        NOT NULL,
+  kilde       TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS hendelser_created_idx ON hendelser (created_at DESC);
+
 -- COGS-måling per KI-operasjon: faktisk tokenforbruk og estimert kostnad, så
 -- en kredittpris kan settes på reelle tall (se docs/prising-bruksbasert.md).
 -- Dette er kostnadssynlighet/analyse — ikke fakturagrunnlag ennå.

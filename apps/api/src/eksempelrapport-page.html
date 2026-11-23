@@ -3,17 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta name="robots" content="index, follow" />
 <link rel="canonical" href="/eksempelrapport" />
-<title>DocrAI – Eksempel på ferdig skaderapport</title>
-<meta name="description" content="Slik ser en ferdig, godkjent DocrAI-skaderapport ut for mottakeren: årsak, faglig beskrivelse, tiltak, bevis og notater. Oppdiktet eksempelsak – ingen ekte adresse, person eller bilder." />
-<meta property="og:title" content="DocrAI – Eksempel på ferdig skaderapport" />
+<title>Eksempel på ferdig skaderapport fra takstperson | DocrAI</title>
+<meta name="description" content="Se en ferdig, godkjent skaderapport slik mottakeren får den: årsak, faglig beskrivelse, tiltak, bevis og notater. Oppdiktet eksempelsak." />
+<meta property="og:title" content="Eksempel på ferdig skaderapport fra takstperson | DocrAI" />
 <meta property="og:description" content="Slik ser en ferdig, godkjent DocrAI-skaderapport ut for mottakeren. Oppdiktet eksempelsak." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
 <!--
   Eksempeldata fra øvingssaken (presentation/ovingssak.html): samme oppdiktede
@@ -22,6 +28,8 @@
   Byggforsk-nummer, ingen ekte foto — alt som ville stått uten kode bak seg
   på en oppdiktet sak, er utelatt.
 -->
+<link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/site.css" />
 <style>
   :root {
     --paper: #FBFEFF; --surface: #E8F5F8; --ink: #072227; --muted: #596D71;
@@ -42,7 +50,7 @@
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--surface); color: var(--ink);
-    font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font);
     font-size: 15px; line-height: 1.55;
   }
   .page { max-width: 840px; margin: 0 auto; padding: 32px 18px 64px; display: flex; flex-direction: column; gap: 20px; }
@@ -58,11 +66,12 @@
   .banner { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--ink); border-radius: 10px; padding: 12px 16px; font-size: 14px; }
   .banner b { color: var(--warn); }
   .card { background: var(--paper); border: 1px solid var(--border); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-  h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+  h1 { margin: 0; font-size: clamp(28px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.12; text-wrap: balance; }
   h2 { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); }
   .muted { color: var(--muted); }
   .kv { display: grid; grid-template-columns: minmax(130px, 180px) 1fr; gap: 6px 14px; font-size: 14.5px; margin: 0; }
   .kv dt { color: var(--muted); margin: 0; } .kv dd { margin: 0; }
+  @media (max-width: 560px) { .kv { grid-template-columns: 1fr; gap: 2px 0; } .kv dt { font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 10px; } .kv dt:first-child { margin-top: 0; } }
   /* Kobber — identitetens signaturdetalj: kun godkjenningsstempelet. */
   .badge-stamp {
     display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700;
@@ -84,14 +93,13 @@
   .btn.primary { background: var(--accent); color: #fff; }
   .btn.ghost { border: 1.5px solid var(--border); color: var(--ink); background: var(--paper); }
   @media (prefers-color-scheme: dark) { .btn.primary { color: #051214; } }
-  footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
   a { color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 </style>
 </head>
 <body>
+__SITE_HEADER__
 <main class="page">
-  <div class="brand"><svg class="merke" viewBox="0 0 96 96" width="24" height="24" aria-hidden="true" focusable="false"><g><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="merke1"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#merke1)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></g></svg><b>DocrAI</b><span class="muted">· eksempel på delt skaderapport</span><a href="/om">← Om DocrAI</a></div>
 
   <div class="banner"><b>Eksempeldata.</b> Saken, adressen, takstpersonen og bildene er oppdiktet
     (samme sak som i øvingssaken). Slik ser en ferdig, godkjent rapport ut for den som mottar
@@ -209,19 +217,20 @@
       utløpsdato, som takstpersonen kan trekke tilbake. Lenken kan ikke lages før rapporten er
       godkjent – det håndheves av serveren.</p>
     <div class="cta-row">
-      <a class="btn primary" href="/om#pilot">Bli pilotdeltaker</a>
-      <a class="btn ghost" href="/demo">Prøv saksunderlaget på din adresse</a>
+      <a class="btn primary" href="/om#pilot" data-cta="cta_pilot">Bli pilotdeltaker</a>
+      <a class="btn ghost" href="/demo" data-cta="cta_demo">Prøv saksunderlaget på din adresse</a>
     </div>
   </div>
 
-  <footer>
-    <span>Eksempelrapport fra DocrAI · oppdiktet sak · ingen ekte adresse, person eller bilder.</span>
-    <span><a href="/om">Om DocrAI</a> · <a href="/demo">Demo</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a></span>
-  </footer>
+  <p class="pagenote">Eksempelrapport fra DocrAI · oppdiktet sak · ingen ekte adresse, person eller bilder.</p>
 </main>
+__SITE_FOOTER__
 
 <script>
   try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/eksempelrapport', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DocrAI","item":"/om"},{"@type":"ListItem","position":2,"name":"Eksempelrapport","item":"/eksempelrapport"}]}
 </script>
 </body>
 </html>

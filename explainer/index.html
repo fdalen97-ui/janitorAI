@@ -1,311 +1,418 @@
 <!DOCTYPE html>
 <html lang="nb">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DocrAI — Fra befaring til skaderapport</title>
-<meta name="description" content="DocrAI er en rapportmotor for skadetakst. Snakk deg gjennom befaringen — få et AI-utkast med årsak, akutt/gradvis-vurdering og Byggforsk-henvisninger, klart for din kontroll og godkjenning.">
-<link rel="canonical" href="https://docrai.io/">
-<link rel="icon" href="/favicon.png" type="image/png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="DocrAI">
-<meta property="og:title" content="DocrAI — Fra befaring til skaderapport">
-<meta property="og:description" content="Snakk deg gjennom befaringen. Få et AI-utkast til skaderapport — du kontrollerer og godkjenner før noe deles.">
-<meta property="og:url" content="https://docrai.io/">
-<meta property="og:image" content="https://docrai.io/og-bilde.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="DocrAI — Fra befaring til skaderapport">
-<meta name="twitter:description" content="Snakk deg gjennom befaringen. Få et AI-utkast til skaderapport — du kontrollerer og godkjenner før noe deles.">
-<meta name="twitter:image" content="https://docrai.io/og-bilde.png">
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "DocrAI",
-  "url": "https://docrai.io/",
-  "logo": "https://docrai.io/apple-touch-icon.png"
-}
-</script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<title>Skaderapport fra befaring – app for takstpersoner | DocrAI</title>
+<meta name="description" content="DocrAI gjør tale, video og foto fra befaringen om til utkast til skaderapport med foreslått årsak. Du kontrollerer og godkjenner. Gratis pilot i 3 måneder." />
+<meta property="og:title" content="Skaderapport fra befaring – app for takstpersoner | DocrAI" />
+<meta property="og:description" content="Snakk deg gjennom befaringen – AI-en skriver utkastet med foreslått årsak. Du kontrollerer, korrigerer og godkjenner." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="https://docrai.io/og-bilde.png" />
+<meta property="og:url" content="https://docrai.io/" />
+<meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="canonical" href="https://docrai.io/" />
+<link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="site.css" />
 <style>
-  :root{
-    --bg:#E8F5F8;
-    --paper:#FBFEFF;
-    --ink:#072227;
-    --muted:#596D71;
-    --border:#C7D9DC;
-    --accent:#2F4A5E;
-    --accent-strong:#1D374B;
-    --accent-pale:#E5ECF3;
-    --copper:#2F4A5E;
-    --chip-bg:#E0EEF1;
-    --shadow:rgba(7,34,39,0.10);
-    --font-body:'Inter',-apple-system,'Segoe UI',system-ui,sans-serif;
-    --font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#091517;
-      --paper:#132022;
-      --ink:#E6ECEE;
-      --muted:#9FAEB1;
-      --border:#2F3D40;
-      --accent:#A1BFD7;
-      --accent-strong:#B4D2EB;
-      --accent-pale:#242C33;
-      --copper:#97B5CD;
-      --chip-bg:#1C292B;
-      --shadow:rgba(0,0,0,0.35);
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#091517;
-    --paper:#132022;
-    --ink:#E6ECEE;
-    --muted:#9FAEB1;
-    --border:#2F3D40;
-    --accent:#A1BFD7;
-    --accent-strong:#B4D2EB;
-    --accent-pale:#242C33;
-    --copper:#97B5CD;
-    --chip-bg:#1C292B;
-    --shadow:rgba(0,0,0,0.35);
-  }
-
-  *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
-  body{
-    margin:0;
-    background:var(--bg);
-    color:var(--ink);
-    font-family:var(--font-body);
-    -webkit-font-smoothing:antialiased;
-  }
-  a{color:inherit;}
-  .wrap{max-width:1040px;margin:0 auto;padding-inline:24px;}
-  section{padding-block:64px;}
-  h1,h2,h3{text-wrap:balance;}
-
-  /* ---------- Nav ---------- */
-  header.site{
-    position:sticky;top:0;z-index:10;
-    background:var(--paper);border-bottom:1px solid var(--border);
-  }
-  .navrow{
-    display:flex;align-items:center;justify-content:space-between;
-    padding-block:14px;
-  }
-  .brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;text-decoration:none;}
-  .merke{width:26px;height:26px;flex:none;color:var(--accent);}
-  .btn{
-    display:inline-flex;align-items:center;gap:7px;
-    background:var(--accent);color:#fff;
-    font-weight:600;font-size:14px;
-    padding:11px 20px;border-radius:10px;
-    text-decoration:none;white-space:nowrap;
-    transition:background .15s ease, transform .1s ease;
-  }
-  .btn:hover{background:var(--accent-strong);}
-  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
-  .btn.small{padding:8px 15px;font-size:13px;}
-
-  /* ---------- Hero ---------- */
-  .hero{padding-block:72px 56px;}
-  .hero-inner{max-width:600px;margin:0 auto;text-align:center;}
-  .problem-chip{
-    display:inline-flex;align-items:center;gap:7px;
-    font-size:12.5px;color:var(--muted);
-    background:var(--chip-bg);padding:6px 13px;border-radius:999px;margin-bottom:20px;
-  }
-  .problem-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--copper);flex:none;}
-  .hero h1{
-    font-size:clamp(28px,4.6vw,40px);font-weight:700;letter-spacing:-0.02em;line-height:1.18;
-    margin:0 0 16px;
-  }
-  .hero p.lede{
-    font-size:16.5px;line-height:1.65;color:var(--muted);margin:0 auto 30px;max-width:52ch;
-  }
-
-  /* ---------- Section headings ---------- */
-  .section-head{max-width:640px;margin:0 auto 40px;text-align:center;}
-  .eyebrow{
-    font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--accent);margin:0 0 10px;
-  }
-  .section-head h2{font-size:clamp(22px,3.2vw,28px);font-weight:700;letter-spacing:-0.02em;margin:0 0 12px;}
-  .section-head p{font-size:15.5px;line-height:1.6;color:var(--muted);margin:0 auto;max-width:56ch;}
-
-  /* ---------- Problem ---------- */
-  .problem{background:var(--paper);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-  .problem-body{max-width:640px;margin:0 auto;font-size:15.5px;line-height:1.75;color:var(--ink);}
-  .problem-body p{margin:0 0 16px;}
-  .problem-body p:last-child{margin-bottom:0;}
-
-  /* ---------- How it works ---------- */
-  .steps{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:28px;
-    margin-bottom:40px;
-  }
-  @media (max-width:760px){ .steps{grid-template-columns:1fr;} }
-  .step{
-    background:var(--paper);border:1px solid var(--border);border-radius:14px;
-    padding:24px 22px;
-  }
-  .step-num{
-    font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--accent);
-    display:block;margin-bottom:12px;
-  }
-  .step h3{font-size:15.5px;font-weight:700;margin:0 0 8px;}
-  .step p{font-size:13.5px;line-height:1.55;color:var(--muted);margin:0;}
-
-  .principle{
-    max-width:560px;margin:0 auto;text-align:center;
-    padding:30px 28px;border-radius:14px;
-    background:var(--accent-pale);
-  }
-  .principle p.line{
-    font-size:19px;font-weight:700;letter-spacing:-0.01em;margin:0 0 8px;color:var(--ink);
-  }
-  .principle p.sub{font-size:13.5px;color:var(--muted);margin:0;line-height:1.5;}
-
-  /* ---------- Who it's for ---------- */
-  .forwho{background:var(--paper);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-  .forwho-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-  @media (max-width:760px){ .forwho-grid{grid-template-columns:1fr;} }
-  .forwho-card h3{font-size:14.5px;font-weight:700;margin:0 0 8px;}
-  .forwho-card p{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0;}
-
-  /* ---------- Final CTA ---------- */
-  .final-cta{text-align:center;}
-  .final-cta h2{font-size:clamp(22px,3.4vw,30px);font-weight:700;letter-spacing:-0.02em;margin:0 0 14px;}
-  .final-cta p{font-size:15px;color:var(--muted);margin:0 auto 26px;max-width:46ch;}
-
-  /* ---------- Footer ---------- */
-  footer{border-top:1px solid var(--border);padding-block:32px;}
-  .footer-row{
-    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
-  }
-  .footer-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;}
-  .footer-tagline{font-size:12.5px;color:var(--muted);}
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface); color: var(--ink); font-family: var(--font); }
 </style>
 </head>
 <body>
-
-<header class="site">
-  <div class="wrap navrow">
-    <a class="brand" href="#top"><svg class="merke" viewBox="0 0 96 96" width="26" height="26" aria-hidden="true" focusable="false"><g><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="merke1"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#merke1)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></g></svg>DocrAI</a>
-    <a class="btn small" href="https://app.docrai.io">Åpne DocrAI →</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="site-logo" href="./" aria-label="DocrAI – til forsiden"><svg viewBox="0 0 96 96" aria-hidden="true" focusable="false"><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="logo-topp"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#logo-topp)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></svg><span>DocrAI</span></a>
+    <nav class="site-nav" aria-label="Hovedmeny">
+      <a href="#slik">Slik virker det</a>
+      <a href="https://janitorai-backend.onrender.com/eksempelrapport">Eksempelrapport</a>
+      <a href="https://janitorai-backend.onrender.com/demo">Demo</a>
+      <a href="https://janitorai-backend.onrender.com/faq">Spørsmål</a>
+      <a href="https://janitorai-backend.onrender.com/kontakt">Kontakt</a>
+      <a href="https://app.docrai.io">Åpne appen</a>
+    </nav>
+    <a class="site-cta" href="#pilot" data-cta="cta_pilot">Bli pilot</a>
   </div>
 </header>
 
-<main id="top">
+<main class="lp">
 
-  <!-- HERO -->
   <section class="hero">
-    <div class="wrap hero-inner">
-      <div class="problem-chip"><span class="dot"></span>I dag skjer mye av rapportarbeidet etter at befaringen er ferdig</div>
-      <h1>Dokumenter skaden der og da — la utkastet vente på deg i kontoret.</h1>
-      <p class="lede">DocrAI er en rapportmotor for skadetakst: du snakker deg gjennom befaringen, og får et AI-utkast til skaderapport med årsak, akutt/gradvis-vurdering og Byggforsk-henvisninger — klart for din kontroll og godkjenning.</p>
-      <a class="btn" href="https://app.docrai.io">Åpne DocrAI →</a>
+    <div class="wrap grid">
+      <div class="copy">
+        <span class="eyebrow">For takstpersoner og skadeutredere</span>
+        <h1>Fra befaring til skaderapport. AI‑en skriver utkastet – du godkjenner.</h1>
+        <p class="lede">Snakk deg gjennom befaringen, så skriver AI-en utkastet – med foreslått årsak og
+          akutt/gradvis-vurdering. <strong>Du kontrollerer, korrigerer og godkjenner.</strong> Ingenting deles uten
+          stempelet ditt.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="#pilot" data-cta="cta_pilot">Bli pilotdeltaker</a>
+          <a class="btn ghost" href="https://janitorai-backend.onrender.com/eksempelrapport" data-cta="cta_rapport">Se en ferdig rapport</a>
+        </div>
+        <ul class="ticks">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Gratis pilot i 3 måneder</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ingen bindingstid</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ingenting deles før du har stemplet</li>
+        </ul>
+        <p class="altlink">Vil du prøve noe med en gang? <a href="https://janitorai-backend.onrender.com/demo" data-cta="cta_demo">Se saksunderlaget for din adresse</a> eller <a href="https://janitorai-backend.onrender.com/kontakt#book" data-cta="cta_mote">book et 15-min møte</a>.</p>
+      </div>
+      <div class="visual" role="img" aria-label="Illustrasjon: telefonen med bevis fra kjelleren, og rapporten som er godkjent av takstpersonen">
+        <div class="phone" aria-hidden="true">
+          <div class="screen">
+            <div class="rec"><i></i>Lydnotat<span>0:31</span></div>
+            <div class="room">Kjeller</div>
+            <div class="wave"><i style="height:18px"></i><i style="height:34px"></i><i style="height:52px"></i><i style="height:26px"></i><i style="height:44px"></i><i style="height:20px"></i><i style="height:38px"></i><i style="height:14px"></i><i style="height:30px"></i><i style="height:48px"></i><i style="height:22px"></i></div>
+            <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg><div><b>Videoklipp</b><span>vegg bak sofa</span></div></div>
+            <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><div><b>4 bilder</b><span>tid og sted settes ved fangst</span></div></div>
+            <div class="item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg><div><b>Lydnotat</b><span>«fuktmerker nederst på veggen …»</span></div></div>
+            <div class="make">Lag rapport</div>
+          </div>
+        </div>
+        <div class="sheet" aria-hidden="true">
+          <span class="kicker">Skaderapport</span>
+          <span class="title">Øvingsveien 12, Hamar</span>
+          <span class="stamp">Faglig vurdert og godkjent av Kari Eksempel · 28.09.2026</span>
+          <dl>
+            <dt>Skadested</dt><dd>Kjeller, vegg bak sofa</dd>
+            <dt>Årsak</dt><dd>Nedbør / overvann – vann trenger inn nedenfra, gradvis</dd>
+            <dt>Omfang</dt><dd>Fuktmerker 0–30 cm over gulv på ca. 2,5 m veggflate</dd>
+          </dl>
+          <span class="note">1 felt er faglig korrigert av takstpersonen fra AI-utkastet før godkjenning.</span>
+        </div>
+        <p class="caption">Illustrasjon med oppdiktet sak – samme eksempel som i <a href="https://janitorai-backend.onrender.com/eksempelrapport">eksempelrapporten</a>.</p>
+      </div>
     </div>
   </section>
 
-  <!-- PROBLEM -->
-  <section class="problem">
+  <section class="paper tight">
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">Problemet</p>
-        <h2>Rapportarbeidet skjer for ofte etter befaringen</h2>
-      </div>
-      <div class="problem-body">
-        <p>Takstpersoner og skadeutredere bruker en stor del av arbeidsdagen på etterarbeid — å renskrive notater, organisere bilder og formulere en skaderapport i etterkant av befaringen, ofte fra bilen eller tilbake på kontoret. Det er tid som ikke går til selve vurderingen av skaden, og som gjør at ferdigstillelse av saken trekker ut.</p>
-        <p>DocrAI flytter strukturering av rapporten til befaringstidspunktet, slik at det som gjenstår etterpå er kontroll — ikke skriving fra bunnen av.</p>
+      <div class="versus">
+        <div class="before">
+          <span class="eyebrow">Slik er det ofte i dag</span>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Rapportskriving i bilen etterpå.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Notater på små knapper med våte hansker.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Dokumentasjon som ikke holder i oppgjøret.</span></li>
+          </ul>
+        </div>
+        <div class="after">
+          <span class="eyebrow">DocrAI snur det</span>
+          <ul>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du snakker deg gjennom befaringen.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>AI-en skriver utkastet, med foreslått årsak og akutt/gradvis-vurdering.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten stempelet ditt.</span></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section id="slik-fungerer-det">
+  <section id="slik">
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">Slik fungerer det</p>
-        <h2>Fra befaring til godkjent rapport</h2>
-        <p>Tre steg, med fagpersonens kontroll som siste og avgjørende steg — ikke en formalitet.</p>
+      <div class="head">
+        <span class="eyebrow">Slik virker det</span>
+        <h2>Tre steg: før, i felt og etter</h2>
       </div>
-
       <div class="steps">
-        <div class="step">
-          <span class="step-num">01</span>
-          <h3>Fang mens du er der</h3>
-          <p>Video, foto og tale mens du dokumenterer skaden på befaring. Ingen egen rapportmal å fylle ut i felt.</p>
-        </div>
-        <div class="step">
-          <span class="step-num">02</span>
-          <h3>AI foreslår et utkast</h3>
-          <p>DocrAI strukturerer det til et rapportutkast: mulig årsak, vurdering av akutt eller gradvis skade, og relevante Byggforsk-henvisninger.</p>
-        </div>
-        <div class="step">
-          <span class="step-num">03</span>
-          <h3>Du kontrollerer og godkjenner</h3>
-          <p>AI velger aldri årsak — «usikker» er et fullverdig svar. Årsaken låses først ved ditt godkjenningsstempel, samme kontroll som i dag.</p>
-        </div>
-      </div>
-
-      <div class="principle">
-        <p class="line">AI foreslår. Fagpersonen bestemmer.</p>
-        <p class="sub">Falsk sikkerhet er farligere enn usikkerhet — derfor er «usikker» alltid et gyldig svar i DocrAI, aldri tvunget frem en konklusjon.</p>
+        <div class="step"><span class="n"><b>1</b>Før</span><h3>Adressen inn</h3><p>Ett søk gir saksunderlaget: kart, gnr/bnr, bygningstype, terreng og vær – ferdig utfylt sak før avreise.</p></div>
+        <div class="step"><span class="n"><b>2</b>I felt</span><h3>Fang og snakk</h3><p>Video, foto og lydnotater rom for rom. Alt lagres lokalt først – appen virker uten dekning i kjelleren.</p></div>
+        <div class="step"><span class="n"><b>3</b>Etter</span><h3>Godkjenn og del</h3><p>Ett trykk, så skriver AI-en utkastet på serveren. Kontrollér, stemple – og del PIN-beskyttet med forsikringen.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- WHO IT'S FOR -->
-  <section class="forwho">
+  <section class="paper">
     <div class="wrap">
-      <div class="section-head">
-        <p class="eyebrow">Hvem det er for</p>
-        <h2>Bygget rundt fagpersonens vurdering</h2>
+      <div class="head">
+        <span class="eyebrow">Hva du får</span>
+        <h2>Fem ting DocrAI gjør for deg</h2>
       </div>
-      <div class="forwho-grid">
-        <div class="forwho-card">
-          <h3>Takstpersoner og skadeutredere</h3>
-          <p>De som dokumenterer bygningsskader på befaring, og som i dag skriver rapporten selv — DocrAI er bygget rundt deres arbeidsflyt, ikke en erstatning for deres vurdering.</p>
-        </div>
-        <div class="forwho-card">
-          <h3>Pilotpartnere</h3>
-          <p>DocrAI utvikles sammen med praktiserende skadeutredere. Deres fagkunnskap er grunnlaget for hvordan rapportmotoren resonnerer, og de tester løsningen på ekte saker før den slippes bredere.</p>
-        </div>
-        <div class="forwho-card">
-          <h3>Forsikringsselskap</h3>
-          <p>Den godkjente rapporten er bygget for å gå videre til forsikringsselskapet som skal behandle saken — med årsak, vurdering og henvisninger sporbare til bevisene i befaringen.</p>
-        </div>
+      <div class="features">
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></span><h3>Saken er klar før bilen starter.</h3><p>Skriv inn adressen – kart, matrikkel, bygningstype, terreng og vær hentes automatisk fra Kartverket og MET. Ingen avtaler, ingen manuelle oppslag.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg></span><h3>Snakk – ikke tast.</h3><p>Store knapper laget for våte hansker, og transkripsjon styrt mot norsk fagspråk: klemring, svill, diffusjonssperre. Talen din blir strukturen i rapporten.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span><h3>AI-en skriver utkastet. Du eier konklusjonen.</h3><p>Årsak og akutt/gradvis foreslås – aldri fastslås. Du redigerer direkte i den ferdige rapportvisningen og stempler med navn og tidspunkt.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><h3>Bevis med sporbarhet.</h3><p>Geo og klokkeslett settes i fangstøyeblikket; SHA-256-sjekksummen settes av serveren ved opplasting. Mottakeren åpner en PIN-beskyttet rapport – uten konto – og kan verifisere at ingenting er endret siden opplasting.</p></div>
+        <div class="feature"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg></span><h3>Passer inn i flyten du har.</h3><p>Uavhengig av forsikringsselskapene: rapporten deles som PIN-beskyttet lenke eller lastes ned som PDF eller Word. Gjør befaringen i DocrAI, lever som før.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- FINAL CTA -->
-  <section class="final-cta">
-    <div class="wrap">
-      <h2>Klar til å prøve DocrAI?</h2>
-      <p>Åpne DocrAI og se hvordan en befaring blir til et rapportutkast du kontrollerer og godkjenner.</p>
-      <a class="btn" href="https://app.docrai.io">Åpne DocrAI →</a>
+  <section class="trust">
+    <div class="wrap grid">
+      <div class="left">
+        <span class="stamp">Godkjent av takstperson</span>
+        <h2>AI foreslår. Du avgjør. Det er systemet – ikke et forbehold.</h2>
+        <p>AI-prosesseringen skjer hos Google; databehandleravtale og EU/EØS-region er ikke på plass ennå – vi sier det som det er.</p>
+      </div>
+      <ul class="facts">
+        <li><b>Utkast til du godkjenner.</b><span>Rapporten er merket som utkast til du aktivt godkjenner den.</span></li>
+        <li><b>Ingen delingslenke uten stempel.</b><span>Delingslenker kan ikke lages før stempelet er satt – det håndheves av serveren, ikke bare av appen.</span></li>
+        <li><b>Referanser kontrolleres.</b><span>Byggforsk-referanser AI-en foreslår, kontrolleres mot en liste over verifiserte bladnummer – uverifiserte forkastes.</span></li>
+      </ul>
     </div>
   </section>
+
+  <section id="kom-i-gang">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Kom i gang</span>
+        <h2>Tre måter å komme i gang på</h2>
+        <p>Velg det som passer deg i dag. Ingen av dem binder deg til noe.</p>
+      </div>
+      <ol class="ways">
+        <li class="way">
+          <span class="n"><b>1</b>Uten registrering</span>
+          <h3>Prøv selv, nå</h3>
+          <p>Skriv inn en adresse du kjenner, og se saksunderlaget slik det ligger klart i DocrAI før hver befaring – hentet live fra åpne offentlige kilder.</p>
+          <form class="adrform" action="https://janitorai-backend.onrender.com/demo" method="get" data-cta="demo_sok">
+            <label for="lp-adr" style="position:absolute;left:-9999px">Adresse</label>
+            <input id="lp-adr" name="adresse" type="text" placeholder="F.eks. Solbergliveien 8, Oslo" autocomplete="street-address" required minlength="3" />
+            <button class="btn ghost" type="submit">Hent saksunderlaget</button>
+          </form>
+          <p class="sub">Eller se hva forsikringen mottar: <a href="https://janitorai-backend.onrender.com/eksempelrapport" data-cta="cta_rapport">åpne eksempelrapporten</a>.</p>
+        </li>
+        <li class="way">
+          <span class="n"><b>2</b>15 minutter</span>
+          <h3>Ta en prat med oss</h3>
+          <p>Et kort introduksjonsmøte der vi viser DocrAI og svarer på det du lurer på om fag, personvern og pris. Du snakker med oss som bygger produktet.</p>
+          <a class="btn ghost" href="https://janitorai-backend.onrender.com/kontakt#book" data-cta="cta_mote">Book et møte</a>
+          <p class="sub"><a href="#kontakt-oss">Se hvem du møter</a></p>
+        </li>
+        <li class="way featured">
+          <span class="n"><b>3</b>3 måneder gratis</span>
+          <h3>Bli pilotdeltaker</h3>
+          <p>Bruk DocrAI på egne saker med alt inkludert og uten bindingstid. Motytelsen er ukentlig tilbakemelding – dere er med og former produktet.</p>
+          <a class="btn primary" href="#pilot" data-cta="cta_pilot">Meld interesse for piloten</a>
+          <p class="sub">Uforpliktende. Du takker ja eller nei etter oppstartsmøtet.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="paper">
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Pris</span>
+        <h2>Enkel og uten binding</h2>
+        <p>Prisen settes i pilotfasen sammen med pilotdeltakerne, etter at kostnaden per rapport er målt på ekte saker.</p>
+      </div>
+      <!-- Regel 6 (CLAUDE.md): bare tall og løfter med kodelinje bak seg. Tidsbruk
+           måles per sak i appen (metrics.ts); mottakerens felt-telling rendres på
+           delingssiden; «ingenting faktureres» er sant fordi det ikke finnes
+           fakturagrunnlag (db.js). Baseline-tall kommer når de er målt. -->
+      <div class="tiers">
+        <div class="tier">
+          <h3>Pilot</h3>
+          <div class="price">Gratis</div>
+          <div class="sub">3 måneder</div>
+          <ul>
+            <li>Alt inkludert, maks 8 foretak</li>
+            <li>Motytelse: ukentlig tilbakemelding</li>
+            <li>50 % rabatt første år etterpå</li>
+          </ul>
+          <span class="tag">opptak nå</span>
+          <a class="btn primary" href="#pilot" data-cta="cta_pilot">Meld interesse</a>
+        </div>
+        <div class="tier hot">
+          <h3>Takstperson</h3>
+          <div class="price">Settes i pilotfasen</div>
+          <div class="sub">ingen bindingstid</div>
+          <ul>
+            <li>Saksunderlag, AI-utkast, godkjenning og PIN-deling inkludert</li>
+            <li>Prisnivået bekreftes mot målt kostnad per rapport før det publiseres</li>
+            <li>Pilotdeltakere: 50 % rabatt første år</li>
+          </ul>
+        </div>
+        <div class="tier">
+          <h3>Foretak</h3>
+          <div class="price">Dialog</div>
+          <div class="sub">fra 5 takstpersoner</div>
+          <ul>
+            <li>Samlefakturering og felles maler</li>
+            <li>Prioritert støtte</li>
+          </ul>
+          <a class="btn ghost" href="https://janitorai-backend.onrender.com/kontakt" data-cta="cta_mote">Snakk med oss</a>
+        </div>
+      </div>
+      <ul class="measures">
+        <li><b>Tid per sak</b>Appen måler tiden fra første bevis til godkjent rapport – sak for sak.</li>
+        <li><b>Utkast → godkjent</b>Korrigerer du AI-utkastet, ser mottakeren hvor mange felt som ble endret.</li>
+        <li><b>Ingen bindingstid</b>Ingenting faktureres i pilotfasen.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="head">
+        <span class="eyebrow">Spørsmål</span>
+        <h2>Det takstpersoner spør om først</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Hvem står ansvarlig for rapporten – AI-en eller takstpersonen?</summary>
+          <p>Alltid takstpersonen. AI-en lager et utkast med foreslått årsak og klassifisering, men
+          rapporten er merket «AI-utkast – ikke godkjent» til du aktivt godkjenner den med navn og
+          tidspunkt. Delingslenker kan ikke lages før stempelet er satt – det håndheves av serveren,
+          ikke bare av appen.</p>
+        </details>
+        <details>
+          <summary>Fungerer appen uten dekning – i kjelleren?</summary>
+          <p>Ja. Alt du fanger (video, lyd, foto, notater) lagres lokalt på enheten først, og sendes
+          til serveren neste gang du åpner appen eller saken med dekning – eller trykker synk. Du
+          mister ikke en befaring på grunn av dårlig nett.</p>
+        </details>
+        <details>
+          <summary>Hvor lagres dataene, og hva med personvern?</summary>
+          <p>Prosjektdata lagres bak tilgangskode per bruker og går over HTTPS. AI-prosessering og
+          rapportdokument skjer hos Google (Gemini, Docs/Drive); databehandleravtale og EU/EØS-region
+          er ikke på plass ennå, og vi sier det som det er. Demosidene bruker ingen cookies og skriver
+          aldri IP til databasen – se <a href="https://janitorai-backend.onrender.com/personvern">personvernerklæringen</a>.</p>
+        </details>
+        <p style="margin-top:8px"><a href="https://janitorai-backend.onrender.com/faq">Se alle spørsmål og svar →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper pilot" id="pilot">
+    <div class="wrap grid">
+      <div>
+        <span class="eyebrow">Pilot</span>
+        <h2 style="margin-top:12px">Bli pilotdeltaker</h2>
+        <!-- Trygghetsnett-mønsteret: vis hvordan det gratis løpet faktisk fungerer,
+             og svar på innvendingen («blir jeg fakturert?») FØR den stilles. -->
+        <ol class="tidslinje">
+          <li><div><b>I dag</b><span>Meld interesse i skjemaet. Vi svarer innen én virkedag og setter opp et 15-minutters oppstartsmøte.</span></div></li>
+          <li><div><b>Underveis</b><span>3 måneder gratis med alt inkludert. Motytelsen er ukentlig tilbakemelding – dere er med og former produktet.</span></div></li>
+          <li><div><b>Før pilotslutt</b><span>Vi tar kontakt i god tid før perioden ender. Ingenting starter å løpe automatisk – dere velger selv om dere fortsetter, med 50&nbsp;% rabatt første år.</span></div></li>
+        </ol>
+      </div>
+      <form class="pilot-form" method="post" action="https://janitorai-backend.onrender.com/api/pilot-interesse" data-cta="pilot_skjema">
+        <label>Navn
+          <input name="navn" required autocomplete="name" maxlength="200" />
+        </label>
+        <label>E-post
+          <input name="epost" type="email" required autocomplete="email" maxlength="200" />
+        </label>
+        <label>Melding <span style="font-weight:400;color:var(--muted);">(valgfritt – f.eks. foretak og antall takstpersoner)</span>
+          <textarea name="melding" maxlength="2000"></textarea>
+        </label>
+        <div class="hp" aria-hidden="true">
+          <label>Firma<input name="firmafelt" tabindex="-1" autocomplete="off" /></label>
+        </div>
+        <button class="btn primary" type="submit">Meld interesse for piloten</button>
+        <span class="svartid"><b>Uforpliktende – du takker ja eller nei etter oppstartsmøtet.</b> Vi svarer innen én virkedag. Navn og e-post brukes kun til å kontakte deg om piloten – se <a href="https://janitorai-backend.onrender.com/personvern">personvern</a>.</span>
+      </form>
+    </div>
+  </section>
+
+<section class="site-team" id="kontakt-oss" aria-labelledby="team-tittel">
+  <div class="team-inner">
+    <div class="team-head">
+      <span class="team-eyebrow">Ta kontakt med oss</span>
+      <h2 id="team-tittel">Du snakker med oss som bygger DocrAI</h2>
+      <p>Velg den som passer spørsmålet ditt. Vi svarer innen én virkedag.</p>
+    </div>
+    <div class="team-people">
+      <!-- Persondata bor bare her. Direkte e-post/telefon legges inn i lenkene under når de finnes. -->
+      <article class="team-person">
+        <img src="bilder/anders.jpg" alt="Portrett av Anders, salg i DocrAI" width="480" height="576" loading="lazy" decoding="async" />
+        <div class="team-who">
+          <h3>Anders</h3>
+          <p class="team-role">Salg</p>
+          <p>Spør Anders om pilotavtale, pris og samarbeid.</p>
+        </div>
+        <div class="team-actions">
+          <a class="team-btn primary" href="https://janitorai-backend.onrender.com/kontakt#book" data-cta="cta_mote">Book 15 min</a>
+          <a class="team-btn ghost" href="mailto:fdalen.97@gmail.com?subject=Til%20Anders%3A%20pilot%2C%20pris%20eller%20samarbeid" data-cta="cta_epost">Send e-post til Anders</a>
+        </div>
+      </article>
+      <article class="team-person">
+        <img src="bilder/william.jpg" alt="Portrett av William, CEO i DocrAI" width="480" height="576" loading="lazy" decoding="async" />
+        <div class="team-who">
+          <h3>William</h3>
+          <p class="team-role">CEO</p>
+          <p>Spør William om produktet, teknologien, sikkerhet og personvern.</p>
+        </div>
+        <div class="team-actions">
+          <a class="team-btn primary" href="https://janitorai-backend.onrender.com/kontakt#book" data-cta="cta_mote">Book 15 min</a>
+          <a class="team-btn ghost" href="mailto:fdalen.97@gmail.com?subject=Til%20William%3A%20produkt%2C%20teknologi%20eller%20personvern" data-cta="cta_epost">Send e-post til William</a>
+        </div>
+      </article>
+    </div>
+    <p class="team-fine">E-post går til DocrAIs felles innboks. Emnefeltet viser hvem du vil ha tak i.</p>
+  </div>
+</section>
+
+
+  <nav class="sticky-cta" aria-label="Hurtigvalg">
+    <a class="p" href="#pilot" data-cta="cta_pilot">Bli pilot</a>
+    <a class="g" href="https://janitorai-backend.onrender.com/eksempelrapport" data-cta="cta_rapport">Se rapport</a>
+  </nav>
 
 </main>
-
-<footer>
-  <div class="wrap footer-row">
-    <div class="footer-brand"><svg class="merke" viewBox="0 0 96 96" width="26" height="26" aria-hidden="true" focusable="false"><g><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="merke2"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#merke2)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></g></svg>DocrAI</div>
-    <div class="footer-tagline">© 2026 DocrAI — AI foreslår. Fagpersonen bestemmer.</div>
+<footer class="site-footer">
+  <div class="inner">
+    <div class="cols">
+      <div>
+        <a class="site-logo" href="./" aria-label="DocrAI – til forsiden"><svg viewBox="0 0 96 96" aria-hidden="true" focusable="false"><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="logo-bunn"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#logo-bunn)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></svg><span>DocrAI</span></a>
+        <p class="motto">AI foreslår. Du avgjør.</p>
+        <p>DocrAI er under utvikling mot pilot.</p>
+      </div>
+      <div>
+        <h2>Produkt</h2>
+        <ul>
+          <li><a href="#slik">Slik virker det</a></li>
+          <li><a href="https://janitorai-backend.onrender.com/eksempelrapport">Eksempelrapport</a></li>
+          <li><a href="https://janitorai-backend.onrender.com/demo">Demo på din adresse</a></li>
+          <li><a href="https://janitorai-backend.onrender.com/kundereisen">Kundereisen</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Hjelp</h2>
+        <ul>
+          <li><a href="https://janitorai-backend.onrender.com/faq">Ofte stilte spørsmål</a></li>
+          <li><a href="https://janitorai-backend.onrender.com/kontakt">Snakk med oss</a></li>
+          <li><a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Vilkår</h2>
+        <ul>
+          <li><a href="https://janitorai-backend.onrender.com/personvern">Personvern</a></li>
+          <li><a href="https://janitorai-backend.onrender.com/vilkar">Vilkår for bruk</a></li>
+          <li><a href="#pilot">Bli pilotdeltaker</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Ingen cookies og ingen tredjeparts sporing. Kilder i demoen: Kartverket, åpen matrikkel (Geonorge) og Meteorologisk institutt. Vi svarer på henvendelser innen én virkedag.</p>
   </div>
 </footer>
+<script src="site.js" defer data-api="https://janitorai-backend.onrender.com" data-sti="/" data-besok></script>
 
+
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"SoftwareApplication","name":"DocrAI","url":"https://docrai.io/",
+  "applicationCategory":"BusinessApplication","operatingSystem":"iOS, Android, Web","inLanguage":"nb",
+  "description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner.",
+  "audience":{"@type":"Audience","audienceType":"Takstpersoner og skadeutredere"},
+  "offers":{"@type":"Offer","name":"Pilot","price":"0","priceCurrency":"NOK","description":"Gratis pilot i 3 måneder, uten bindingstid."},
+  "publisher":{"@type":"Organization","name":"DocrAI"} }
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"WebSite","name":"DocrAI","url":"https://docrai.io/","inLanguage":"nb" }
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"Organization","name":"DocrAI","url":"https://docrai.io/","logo":"https://docrai.io/apple-touch-icon.png","email":"fdalen.97@gmail.com","description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner."}
+</script>
 </body>
 </html>

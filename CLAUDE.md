@@ -18,8 +18,18 @@ Språk: produkt/salgsflater på norsk (bokmål); pitch-deck på engelsk.
   i `src/db.js` (idempotent `CREATE TABLE IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS`).
   Offentlige salgssider (`/om /demo /eksempelrapport /faq /personvern /vilkar /kontakt
   /kundereisen`) serveres herfra med `Cache-Control: public, max-age=300`.
+  Felles topp- og bunntekst settes inn av `src/siteChrome.js` fra `src/partials/`
+  (plassholderne `__SITE_HEADER__`/`__SITE_FOOTER__`, og `__SITE_TEAM__` for kontaktseksjonen
+  med Anders og William, `partials/team.html`); felles stil i `src/assets/site.css`,
+  font selv-hostet (`/fonts/…`) — ingen tredjepartsressurser, testet i `e2e-headere.sh`.
+  Sporing er førsteparts og uten cookies: `src/assets/site.js` bærer kampanjekoden `?k=` i
+  lenker og skjema, og klikk på `data-cta`-knapper telles i `POST /api/hendelse`
+  (godkjente navn i `routes/publikum.js`). **Ingen GTM/GA4/Ads-tag** — se
+  `MARKETING_AND_ADS_STRATEGY.md` §3.4 før noen legger det inn.
   `/kontakt`-bookinglenken styres av `BOOKING_URL` (e-post-fallback). `LANDING_ROOT=/om`
   sender `/` til salgssiden på tjenesten docrai.io peker på (se `docs/DEPLOYMENT.md`).
+  `explainer/index.html` er generert fra forsiden: kjør `node explainer/bygg.mjs` etter
+  endringer i `om-page.html`, `partials/`, `site.css` eller `site.js`.
   **docrai.io serverer i dag `explainer/index.html` (Cloudflare Pages), ikke disse
   sidene** — status og byttet er beskrevet i `docs/nettside-masterplan.md` §0.
 - **brand/** — logoen «Stemmen i søkeren» (valgt 04.11.2026) som SVG-mesterfiler,
@@ -51,7 +61,8 @@ ikke får verdi uten den — ikke på gründer-entusiasme. (Kilde: `inkorporerin
 - E2E delingskjede: `cd apps/api && bash test/e2e-share.sh` (~47 sjekker).
 - E2E tenant-isolasjon: `cd apps/api && bash test/e2e-tenant-isolation.sh`.
 - E2E rapportgenerering (S20 medie-URL, hovedbok): `cd apps/api && bash test/e2e-rapport-motor.sh`.
-- E2E headere/Host-allowliste/security.txt (uten DB): `cd apps/api && bash test/e2e-headere.sh`.
+- E2E headere/Host-allowliste/security.txt (uten DB): `cd apps/api && bash test/e2e-headere.sh`
+  (kjører også SEO-vakten `test/seo-sjekk.mjs`: tittel/beskrivelse, h1, JSON-LD, alt-tekst).
 - Enhetstester (uten DB): `cd apps/api && node test/shareUtils.test.js && node test/publicBase.test.js`.
 - Typesjekk app: `cd apps/mobile && npx tsc --noEmit`.
 - AI-motor: `python3 -m py_compile ai-engine/main.py ai-engine/server.py`.

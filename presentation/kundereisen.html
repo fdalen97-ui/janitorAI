@@ -1,45 +1,62 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DocrAI – Kundereisen</title>
-<meta name="description" content="Se hvordan DocrAI tar takstpersonen fra befaring til godkjent skaderapport – steg for steg, med foreslått årsak, akutt/gradvis-vurdering og bevis med sjekksum." />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
+<title>Kundereisen: fra befaring til godkjent skaderapport | DocrAI</title>
+<meta name="description" content="Steg for steg: slik tar DocrAI takstpersonen fra befaring til godkjent skaderapport, med foreslått årsak, akutt/gradvis-vurdering og bevis med sjekksum." />
 <link rel="canonical" href="/kundereisen" />
-<meta property="og:title" content="DocrAI – Kundereisen" />
+<meta property="og:title" content="Kundereisen: fra befaring til godkjent skaderapport | DocrAI" />
 <meta property="og:description" content="Fra befaring til godkjent skaderapport, steg for steg." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
+<link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/site.css" />
 <style>
   :root {
-    --paper: #FFFFFF; --surface: #F4F3EF; --ink: #16202B; --muted: #5C6B7A;
-    --border: #DDE4EB; --accent: #3D5A80; --accent-fill: #3D5A80; --accent-pale: #E8F0F7;
+    --paper: #FBFEFF; --surface: #E8F5F8; --ink: #072227; --muted: #596D71;
+    --border: #C7D9DC; --accent: #2F4A5E; --accent-fill: #2F4A5E; --accent-pale: #E5ECF3;
     --amber: #A8681F; --amber-pale: #F7EEDD; --ok: #2E7D4F; --bad: #A6453A;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #131920; --surface: #0F141A; --ink: #E4EAF1; --muted: #97A6B5;
-      --border: #2A3542; --accent: #94B9DE; --accent-fill: #3D5A80; --accent-pale: #1B2634;
+      --paper: #132022; --surface: #091517; --ink: #E6ECEE; --muted: #9FAEB1;
+      --border: #2F3D40; --accent: #A1BFD7; --accent-fill: #2F4A5E; --accent-pale: #242C33;
       --amber: #D69A4E; --amber-pale: #2B2214; --ok: #5CB884; --bad: #D3766B;
     }
   }
   :root[data-theme="light"] {
-    --paper: #FFFFFF; --surface: #F4F3EF; --ink: #16202B; --muted: #5C6B7A;
-    --border: #DDE4EB; --accent: #3D5A80; --accent-fill: #3D5A80; --accent-pale: #E8F0F7;
+    --paper: #FBFEFF; --surface: #E8F5F8; --ink: #072227; --muted: #596D71;
+    --border: #C7D9DC; --accent: #2F4A5E; --accent-fill: #2F4A5E; --accent-pale: #E5ECF3;
     --amber: #A8681F; --amber-pale: #F7EEDD; --ok: #2E7D4F; --bad: #A6453A;
   }
   :root[data-theme="dark"] {
-    --paper: #131920; --surface: #0F141A; --ink: #E4EAF1; --muted: #97A6B5;
-    --border: #2A3542; --accent: #94B9DE; --accent-fill: #3D5A80; --accent-pale: #1B2634;
+    --paper: #132022; --surface: #091517; --ink: #E6ECEE; --muted: #9FAEB1;
+    --border: #2F3D40; --accent: #A1BFD7; --accent-fill: #2F4A5E; --accent-pale: #242C33;
     --amber: #D69A4E; --amber-pale: #2B2214; --ok: #5CB884; --bad: #D3766B;
   }
 
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--surface); color: var(--ink);
-    font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font, 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif);
     font-size: 15px; line-height: 1.55;
   }
-  .page { max-width: 1020px; margin: 0 auto; padding: 28px 16px 40px; display: flex; flex-direction: column; justify-content: center; min-height: 100vh; }
+  .page { max-width: 1020px; margin: 0 auto; padding: 40px 16px 8px; display: flex; flex-direction: column; gap: 20px; }
+  .intro { display: flex; flex-direction: column; gap: 8px; max-width: 720px; }
+  .intro .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; }
+  .intro h2 { margin: 0; font-size: clamp(26px, 3.6vw, 38px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.12; }
+  .intro p { margin: 0; color: var(--muted); font-size: 17px; }
+  .after { display: flex; flex-wrap: wrap; gap: 10px; }
+  .after a { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border-radius: 12px; font-weight: 700; font-size: 15px; text-decoration: none; }
+  .after a.p { background: var(--accent-fill); color: #fff; }
+  .after a.g { background: var(--paper); color: var(--ink); border: 1.5px solid var(--border); }
+  .player { border-radius: 16px; overflow: hidden; }
 
   header .brand-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
   .brand-sq { width: 22px; height: 22px; background: var(--accent-fill); flex: none; }
@@ -140,7 +157,7 @@
   .co { position: absolute; max-width: 30%; display: flex; flex-direction: column; gap: 0.35em; }
   .co .co-line { display: flex; align-items: center; }
   .co .co-tag { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 0.68em; color: #E0B36A; border: 1px solid #4A3E28; padding: 0.1em 0.6em; border-radius: 999px; }
-  .co h4 { margin: 0; font-size: 0.92em; font-weight: 700; color: #F0E2C8; }
+  .co h3 { margin: 0; font-size: 0.92em; font-weight: 700; color: #F0E2C8; }
   .co p { margin: 0; font-size: 0.76em; color: #A5946F; line-height: 1.45; }
   .co.left .co-line { flex-direction: row-reverse; }
   .co.left { text-align: right; align-items: flex-end; }
@@ -230,12 +247,15 @@
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 </style>
 
-<div class="page">
+__SITE_HEADER__
+<main class="page">
   <h1 class="sr-only">DocrAI – kundereisen: fra befaring til godkjent skaderapport</h1>
+  <div class="intro">
+    <span class="eyebrow">Kundereisen</span>
+    <h2>Fra befaring til godkjent skaderapport, steg for steg</h2>
+    <p>Åtte korte scener. Bruk piltastene eller knappene under for å bla, og mellomrom for pause.</p>
+  </div>
 
-
-  <!-- Retur til nettstedet (W5: unngå navigasjonsblindvei) -->
-  <a href="/om" style="position:fixed; left:16px; top:14px; z-index:60; color:#B7D2EC; background:rgba(12,17,24,0.72); border:1px solid rgba(148,185,222,0.35); border-radius:999px; padding:6px 14px; font:600 13px/1 'Inter',-apple-system,'Segoe UI',system-ui,sans-serif; text-decoration:none; backdrop-filter:blur(6px);">← DocrAI</a>
 
   <!-- ═══════════ VIDEO-PITCH ═══════════ -->
   <div class="player" aria-label="DocrAI pitch-video">
@@ -298,12 +318,11 @@
         </div>
         <div class="co rise d1" style="right: 6%; top: 14%;">
           <div class="co-line"><span class="co-tag">Kartverket · bygget</span></div>
-          <h4>Adressesøk mens hun skriver</h4>
+          <h3>Adressesøk mens hun skriver</h3>
           <p>Ekte treff fra Kartverkets åpne adresse-API – duplikatvarsel inline, aldri blokkering.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 52%;">
-          <div class="co-line"><span class="co-tag">B17 · løst med data</span></div>
-          <h4>Adressen er prosjektnavnet</h4>
+          <h3>Adressen er prosjektnavnet</h3>
           <p>Ikke fritekst: valget gir korrekt adresse, matrikkelreferanse og posisjon i samme trykk.</p>
         </div>
       </div>
@@ -329,17 +348,16 @@
         </div>
         <div class="co rise d1" style="right: 6%; top: 12%;">
           <div class="co-line"><span class="co-tag">Åpne kilder · bygget</span></div>
-          <h4>Fem åpne tjenester, ingen avtale</h4>
+          <h3>Fem åpne tjenester, ingen avtale</h3>
           <p>Kart, matrikkel, bygningsdata, kulturminneflagg, terreng og vær – fra Kartverket og MET, hentet automatisk.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 44%;">
-          <div class="co-line"><span class="co-tag">CAPE-mønsteret</span></div>
-          <h4>Innsikt før bilen starter</h4>
+          <h3>Innsikt før bilen starter</h3>
           <p>Byggeåret peker på riktig regelverk, terrenget på avrenning – og «kraftig regn i vente» er saksrelevant i en lekkasjesak.</p>
         </div>
         <div class="co rise d5" style="right: 6%; top: 74%;">
           <div class="co-line"><span class="co-tag">Boligmappa · neste</span></div>
-          <h4>Dokumentlaget kobles på</h4>
+          <h3>Dokumentlaget kobles på</h3>
           <p>Plantegning fra byggesaksarkivet og boligens historikk fra Boligmappa – med samtykke.</p>
         </div>
       </div>
@@ -375,18 +393,15 @@
           </div>
         </div>
         <div class="co rise d1" style="right: 6%; top: 12%;">
-          <div class="co-line"><span class="co-tag">B13</span></div>
-          <h4>Tre store knapper – minst 56 px</h4>
+          <h3>Tre store knapper – minst 56 px</h3>
           <p>Var fire små knapper i rutenett. Nå tre fulle rader på 56 piksler – laget for våte hansker.</p>
         </div>
         <div class="co rise d4" style="right: 6%; top: 47%;">
-          <div class="co-line"><span class="co-tag">B9 + B11</span></div>
-          <h4>Bevis fødes verifiserbart</h4>
+          <h3>Bevis fødes verifiserbart</h3>
           <p>Geo og klokkeslett settes ved opptak; SHA-256-sjekksummen settes av serveren ved opplasting – før noen kan redigere.</p>
         </div>
         <div class="co rise d5" style="right: 6%; top: 76%;">
-          <div class="co-line"><span class="co-tag">B13</span></div>
-          <h4>«Se rapport» fast i bunn</h4>
+          <h3>«Se rapport» fast i bunn</h3>
           <p>Var gjemt i scrollen. Nå forankret nederst på skjermen, alltid ett trykk unna.</p>
         </div>
       </div>
@@ -404,7 +419,7 @@
               <div class="pipe-step pop d1">Transkripsjon (norsk) <span class="st done">Ferdig</span></div>
               <div class="pipe-step pop d2">Skadetype: <b>&nbsp;Vann – gradvis?</b> <span class="st run">Forslag</span></div>
               <div class="pipe-step pop d3">Bevisbilde @ 02:41.320 <span class="st done">Hentet</span></div>
-              <div class="pipe-step pop d4">Byggforsk-forslag mot verifisert liste <span class="st done">Sitatport</span></div>
+              <div class="pipe-step pop d4">Byggforsk-forslag mot verifisert liste <span class="st done">kontrollert</span></div>
               <div class="evrow pop d5">
                 <div class="thumb"></div>
                 <div class="evmeta"><b>Fuktskjolder ved sluk</b><br/>bilde låst til påstand – ikke talen alene</div>
@@ -413,18 +428,16 @@
           </div>
         </div>
         <div class="co rise d1" style="right: 6%; top: 12%;">
-          <div class="co-line"><span class="co-tag">B1 + B4 + B8</span></div>
-          <h4>AI-en gjør grovarbeidet</h4>
+          <h3>AI-en gjør grovarbeidet</h3>
           <p>Norsk språkhint på fagspråk og stedsnavn; skadetype foreslås – aldri fastslås.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 42%;">
-          <div class="co-line"><span class="co-tag">Sitatport</span></div>
-          <h4>Ingen oppdiktede bladnummer</h4>
+          <div class="co-line"><span class="co-tag">Kildekontroll</span></div>
+          <h3>Ingen oppdiktede bladnummer</h3>
           <p>Byggforsk-referanser AI-en foreslår, kontrolleres mot en liste over verifiserte bladnummer – de som ikke finnes der, forkastes.</p>
         </div>
         <div class="co rise d5" style="right: 6%; top: 72%;">
-          <div class="co-line"><span class="co-tag">B20</span></div>
-          <h4>Status man kan lese</h4>
+          <h3>Status man kan lese</h3>
           <p>Chips med AA-kontrast – og «Feilet» gir alltid «Prøv igjen», ikke bare en feilmelding.</p>
         </div>
       </div>
@@ -458,12 +471,11 @@
         <div class="toastx pop d4" style="left: 15%; bottom: 4.5%;">✓ Rapport godkjent</div>
         <div class="co rise d1" style="right: 6%; top: 14%;">
           <div class="co-line"><span class="co-tag">Menneske-i-løkken</span></div>
-          <h4>AI foreslår. Kari avgjør.</h4>
+          <h3>AI foreslår. Kari avgjør.</h3>
           <p>Ingenting deles uten godkjenning – og godkjenningen stemples synlig i rapporten. Det er et salgsargument, ikke en brems.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 52%;">
-          <div class="co-line"><span class="co-tag">B18</span></div>
-          <h4>Stille kvitteringer</h4>
+          <h3>Stille kvitteringer</h3>
           <p>Avbrytende systemvarsler er byttet ut: kvitteringer bekrefter i forbifarten, kun sletting krever svar.</p>
         </div>
       </div>
@@ -486,13 +498,11 @@
           </div>
         </div>
         <div class="co left rise d1" style="right: 6%; top: 16%; max-width: 34%;">
-          <div class="co-line"><span class="co-tag">B7</span></div>
-          <h4>Lenken åpner en rapport – ikke råfiler</h4>
+          <h3>Lenken åpner en rapport – ikke råfiler</h3>
           <p>Var en rå dokumentlenke. Nå møter mottakeren skadefaget: årsak, faglig beskrivelse og bevis – uten konto.</p>
         </div>
         <div class="co left rise d3" style="right: 6%; top: 52%; max-width: 34%;">
-          <div class="co-line"><span class="co-tag">B10 + B11</span></div>
-          <h4>Tillit som standard</h4>
+          <h3>Tillit som standard</h3>
           <p>PIN og utløpsdato på hver lenke; hash lar mottakeren verifisere at beviset er urørt.</p>
         </div>
       </div>
@@ -508,7 +518,12 @@
     </div>
   </div>
 
-</div>
+  <div class="after"><a class="p" href="/om#pilot">Bli pilotdeltaker</a><a class="g" href="/eksempelrapport">Se en ferdig rapport</a><a class="g" href="/demo">Prøv på din adresse</a></div>
+</main>
+__SITE_FOOTER__
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DocrAI","item":"/om"},{"@type":"ListItem","position":2,"name":"Kundereisen","item":"/kundereisen"}]}
+</script>
 
 <script>
   (function () {

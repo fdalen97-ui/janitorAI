@@ -6,6 +6,7 @@ Nyeste øverst. En beslutning som endres, får en ny linje; den gamle blir ståe
 
 | Dato | Beslutning | Hvem | Grunnlag |
 |---|---|---|---|
+| 23.11.2026 | Nettsiden forblir uten cookies og tredjeparts sporing også når Google Ads testes: ingen GTM/GA4/Ads-tag. Kampanjekilde (`?k=`) og klikk på handlingsknapper telles førsteparts. Google-tag, eller opplasting av konverteringer med `gclid`, er en åpen beslutning for gruppa. | Fredrik (foreslått av Claude, ikke behandlet i gruppa) | `MARKETING_AND_ADS_STRATEGY.md` §3.4, `apps/api/src/assets/site.js` |
 | 04.11.2026 | Logo: «Stemmen i søkeren» (kamerasøker rundt en D av lydstolper, gul opptaksprikk) valgt av gruppa blant 70 utkast. Ordmerket er Manrope 700. Lagt inn i app, salgssider, favicon og OG-bilde. | Gruppa | `brand/MERKEVARE.md` |
 | 01.10.2026 | Sigurd eier rapportmalen: ny, generaliserbar vannskademal med eksempeltekster, bildeplasser og importfelter, levert innen søndag 05.10 (Trello). Koden tilpasses malen etterpå. | Fredrik, William, Sigurd (teammøte) | `docs/pilotlogg-ocab.md` 01.10 |
 | 01.10.2026 | Roller: Fredrik produkt (CPO) og støtte til teknisk; William CEO/CTO; Sigurd kunde- og brukerreise, mal og testing; Anders finans og salg. Trello er prosjektstyring. | Fredrik, William, Sigurd (teammøte) | samme |

@@ -3,17 +3,25 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<title>Snakk med oss – DocrAI</title>
-<meta name="description" content="Book et 15 minutters introduksjonsmøte om DocrAI, eller send en e-post – vi svarer innen én virkedag. Cookiefrie sider uten tredjeparts sporing." />
+<title>Kontakt DocrAI – book et møte på 15 minutter</title>
+<meta name="description" content="Book et 15 minutters introduksjonsmøte med Anders eller William i DocrAI, eller send en e-post. Vi svarer innen én virkedag." />
 <link rel="canonical" href="/kontakt" />
-<meta property="og:title" content="Snakk med oss – DocrAI" />
+<meta property="og:title" content="Kontakt DocrAI – book et møte på 15 minutter" />
 <meta property="og:description" content="Book et kort introduksjonsmøte om DocrAI, eller ta kontakt på e-post – vi svarer innen én virkedag." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
+<link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/site.css" />
 <style>
   :root {
     --paper: #FBFEFF; --surface: #E8F5F8; --ink: #072227; --muted: #596D71;
@@ -27,9 +35,9 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--surface); color: var(--ink);
-    font-family: 'Inter', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font);
     font-size: 16px; line-height: 1.6; }
-  .page { max-width: 760px; margin: 0 auto; padding: 40px 18px 64px; display: flex; flex-direction: column; gap: 36px; }
+  .page { max-width: 880px; margin: 0 auto; padding: 40px 18px 64px; display: flex; flex-direction: column; gap: 36px; }
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand .merke { width: 22px; height: 22px; flex: none; color: #2F4A5E; }
   .brand b { font-size: 16px; }
@@ -37,7 +45,7 @@
 
   .hero { display: flex; flex-direction: column; gap: 10px; text-align: center; align-items: center; padding-top: 12px; }
   .kicker { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
-  h1 { margin: 0; font-size: clamp(30px, 6vw, 44px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+  h1 { margin: 0; font-size: clamp(28px, 4.2vw, 40px); font-weight: 800; letter-spacing: -0.025em; line-height: 1.12; text-wrap: balance; }
   .hero p { margin: 0; color: var(--muted); font-size: 17px; max-width: 52ch; }
 
   .cards { display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch; }
@@ -53,8 +61,12 @@
   .btn.ghost { border: 1.5px solid var(--border); color: var(--ink); background: var(--paper); }
   @media (prefers-color-scheme: dark) { .btn.primary { color: #051214; } }
 
+  .card:target { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-pale); }
+  .page .site-team .team-eyebrow { display: none; }
+  .page .site-team .team-head { margin-bottom: 20px; }
+  .page .site-team .team-head p { font-size: 16px; }
+  html { scroll-padding-top: 88px; }
   .direkte { text-align: center; font-size: 14.5px; color: var(--muted); }
-  footer { border-top: 1px solid var(--border); padding-top: 16px; font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
   a { color: var(--accent); }
 
   /* Tilgjengelighet (WCAG 2.4.7): tydelig fokusmarkering for tastaturbrukere. */
@@ -65,9 +77,9 @@
 </style>
 </head>
 <body>
+__SITE_HEADER__
 <main class="page">
 
-  <div class="brand"><svg class="merke" viewBox="0 0 96 96" width="24" height="24" aria-hidden="true" focusable="false"><g><path d="M8 28 V8 H28 M68 8 H88 V28 M88 68 V88 H68 M28 88 H8 V68" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><clipPath id="merke1"><path d="M8 4 H40 C62 4 76 19 76 40 C76 61 62 76 40 76 H8 Z" transform="translate(20 20) scale(0.7)"/></clipPath><g clip-path="url(#merke1)" fill="currentColor" transform="translate(20 20) scale(0.7)"><rect x="8" y="4" width="9" height="72" rx="4.5"/><rect x="22" y="22" width="9" height="36" rx="4.5"/><rect x="36" y="10" width="9" height="60" rx="4.5"/><rect x="50" y="26" width="9" height="28" rx="4.5"/><rect x="64" y="18" width="9" height="44" rx="4.5"/></g><circle cx="78" cy="18" r="5" fill="#FFD84D"/></g></svg><b>DocrAI</b><a href="/demo">Prøv demoen →</a></div>
 
   <div class="hero">
     <span class="kicker">Ta kontakt</span>
@@ -77,38 +89,40 @@
   </div>
 
   <div class="cards">
-    <div class="card">
+    <div class="card" id="book">
       <h2>Book et møte</h2>
       <p>Velg tid for et 15 minutters introduksjonsmøte.</p>
-      <a class="btn primary" href="__BOOKING_HREF__"__BOOKING_TARGET__>Velg tidspunkt</a>
+      <a class="btn primary" href="__BOOKING_HREF__"__BOOKING_TARGET__ data-cta="cta_mote">Velg tidspunkt</a>
       <span class="note">__BOOKING_NOTE__</span>
     </div>
     <div class="card">
       <h2>Foretrekker e-post?</h2>
       <p>Ta kontakt direkte. Vi svarer innen én virkedag.</p>
-      <a class="btn ghost" href="mailto:fdalen.97@gmail.com?subject=Henvendelse%20om%20DocrAI">Send e-post</a>
+      <a class="btn ghost" href="mailto:fdalen.97@gmail.com?subject=Henvendelse%20om%20DocrAI" data-cta="cta_epost">Send e-post</a>
       <span class="note">Cookiefrie sider uten tredjeparts sporing. AI-prosessering skjer hos Google;
         databehandleravtale og EU/EØS-region er ikke på plass ennå – se <a href="/personvern">personvern</a>.</span>
     </div>
   </div>
 
-  <p class="direkte">Vil du rett på sak? <a href="/demo">Prøv demoen</a> eller
+__SITE_TEAM__
+
+  <p class="direkte">Vil du rett på sak? <a href="/demo" data-cta="cta_demo">Prøv demoen</a> eller
     <a href="/om#pilot">meld interesse for piloten</a>.</p>
 
-  <footer>
-    <span>Kontakt: <a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a> · vi svarer innen én virkedag.</span>
-    <span><a href="/om">Om DocrAI</a> · <a href="/demo">Demo</a> · <a href="/faq">Ofte stilte spørsmål</a> · <a href="/personvern">Personvern</a> · <a href="/vilkar">Vilkår</a></span>
-  </footer>
 
 </main>
+__SITE_FOOTER__
 
 <script type="application/ld+json">
-{ "@context": "https://schema.org", "@type": "ContactPage", "name": "Snakk med oss – DocrAI",
-  "inLanguage": "nb", "url": "/kontakt",
-  "about": { "@type": "Organization", "name": "DocrAI", "email": "fdalen.97@gmail.com" } }
+{ "@context":"https://schema.org","@type":"ContactPage","name":"Kontakt DocrAI","inLanguage":"nb","url":"/kontakt",
+  "about":{"@type":"Organization","name":"DocrAI","url":"/om","email":"fdalen.97@gmail.com",
+    "contactPoint":{"@type":"ContactPoint","contactType":"sales","email":"fdalen.97@gmail.com","availableLanguage":"nb"}} }
 </script>
 <script>
   try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/kontakt', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DocrAI","item":"/om"},{"@type":"ListItem","position":2,"name":"Kontakt","item":"/kontakt"}]}
 </script>
 </body>
 </html>
