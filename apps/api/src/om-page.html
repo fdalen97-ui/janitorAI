@@ -78,26 +78,50 @@ __SITE_HEADER__
     </div>
   </section>
 
-  <section class="paper tight">
+  <section class="paper" id="i-dag">
     <div class="wrap">
-      <div class="versus">
-        <div class="before">
-          <span class="eyebrow">Slik er det ofte i dag</span>
+      <div class="head">
+        <span class="eyebrow">Slik er det ofte i dag</span>
+        <h2>Den etablerte metoden koster tid, og den gir uro</h2>
+        <p>Notater, kamerarull og rapportskriving etterpå fungerer. Men tiden går til alt annet enn faget, og usikkerheten blir med hjem. Dette er det DocrAI løser.</p>
+      </div>
+      <div class="pains">
+        <div class="pain-group">
+          <h3>Tiden det tar</h3>
           <ul>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Rapportskriving i bilen etterpå.</span></li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Notater på små knapper med våte hansker.</span></li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Dokumentasjon som ikke holder i oppgjøret.</span></li>
+            <li>
+              <p class="pain">Før avreise slås kart, gnr/bnr, bygningstype og vær opp hver for seg.</p>
+              <p class="fix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Ett adressesøk henter saksunderlaget fra Kartverket og MET.</span></p>
+            </li>
+            <li>
+              <p class="pain">I felt tastes notatene på små knapper med våte hansker, eller de utsettes til etterpå.</p>
+              <p class="fix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du snakker deg gjennom befaringen. Lydnotatene blir tekst, styrt mot norsk fagspråk.</span></p>
+            </li>
+            <li>
+              <p class="pain">Etterpå sorteres bildene, og rapporten skrives i bilen eller om kvelden.</p>
+              <p class="fix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>AI-en skriver utkastet fra tale, video og foto, rom for rom. Du går rett til kontrollen.</span></p>
+            </li>
           </ul>
         </div>
-        <div class="after">
-          <span class="eyebrow">DocrAI snur det</span>
+        <div class="pain-group">
+          <h3>Det du er redd for</h3>
           <ul>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du snakker deg gjennom befaringen.</span></li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>AI-en skriver utkastet, med foreslått årsak og akutt/gradvis-vurdering.</span></li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten stempelet ditt.</span></li>
+            <li>
+              <p class="pain">Husker jeg riktig? Rapporten skrives etter at du har forlatt skadestedet.</p>
+              <p class="fix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Alt fanges der og da og lagres lokalt først. Appen virker uten dekning i kjelleren.</span></p>
+            </li>
+            <li>
+              <p class="pain">Holder bevisene? Når ble bildet tatt, hvor, og er det endret siden?</p>
+              <p class="fix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Tid og sted settes ved fangst. Serveren setter en SHA-256-sjekksum ved opplasting, og mottakeren kan verifisere den.</span></p>
+            </li>
+            <li>
+              <p class="pain">Hvem står ansvarlig? Navnet ditt står på konklusjonen, uansett hvem som skrev teksten.</p>
+              <p class="fix"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>AI-en foreslår årsak og akutt/gradvis, den fastslår aldri. Ingenting kan deles før du har godkjent. Det håndheves av serveren.</span></p>
+            </li>
           </ul>
         </div>
       </div>
+      <p class="pains-note">Spart tid oppgir vi ikke i tall før piloten har målt det.</p>
     </div>
   </section>
 
