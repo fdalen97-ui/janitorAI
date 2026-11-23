@@ -99,7 +99,7 @@
         <div class="before">
           <span class="eyebrow">Slik er det ofte i dag</span>
           <ul>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Rapportskriving i bilen etterpå.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Rapportskriving etterpå, linje for linje: «riv og nytt laminatgulv, stue, 15 kvm».</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Notater på små knapper med våte hansker.</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Dokumentasjon som ikke holder i oppgjøret.</span></li>
           </ul>
@@ -111,6 +111,19 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>AI-en skriver utkastet, med foreslått årsak og akutt/gradvis-vurdering.</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten stempelet ditt.</span></li>
           </ul>
+        </div>
+      </div>
+      <!-- Tidsanslaget er IKKE målt. Det bygger på erfaringen til en prosjektleder i teamet
+           (docs/beslutninger.md 23.11.2026): 2–3 timer per rapport når utkastet fyller ut feltene,
+           og rundt 4 rapporter i uka. At utkastet fyller ut skadeomfang og reparasjonsbehov:
+           ai-engine/models.py (extent_description, repairs_description). Tallet skal alltid stå
+           merket som anslag til piloten har målt det; testet i e2e-headere.sh. -->
+      <div class="saving">
+        <p class="saving-num">2–3&nbsp;timer</p>
+        <div class="saving-text">
+          <p class="saving-what">spart per rapport. Det er vårt anslag.</p>
+          <p class="saving-roi">Med rundt fire rapporter i uka blir det 8–12&nbsp;timer per prosjektleder.</p>
+          <p class="saving-note">Anslaget forutsetter at utkastet fyller ut feltene for deg, også skadeomfang og reparasjonsbehov. Det bygger på erfaringen til en prosjektleder i teamet vårt og er ikke målt ennå. Appen måler tiden fra første bevis til godkjent rapport, sak for sak.</p>
         </div>
       </div>
     </div>
@@ -333,19 +346,19 @@
         </div>
         <div class="team-actions">
           <a class="team-btn primary" href="https://janitorai-backend.onrender.com/kontakt#book" data-cta="cta_mote">Book 15 min</a>
-          <a class="team-btn ghost" href="mailto:fdalen.97@gmail.com?subject=Til%20Anders%3A%20pilot%2C%20pris%20eller%20samarbeid" data-cta="cta_epost">Send e-post til Anders</a>
+          <a class="team-btn ghost" href="mailto:hei@docrai.io?subject=Til%20Anders%3A%20pilot%2C%20pris%20eller%20samarbeid" data-cta="cta_epost">Send e-post til Anders</a>
         </div>
       </article>
       <article class="team-person">
-        <img src="bilder/william.jpg" alt="Portrett av William, CEO i DocrAI" width="480" height="576" loading="lazy" decoding="async" />
+        <img src="bilder/william.jpg" alt="Portrett av William, teknologi og sikkerhet i DocrAI" width="480" height="576" loading="lazy" decoding="async" />
         <div class="team-who">
           <h3>William</h3>
-          <p class="team-role">CEO</p>
-          <p>Spør William om produktet, teknologien, sikkerhet og personvern.</p>
+          <p class="team-role">Teknologi og sikkerhet</p>
+          <p>Spør William om produktet, teknologien og personvern.</p>
         </div>
         <div class="team-actions">
           <a class="team-btn primary" href="https://janitorai-backend.onrender.com/kontakt#book" data-cta="cta_mote">Book 15 min</a>
-          <a class="team-btn ghost" href="mailto:fdalen.97@gmail.com?subject=Til%20William%3A%20produkt%2C%20teknologi%20eller%20personvern" data-cta="cta_epost">Send e-post til William</a>
+          <a class="team-btn ghost" href="mailto:hei@docrai.io?subject=Til%20William%3A%20produkt%2C%20teknologi%20eller%20sikkerhet" data-cta="cta_epost">Send e-post til William</a>
         </div>
       </article>
     </div>
@@ -382,7 +395,7 @@
         <ul>
           <li><a href="https://janitorai-backend.onrender.com/faq">Ofte stilte spørsmål</a></li>
           <li><a href="https://janitorai-backend.onrender.com/kontakt">Snakk med oss</a></li>
-          <li><a href="mailto:fdalen.97@gmail.com">fdalen.97@gmail.com</a></li>
+          <li><a href="mailto:hei@docrai.io">hei@docrai.io</a></li>
         </ul>
       </div>
       <div>
@@ -412,7 +425,7 @@
 { "@context":"https://schema.org","@type":"WebSite","name":"DocrAI","url":"https://docrai.io/","inLanguage":"nb" }
 </script>
 <script type="application/ld+json">
-{ "@context":"https://schema.org","@type":"Organization","name":"DocrAI","url":"https://docrai.io/","logo":"https://docrai.io/apple-touch-icon.png","email":"fdalen.97@gmail.com","description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner."}
+{ "@context":"https://schema.org","@type":"Organization","name":"DocrAI","url":"https://docrai.io/","logo":"https://docrai.io/apple-touch-icon.png","email":"hei@docrai.io","description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner."}
 </script>
 </body>
 </html>

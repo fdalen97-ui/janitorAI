@@ -324,11 +324,11 @@ og sammenlign kostnaden med hva en signert pilot er verdt for dere.
 
 Gjort i denne runden:
 - «Tre måter å komme i gang på»: prøv selv uten registrering, ta en prat på 15 minutter, eller bli pilot gratis i tre måneder.
-- «Ta kontakt med oss» med Anders (salg) og William (CEO), på forsiden og på `/kontakt`.
+- «Ta kontakt med oss» med Anders (salg) og William (teknologi og sikkerhet), på forsiden og på `/kontakt`.
 - Hver handlingsknapp er merket, så dere ser hvilken av de tre veiene folk faktisk velger.
 
 Gjenstår, i prioritert rekkefølge:
 1. **Sett `BOOKING_URL`** til en ekte bookingkalender. I dag åpner bookingknappen på `/kontakt` en e-post. Det er ærlig merket, men det koster møter.
-2. **Egen e-postadresse på eget domene.** Kontaktadressen er en Gmail-adresse, og Anders og William har ikke direkte adresser på siden. Legg dem inn i `apps/api/src/partials/team.html` når de finnes.
+2. **Direkte adresser til Anders og William.** Felles innboks er `hei@docrai.io` (valgt 23.11.2026). Anders og William har ikke direkte adresser på siden. Legg dem inn i `apps/api/src/partials/team.html` når de finnes.
 3. **Ett ekte kundesitat** med navn og foretak når første pilot er i gang. Det er det som mangler mest på siden.
 4. **Ikke lag egne landingssider per annonsegruppe ennå.** Vent til kodene viser hvilke grupper som gir leads.

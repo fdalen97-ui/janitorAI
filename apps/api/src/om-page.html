@@ -84,7 +84,7 @@ __SITE_HEADER__
         <div class="before">
           <span class="eyebrow">Slik er det ofte i dag</span>
           <ul>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Rapportskriving i bilen etterpå.</span></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Rapportskriving etterpå, linje for linje: «riv og nytt laminatgulv, stue, 15 kvm».</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Notater på små knapper med våte hansker.</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><span>Dokumentasjon som ikke holder i oppgjøret.</span></li>
           </ul>
@@ -96,6 +96,19 @@ __SITE_HEADER__
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>AI-en skriver utkastet, med foreslått årsak og akutt/gradvis-vurdering.</span></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Du kontrollerer, korrigerer og godkjenner. Ingenting deles uten stempelet ditt.</span></li>
           </ul>
+        </div>
+      </div>
+      <!-- Tidsanslaget er IKKE målt. Det bygger på erfaringen til en prosjektleder i teamet
+           (docs/beslutninger.md 23.11.2026): 2–3 timer per rapport når utkastet fyller ut feltene,
+           og rundt 4 rapporter i uka. At utkastet fyller ut skadeomfang og reparasjonsbehov:
+           ai-engine/models.py (extent_description, repairs_description). Tallet skal alltid stå
+           merket som anslag til piloten har målt det; testet i e2e-headere.sh. -->
+      <div class="saving">
+        <p class="saving-num">2–3&nbsp;timer</p>
+        <div class="saving-text">
+          <p class="saving-what">spart per rapport. Det er vårt anslag.</p>
+          <p class="saving-roi">Med rundt fire rapporter i uka blir det 8–12&nbsp;timer per prosjektleder.</p>
+          <p class="saving-note">Anslaget forutsetter at utkastet fyller ut feltene for deg, også skadeomfang og reparasjonsbehov. Det bygger på erfaringen til en prosjektleder i teamet vårt og er ikke målt ennå. Appen måler tiden fra første bevis til godkjent rapport, sak for sak.</p>
         </div>
       </div>
     </div>
@@ -325,7 +338,7 @@ __SITE_FOOTER__
   try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/om', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}
 </script>
 <script type="application/ld+json">
-{ "@context":"https://schema.org","@type":"Organization","name":"DocrAI","url":"/om","logo":"/apple-touch-icon.png","email":"fdalen.97@gmail.com","description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner."}
+{ "@context":"https://schema.org","@type":"Organization","name":"DocrAI","url":"/om","logo":"/apple-touch-icon.png","email":"hei@docrai.io","description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner."}
 </script>
 </body>
 </html>
