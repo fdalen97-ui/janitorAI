@@ -268,6 +268,11 @@ EKS="$($CURL "$A/eksempelrapport")"
 check "eksempelrapport: indekserbar, ingen noindex, ingen sjekksum-påstand" "200|0|0" "$(status "$A/eksempelrapport")|$(printf '%s' "$EKS" | grep -c 'noindex')|$(printf '%s' "$EKS" | grep -c 'SHA-256')"
 check "eksempelrapport: merket eksempeldata, ingen Byggforsk-nummer" "yes|0" "$([ "$(printf '%s' "$EKS" | grep -c 'Eksempeldata')" -ge 1 ] && echo yes || echo no)|$(printf '%s' "$EKS" | grep -Ec 'Byggforsk [0-9]')"
 check "eksempelrapport: canonical på fast vert med ond Host" "$FALLBACK/eksempelrapport" "$($CURL -H "Host: $EVIL_HOST" "$A/eksempelrapport" | canonical)"
+# Tidsanslaget på forsiden er gründernes eget og ikke målt: tallet får bare stå
+# sammen med merkingen, og bare ett sted, til piloten har målt det.
+OM_TID="$($CURL "$A/om")"
+check "regel 6: tidsanslaget på /om står ett sted, merket som anslag og ikke målt" "1|1|1" \
+  "$(printf '%s' "$OM_TID" | grep -c '2–3&nbsp;timer')|$(printf '%s' "$OM_TID" | grep -c 'Det er vårt anslag')|$(printf '%s' "$OM_TID" | grep -c 'er ikke målt ennå')"
 check "regel 6: /om og /faq uten pristall, «ubegrenset» og «per takstperson»" "0" "$( { $CURL "$A/om"; $CURL "$A/faq"; } | grep -ci '990\|ubegrens\|per takstperson')"
 # Påstander uten målt baseline eller kode bak seg (docs/nettside-masterplan.md §1/§5.7).
 # «Byggforsk-henvisninger» som leveranse: referansen når verken app, dokument eller
