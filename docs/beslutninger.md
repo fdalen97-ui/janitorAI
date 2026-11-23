@@ -6,6 +6,7 @@ Nyeste øverst. En beslutning som endres, får en ny linje; den gamle blir ståe
 
 | Dato | Beslutning | Hvem | Grunnlag |
 |---|---|---|---|
+| 23.11.2026 | Forsiden viser «2–3 timer spart per rapport» som **eget anslag**, merket «ikke målt ennå». Avvik fra `docs/nettside-masterplan.md` §5.7, som krever målt baseline før tidstall: tallet får stå fordi det er merket, og erstattes når Ocab-baseline og median over ≥10 saker finnes. Enhet: timer, skrevet helt ut. | Fredrik | `apps/api/src/om-page.html` (`.saving`), `apps/api/test/e2e-headere.sh` |
 | 23.11.2026 | Nettsiden forblir uten cookies og tredjeparts sporing også når Google Ads testes: ingen GTM/GA4/Ads-tag. Kampanjekilde (`?k=`) og klikk på handlingsknapper telles førsteparts. Google-tag, eller opplasting av konverteringer med `gclid`, er en åpen beslutning for gruppa. | Fredrik (foreslått av Claude, ikke behandlet i gruppa) | `MARKETING_AND_ADS_STRATEGY.md` §3.4, `apps/api/src/assets/site.js` |
 | 04.11.2026 | Logo: «Stemmen i søkeren» (kamerasøker rundt en D av lydstolper, gul opptaksprikk) valgt av gruppa blant 70 utkast. Ordmerket er Manrope 700. Lagt inn i app, salgssider, favicon og OG-bilde. | Gruppa | `brand/MERKEVARE.md` |
 | 01.10.2026 | Sigurd eier rapportmalen: ny, generaliserbar vannskademal med eksempeltekster, bildeplasser og importfelter, levert innen søndag 05.10 (Trello). Koden tilpasses malen etterpå. | Fredrik, William, Sigurd (teammøte) | `docs/pilotlogg-ocab.md` 01.10 |
