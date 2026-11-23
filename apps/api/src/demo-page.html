@@ -3,17 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta name="robots" content="index, follow" />
 <link rel="canonical" href="/demo" />
-<title>DocrAI – Saksunderlag på sekunder</title>
-<meta name="description" content="Skriv inn en adresse og se saksunderlaget DocrAI henter automatisk før hver befaring: kart, matrikkel, bygningstype, terreng og vær – live fra åpne offentlige kilder." />
-<meta property="og:title" content="DocrAI – Saksunderlag på sekunder" />
+<title>Saksunderlag før befaring: kart, matrikkel og vær | DocrAI</title>
+<meta name="description" content="Skriv inn en adresse og se saksunderlaget DocrAI henter før befaringen: kart, matrikkel, bygningstype, terreng og vær fra åpne offentlige kilder." />
+<meta property="og:title" content="Saksunderlag før befaring: kart, matrikkel og vær | DocrAI" />
 <meta property="og:description" content="Skriv inn en adresse og se kart, matrikkel, bygningstype, terreng og vær hentet live fra åpne offentlige kilder." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/site.css" />
@@ -139,7 +145,7 @@ __SITE_HEADER__
       skaderapport – med foreslått årsak og akutt/gradvis-vurdering – som takstpersonen
       kontrollerer og godkjenner. Rapporten deles PIN-beskyttet, og hvert bevis får en
       SHA-256-sjekksum ved opplasting.</p>
-    <div class="row"><a class="p" href="/om#pilot">Bli pilotdeltaker</a><a class="g" href="/eksempelrapport">Se en ferdig rapport</a></div>
+    <div class="row"><a class="p" href="/om#pilot" data-cta="cta_pilot">Bli pilotdeltaker</a><a class="g" href="/eksempelrapport" data-cta="cta_rapport">Se en ferdig rapport</a></div>
   </div>
 
   <p class="pagenote">Kilder: Kartverket (adresse, kart, terreng), åpen matrikkel (Geonorge) og Meteorologisk institutt. Ingenting lagres om søkene dine.</p>
@@ -227,6 +233,9 @@ __SITE_FOOTER__
     // Cookiefri besøkstelling – kun sti + ev. kampanjekilde, aldri IP.
     try { navigator.sendBeacon("/api/besok", new Blob([JSON.stringify({ sti: "/demo", kilde: params.get("k") || undefined })], { type: "application/json" })); } catch (e) {}
   })();
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DocrAI","item":"/om"},{"@type":"ListItem","position":2,"name":"Saksunderlag for din adresse","item":"/demo"}]}
 </script>
 </body>
 </html>

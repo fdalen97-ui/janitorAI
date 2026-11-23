@@ -3,17 +3,23 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <meta name="robots" content="index, follow" />
 <link rel="canonical" href="/eksempelrapport" />
-<title>DocrAI – Eksempel på ferdig skaderapport</title>
-<meta name="description" content="Slik ser en ferdig, godkjent DocrAI-skaderapport ut for mottakeren: årsak, faglig beskrivelse, tiltak, bevis og notater. Oppdiktet eksempelsak – ingen ekte adresse, person eller bilder." />
-<meta property="og:title" content="DocrAI – Eksempel på ferdig skaderapport" />
+<title>Eksempel på ferdig skaderapport fra takstperson | DocrAI</title>
+<meta name="description" content="Se en ferdig, godkjent skaderapport slik mottakeren får den: årsak, faglig beskrivelse, tiltak, bevis og notater. Oppdiktet eksempelsak." />
+<meta property="og:title" content="Eksempel på ferdig skaderapport fra takstperson | DocrAI" />
 <meta property="og:description" content="Slik ser en ferdig, godkjent DocrAI-skaderapport ut for mottakeren. Oppdiktet eksempelsak." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
 <!--
   Eksempeldata fra øvingssaken (presentation/ovingssak.html): samme oppdiktede
@@ -211,8 +217,8 @@ __SITE_HEADER__
       utløpsdato, som takstpersonen kan trekke tilbake. Lenken kan ikke lages før rapporten er
       godkjent – det håndheves av serveren.</p>
     <div class="cta-row">
-      <a class="btn primary" href="/om#pilot">Bli pilotdeltaker</a>
-      <a class="btn ghost" href="/demo">Prøv saksunderlaget på din adresse</a>
+      <a class="btn primary" href="/om#pilot" data-cta="cta_pilot">Bli pilotdeltaker</a>
+      <a class="btn ghost" href="/demo" data-cta="cta_demo">Prøv saksunderlaget på din adresse</a>
     </div>
   </div>
 
@@ -222,6 +228,9 @@ __SITE_FOOTER__
 
 <script>
   try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/eksempelrapport', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DocrAI","item":"/om"},{"@type":"ListItem","position":2,"name":"Eksempelrapport","item":"/eksempelrapport"}]}
 </script>
 </body>
 </html>

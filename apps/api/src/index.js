@@ -339,9 +339,21 @@ app.get("/site.css", (req, res) => {
   res.set("Cache-Control", PUBLIC_CACHE);
   res.type("css").sendFile(path.join(__dirname, "assets/site.css"));
 });
+// Cookiefri kampanjekilde + klikktelling (førsteparts, se assets/site.js).
+app.get("/site.js", (req, res) => {
+  res.set("Cache-Control", PUBLIC_CACHE);
+  res.type("js").sendFile(path.join(__dirname, "assets/site.js"));
+});
 app.get("/fonts/manrope-latin.woff2", (req, res) => {
   res.sendFile(path.join(__dirname, "assets/fonts/manrope-latin.woff2"), { maxAge: ICON_MAX_AGE });
 });
+// Portrettene i kontaktseksjonen (partials/team.html). Fast liste: filnavnet
+// kommer aldri fra forespørselen.
+for (const navn of ["anders", "william"]) {
+  app.get(`/bilder/${navn}.jpg`, (req, res) => {
+    res.sendFile(path.join(__dirname, `assets/team/${navn}.jpg`), { maxAge: ICON_MAX_AGE });
+  });
+}
 app.get("/og-bilde.png", (req, res) => {
   res.sendFile(path.join(__dirname, "assets/og-bilde.png"), { maxAge: ICON_MAX_AGE });
 });

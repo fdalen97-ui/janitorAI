@@ -1,13 +1,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>DocrAI – Kundereisen</title>
-<meta name="description" content="Se hvordan DocrAI tar takstpersonen fra befaring til godkjent skaderapport – steg for steg, med foreslått årsak, akutt/gradvis-vurdering og bevis med sjekksum." />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
+<title>Kundereisen: fra befaring til godkjent skaderapport | DocrAI</title>
+<meta name="description" content="Steg for steg: slik tar DocrAI takstpersonen fra befaring til godkjent skaderapport, med foreslått årsak, akutt/gradvis-vurdering og bevis med sjekksum." />
 <link rel="canonical" href="/kundereisen" />
-<meta property="og:title" content="DocrAI – Kundereisen" />
+<meta property="og:title" content="Kundereisen: fra befaring til godkjent skaderapport | DocrAI" />
 <meta property="og:description" content="Fra befaring til godkjent skaderapport, steg for steg." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/site.css" />
@@ -151,7 +157,7 @@
   .co { position: absolute; max-width: 30%; display: flex; flex-direction: column; gap: 0.35em; }
   .co .co-line { display: flex; align-items: center; }
   .co .co-tag { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 0.68em; color: #E0B36A; border: 1px solid #4A3E28; padding: 0.1em 0.6em; border-radius: 999px; }
-  .co h4 { margin: 0; font-size: 0.92em; font-weight: 700; color: #F0E2C8; }
+  .co h3 { margin: 0; font-size: 0.92em; font-weight: 700; color: #F0E2C8; }
   .co p { margin: 0; font-size: 0.76em; color: #A5946F; line-height: 1.45; }
   .co.left .co-line { flex-direction: row-reverse; }
   .co.left { text-align: right; align-items: flex-end; }
@@ -312,11 +318,11 @@ __SITE_HEADER__
         </div>
         <div class="co rise d1" style="right: 6%; top: 14%;">
           <div class="co-line"><span class="co-tag">Kartverket · bygget</span></div>
-          <h4>Adressesøk mens hun skriver</h4>
+          <h3>Adressesøk mens hun skriver</h3>
           <p>Ekte treff fra Kartverkets åpne adresse-API – duplikatvarsel inline, aldri blokkering.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 52%;">
-          <h4>Adressen er prosjektnavnet</h4>
+          <h3>Adressen er prosjektnavnet</h3>
           <p>Ikke fritekst: valget gir korrekt adresse, matrikkelreferanse og posisjon i samme trykk.</p>
         </div>
       </div>
@@ -342,16 +348,16 @@ __SITE_HEADER__
         </div>
         <div class="co rise d1" style="right: 6%; top: 12%;">
           <div class="co-line"><span class="co-tag">Åpne kilder · bygget</span></div>
-          <h4>Fem åpne tjenester, ingen avtale</h4>
+          <h3>Fem åpne tjenester, ingen avtale</h3>
           <p>Kart, matrikkel, bygningsdata, kulturminneflagg, terreng og vær – fra Kartverket og MET, hentet automatisk.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 44%;">
-          <h4>Innsikt før bilen starter</h4>
+          <h3>Innsikt før bilen starter</h3>
           <p>Byggeåret peker på riktig regelverk, terrenget på avrenning – og «kraftig regn i vente» er saksrelevant i en lekkasjesak.</p>
         </div>
         <div class="co rise d5" style="right: 6%; top: 74%;">
           <div class="co-line"><span class="co-tag">Boligmappa · neste</span></div>
-          <h4>Dokumentlaget kobles på</h4>
+          <h3>Dokumentlaget kobles på</h3>
           <p>Plantegning fra byggesaksarkivet og boligens historikk fra Boligmappa – med samtykke.</p>
         </div>
       </div>
@@ -387,15 +393,15 @@ __SITE_HEADER__
           </div>
         </div>
         <div class="co rise d1" style="right: 6%; top: 12%;">
-          <h4>Tre store knapper – minst 56 px</h4>
+          <h3>Tre store knapper – minst 56 px</h3>
           <p>Var fire små knapper i rutenett. Nå tre fulle rader på 56 piksler – laget for våte hansker.</p>
         </div>
         <div class="co rise d4" style="right: 6%; top: 47%;">
-          <h4>Bevis fødes verifiserbart</h4>
+          <h3>Bevis fødes verifiserbart</h3>
           <p>Geo og klokkeslett settes ved opptak; SHA-256-sjekksummen settes av serveren ved opplasting – før noen kan redigere.</p>
         </div>
         <div class="co rise d5" style="right: 6%; top: 76%;">
-          <h4>«Se rapport» fast i bunn</h4>
+          <h3>«Se rapport» fast i bunn</h3>
           <p>Var gjemt i scrollen. Nå forankret nederst på skjermen, alltid ett trykk unna.</p>
         </div>
       </div>
@@ -422,16 +428,16 @@ __SITE_HEADER__
           </div>
         </div>
         <div class="co rise d1" style="right: 6%; top: 12%;">
-          <h4>AI-en gjør grovarbeidet</h4>
+          <h3>AI-en gjør grovarbeidet</h3>
           <p>Norsk språkhint på fagspråk og stedsnavn; skadetype foreslås – aldri fastslås.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 42%;">
           <div class="co-line"><span class="co-tag">Kildekontroll</span></div>
-          <h4>Ingen oppdiktede bladnummer</h4>
+          <h3>Ingen oppdiktede bladnummer</h3>
           <p>Byggforsk-referanser AI-en foreslår, kontrolleres mot en liste over verifiserte bladnummer – de som ikke finnes der, forkastes.</p>
         </div>
         <div class="co rise d5" style="right: 6%; top: 72%;">
-          <h4>Status man kan lese</h4>
+          <h3>Status man kan lese</h3>
           <p>Chips med AA-kontrast – og «Feilet» gir alltid «Prøv igjen», ikke bare en feilmelding.</p>
         </div>
       </div>
@@ -465,11 +471,11 @@ __SITE_HEADER__
         <div class="toastx pop d4" style="left: 15%; bottom: 4.5%;">✓ Rapport godkjent</div>
         <div class="co rise d1" style="right: 6%; top: 14%;">
           <div class="co-line"><span class="co-tag">Menneske-i-løkken</span></div>
-          <h4>AI foreslår. Kari avgjør.</h4>
+          <h3>AI foreslår. Kari avgjør.</h3>
           <p>Ingenting deles uten godkjenning – og godkjenningen stemples synlig i rapporten. Det er et salgsargument, ikke en brems.</p>
         </div>
         <div class="co rise d3" style="right: 6%; top: 52%;">
-          <h4>Stille kvitteringer</h4>
+          <h3>Stille kvitteringer</h3>
           <p>Avbrytende systemvarsler er byttet ut: kvitteringer bekrefter i forbifarten, kun sletting krever svar.</p>
         </div>
       </div>
@@ -492,11 +498,11 @@ __SITE_HEADER__
           </div>
         </div>
         <div class="co left rise d1" style="right: 6%; top: 16%; max-width: 34%;">
-          <h4>Lenken åpner en rapport – ikke råfiler</h4>
+          <h3>Lenken åpner en rapport – ikke råfiler</h3>
           <p>Var en rå dokumentlenke. Nå møter mottakeren skadefaget: årsak, faglig beskrivelse og bevis – uten konto.</p>
         </div>
         <div class="co left rise d3" style="right: 6%; top: 52%; max-width: 34%;">
-          <h4>Tillit som standard</h4>
+          <h3>Tillit som standard</h3>
           <p>PIN og utløpsdato på hver lenke; hash lar mottakeren verifisere at beviset er urørt.</p>
         </div>
       </div>
@@ -515,6 +521,9 @@ __SITE_HEADER__
   <div class="after"><a class="p" href="/om#pilot">Bli pilotdeltaker</a><a class="g" href="/eksempelrapport">Se en ferdig rapport</a><a class="g" href="/demo">Prøv på din adresse</a></div>
 </main>
 __SITE_FOOTER__
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"DocrAI","item":"/om"},{"@type":"ListItem","position":2,"name":"Kundereisen","item":"/kundereisen"}]}
+</script>
 
 <script>
   (function () {

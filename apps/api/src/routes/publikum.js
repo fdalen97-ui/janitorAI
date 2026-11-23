@@ -73,6 +73,15 @@ function robotsHandler(req, res) {
   res.type("text/plain").send(robotsBody(publicBase(req)));
 }
 
+// ── Kampanjekilde (?k= i lenken) ─────────────────────────────────────────────
+// Kort kode satt av oss i kampanjelenken (f.eks. «gads_123_456», «li_host26»).
+// Bare trygge tegn; alt annet forkastes i stedet for å lagres. Samme regel står
+// i assets/site.js, som bærer koden videre i lenker og skjema uten cookie.
+function normalizeKilde(v) {
+  const s = String(v == null ? "" : v).trim();
+  return /^[A-Za-z0-9_.:-]{1,80}$/.test(s) ? s : null;
+}
+
 // ── Pilotinteresse (POST /api/pilot-interesse) ───────────────────────────────
 // Honeypot-feltet «firmafelt» er usynlig i skjemaet — bots fyller det ut,
 // mennesker gjør det ikke.
@@ -85,6 +94,7 @@ router.post("/pilot-interesse", requireDb, express.urlencoded({ extended: false 
   const epost = String(req.body?.epost || "").trim().slice(0, 200);
   const melding = String(req.body?.melding || "").trim().slice(0, 2000);
   const honeypot = String(req.body?.firmafelt || "").trim();
+  const kilde = normalizeKilde(req.body?.kilde);
 
   if (honeypot) return res.redirect(303, "/takk"); // stille avvisning av bots
   if (!navn || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(epost)) {
@@ -94,8 +104,8 @@ router.post("/pilot-interesse", requireDb, express.urlencoded({ extended: false 
   try {
     const pool = getPool();
     await pool.query(
-      "INSERT INTO pilot_interesse (navn, epost, melding) VALUES ($1, $2, $3)",
-      [navn, epost, melding || null]
+      "INSERT INTO pilot_interesse (navn, epost, melding, kilde) VALUES ($1, $2, $3, $4)",
+      [navn, epost, melding || null, kilde]
     );
     res.redirect(303, "/takk");
   } catch (err) {
@@ -107,9 +117,14 @@ router.post("/pilot-interesse", requireDb, express.urlencoded({ extended: false 
 // ── Cookiefri besøkstelling (POST /api/besok) ────────────────────────────────
 // Kun forhåndsgodkjente stier telles; ingen IP, ingen bruker-ID.
 // /kontakt sender beacon (kontakt-page.html) men manglet her — ble aldri telt.
-const TELLBARE_STIER = new Set(["/om", "/demo", "/eksempelrapport", "/faq", "/personvern", "/vilkar", "/takk", "/kontakt", "/kundereisen"]);
+// «/» er forsiden på docrai.io (explainer/), som sender tellingen hit.
+const TELLBARE_STIER = new Set(["/", "/om", "/demo", "/eksempelrapport", "/faq", "/personvern", "/vilkar", "/takk", "/kontakt", "/kundereisen"]);
 
-router.post("/besok", requireDb, express.json({ limit: "1kb" }), async (req, res) => {
+// sendBeacon med ren tekst er en «enkel» forespørsel: den når fram også fra
+// docrai.io (annen origin) uten CORS-forhåndsspørring. Innholdet er JSON.
+const beaconJson = express.json({ limit: "1kb", type: ["application/json", "text/plain"] });
+
+router.post("/besok", requireDb, beaconJson, async (req, res) => {
   if (limited(req, 120)) return res.status(204).end();
   const sti = String(req.body?.sti || "");
   if (!TELLBARE_STIER.has(sti)) return res.status(204).end();
@@ -124,6 +139,43 @@ router.post("/besok", requireDb, express.json({ limit: "1kb" }), async (req, res
   res.status(204).end();
 });
 
+// ── Cookiefri klikktelling (POST /api/hendelse) ──────────────────────────────
+// Teller klikk på handlingsknappene (data-cta) per kampanjekilde, så vi kan se
+// hvilken kanal som gir møter og pilotinteresse – uten Google Analytics/Ads-tag.
+// Kun forhåndsgodkjente navn og stier; ingen IP, ingen bruker-ID.
+const HENDELSER = new Set([
+  "cta_pilot",     // «Bli pilot»-knapper (fører til skjemaet)
+  "cta_rapport",   // åpner eksempelrapporten
+  "cta_demo",      // lenke til adressedemoen
+  "cta_mote",      // «Book et møte»/«Book 15 min»
+  "cta_epost",     // e-postlenker
+  "demo_sok",      // adressefeltet sendt inn
+  "pilot_skjema",  // pilotskjemaet sendt inn (selve leadet lagres i pilot_interesse)
+]);
+
+// Ren funksjon så enhetstesten kan sjekke valideringen uten database.
+function hendelseFra(body) {
+  const navn = String(body?.navn || "");
+  const sti = String(body?.sti || "");
+  if (!HENDELSER.has(navn) || !TELLBARE_STIER.has(sti)) return null;
+  return { navn, sti, kilde: normalizeKilde(body?.kilde) };
+}
+
+router.post("/hendelse", requireDb, beaconJson, async (req, res) => {
+  if (limited(req, 120)) return res.status(204).end();
+  const h = hendelseFra(req.body);
+  if (!h) return res.status(204).end();
+  try {
+    const pool = getPool();
+    await pool.query("INSERT INTO hendelser (navn, sti, kilde) VALUES ($1, $2, $3)", [h.navn, h.sti, h.kilde]);
+  } catch (err) {
+    console.warn("POST /api/hendelse error:", sanitizeError(err));
+  }
+  res.status(204).end();
+});
+
 module.exports = router;
+module.exports.normalizeKilde = normalizeKilde;
+module.exports.hendelseFra = hendelseFra;
 module.exports.robotsHandler = robotsHandler;
 module.exports.robotsBody = robotsBody;

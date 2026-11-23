@@ -236,6 +236,26 @@ check "ramme /faq: gjeldende side er merket i menyen" "1" "$($CURL "$A/faq" | gr
 # Stilark og font er offentlige (ingen 401 fra token-vakten) og selv-hostet.
 check "site.css: offentlig, text/css, fem minutters cache" "200|text/css; charset=utf-8|public, max-age=300" "$(status "$A/site.css")|$(header content-type "$A/site.css")|$(header cache-control "$A/site.css")"
 check "font: offentlig woff2 med ukes-cache" "200|font/woff2|public, max-age=604800" "$(status "$A/fonts/manrope-latin.woff2")|$(header content-type "$A/fonts/manrope-latin.woff2")|$(header cache-control "$A/fonts/manrope-latin.woff2")"
+# Kontaktseksjonen (partials/team.html): portrettene er offentlige, og Anders står
+# før William i kilden (venstre/høyre på skjerm, Anders først på mobil).
+for n in anders william; do
+  check "portrett $n: offentlig jpeg med ukes-cache" "200|image/jpeg|public, max-age=604800" "$(status "$A/bilder/$n.jpg")|$(header content-type "$A/bilder/$n.jpg")|$(header cache-control "$A/bilder/$n.jpg")"
+done
+check "portrett: bare den faste lista serveres" "404" "$($CURL -o /dev/null -w '%{http_code}' -H 'Accept: text/html' "$A/bilder/fredrik.jpg")"
+for p in /om /kontakt; do
+  PAGE="$($CURL "$A$p")"
+  check "kontaktseksjon $p: Anders før William, alt-tekst og mål på bildene" "1|yes|2" \
+    "$(printf '%s' "$PAGE" | grep -c 'id="kontakt-oss"')|$(printf '%s' "$PAGE" | tr '\n' ' ' | grep -q 'bilder/anders.jpg.*bilder/william.jpg' && echo yes || echo no)|$(printf '%s' "$PAGE" | grep -c '<img src="/bilder/[a-z]*.jpg" alt="Portrett av [^"]*" width="480" height="576" loading="lazy"')"
+done
+check "/kontakt: bookingkortet har ankeret kontaktseksjonen lenker til" "1" "$($CURL "$A/kontakt" | grep -c '<div class="card" id="book">')"
+check "/om: tre måter å komme i gang på" "1|3" "$($CURL "$A/om" | grep -c 'Tre måter å komme i gang på')|$($CURL "$A/om" | grep -c '<li class="way')"
+# Sporing uten cookies: eget skript fra egen vert, og ingen kjent sporingskode.
+check "site.js: offentlig, javascript, fem minutters cache" "200|text/javascript; charset=utf-8|public, max-age=300" "$(status "$A/site.js")|$(header content-type "$A/site.js")|$(header cache-control "$A/site.js")"
+check "site.js: ingen cookie og ingen nettleserlagring" "0" "$($CURL "$A/site.js" | grep -v '^ *//' | grep -ci 'document\.cookie\|localStorage\|sessionStorage\|indexedDB')"
+check "ingen tredjeparts sporingskode (GTM/GA4/Ads/Meta/LinkedIn)" "0" \
+  "$( { for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk /kundereisen /site.js; do $CURL "$A$p"; done; } | grep -Eci 'googletagmanager|google-analytics|gtag\(|doubleclick|googleadservices|connect\.facebook|snap\.licdn')"
+# SEO-vakt: tittel/beskrivelse, én h1, overskriftsnivå, canonical, og:-tagger, JSON-LD, alt.
+check "SEO: de åtte indekserbare sidene består seo-sjekk" "seo ok" "$(node test/seo-sjekk.mjs "$A" 2>&1 | head -20)"
 # Personvernløftet («ingen tredjeparts sporing»): ingen offentlig side laster
 # stilark, font, skript eller bilder fra en annen vert.
 check "ingen tredjepartsressurser på de offentlige sidene" "0" \

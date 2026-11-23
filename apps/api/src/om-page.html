@@ -3,15 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<title>DocrAI – Fra befaring til skaderapport du godkjenner</title>
-<meta name="description" content="DocrAI gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Du kontrollerer og godkjenner – AI-en skriver utkastet." />
-<meta property="og:title" content="DocrAI – Fra befaring til skaderapport du godkjenner" />
+<title>Skaderapport fra befaring – app for takstpersoner | DocrAI</title>
+<meta name="description" content="DocrAI gjør tale, video og foto fra befaringen om til utkast til skaderapport med foreslått årsak. Du kontrollerer og godkjenner. Gratis pilot i 3 måneder." />
+<meta property="og:title" content="Skaderapport fra befaring – app for takstpersoner | DocrAI" />
 <meta property="og:description" content="Snakk deg gjennom befaringen – AI-en skriver utkastet med foreslått årsak. Du kontrollerer, korrigerer og godkjenner." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="canonical" href="/om" />
 <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
@@ -34,15 +40,15 @@ __SITE_HEADER__
           akutt/gradvis-vurdering. <strong>Du kontrollerer, korrigerer og godkjenner.</strong> Ingenting deles uten
           stempelet ditt.</p>
         <div class="cta-row">
-          <a class="btn primary" href="#pilot">Bli pilotdeltaker</a>
-          <a class="btn ghost" href="/eksempelrapport">Se en ferdig rapport</a>
+          <a class="btn primary" href="#pilot" data-cta="cta_pilot">Bli pilotdeltaker</a>
+          <a class="btn ghost" href="/eksempelrapport" data-cta="cta_rapport">Se en ferdig rapport</a>
         </div>
         <ul class="ticks">
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Gratis pilot i 3 måneder</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ingen bindingstid</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Ingenting deles før du har stemplet</li>
         </ul>
-        <p class="altlink">Vil du prøve noe med en gang? <a href="/demo">Se saksunderlaget for din adresse</a> eller <a href="/kontakt">book et 15-min møte</a>.</p>
+        <p class="altlink">Vil du prøve noe med en gang? <a href="/demo" data-cta="cta_demo">Se saksunderlaget for din adresse</a> eller <a href="/kontakt#book" data-cta="cta_mote">book et 15-min møte</a>.</p>
       </div>
       <div class="visual" role="img" aria-label="Illustrasjon: telefonen med bevis fra kjelleren, og rapporten som er godkjent av takstpersonen">
         <div class="phone" aria-hidden="true">
@@ -140,28 +146,40 @@ __SITE_HEADER__
     </div>
   </section>
 
-  <section>
+  <section id="kom-i-gang">
     <div class="wrap">
       <div class="head">
-        <span class="eyebrow">Se det selv</span>
-        <h2>To måter å prøve på, uten å registrere deg</h2>
+        <span class="eyebrow">Kom i gang</span>
+        <h2>Tre måter å komme i gang på</h2>
+        <p>Velg det som passer deg i dag. Ingen av dem binder deg til noe.</p>
       </div>
-      <div class="try">
-        <div>
-          <h3>Se hva forsikringen mottar</h3>
-          <p>En ferdig, godkjent rapport slik mottakeren ser den: årsak, faglig beskrivelse, bevis og notater. Saken er oppdiktet og merket som eksempel.</p>
-          <div class="cta-row"><a class="btn ghost" href="/eksempelrapport">Åpne eksempelrapporten</a></div>
-        </div>
-        <div>
-          <h3>Prøv det på din egen adresse</h3>
+      <ol class="ways">
+        <li class="way">
+          <span class="n"><b>1</b>Uten registrering</span>
+          <h3>Prøv selv, nå</h3>
           <p>Skriv inn en adresse du kjenner, og se saksunderlaget slik det ligger klart i DocrAI før hver befaring – hentet live fra åpne offentlige kilder.</p>
-          <form class="adrform" action="/demo" method="get">
+          <form class="adrform" action="/demo" method="get" data-cta="demo_sok">
             <label for="lp-adr" style="position:absolute;left:-9999px">Adresse</label>
             <input id="lp-adr" name="adresse" type="text" placeholder="F.eks. Solbergliveien 8, Oslo" autocomplete="street-address" required minlength="3" />
-            <button class="btn primary" type="submit">Hent saksunderlaget</button>
+            <button class="btn ghost" type="submit">Hent saksunderlaget</button>
           </form>
-        </div>
-      </div>
+          <p class="sub">Eller se hva forsikringen mottar: <a href="/eksempelrapport" data-cta="cta_rapport">åpne eksempelrapporten</a>.</p>
+        </li>
+        <li class="way">
+          <span class="n"><b>2</b>15 minutter</span>
+          <h3>Ta en prat med oss</h3>
+          <p>Et kort introduksjonsmøte der vi viser DocrAI og svarer på det du lurer på om fag, personvern og pris. Du snakker med oss som bygger produktet.</p>
+          <a class="btn ghost" href="/kontakt#book" data-cta="cta_mote">Book et møte</a>
+          <p class="sub"><a href="#kontakt-oss">Se hvem du møter</a></p>
+        </li>
+        <li class="way featured">
+          <span class="n"><b>3</b>3 måneder gratis</span>
+          <h3>Bli pilotdeltaker</h3>
+          <p>Bruk DocrAI på egne saker med alt inkludert og uten bindingstid. Motytelsen er ukentlig tilbakemelding – dere er med og former produktet.</p>
+          <a class="btn primary" href="#pilot" data-cta="cta_pilot">Meld interesse for piloten</a>
+          <p class="sub">Uforpliktende. Du takker ja eller nei etter oppstartsmøtet.</p>
+        </li>
+      </ol>
     </div>
   </section>
 
@@ -187,7 +205,7 @@ __SITE_HEADER__
             <li>50 % rabatt første år etterpå</li>
           </ul>
           <span class="tag">opptak nå</span>
-          <a class="btn primary" href="#pilot">Meld interesse</a>
+          <a class="btn primary" href="#pilot" data-cta="cta_pilot">Meld interesse</a>
         </div>
         <div class="tier hot">
           <h3>Takstperson</h3>
@@ -207,7 +225,7 @@ __SITE_HEADER__
             <li>Samlefakturering og felles maler</li>
             <li>Prioritert støtte</li>
           </ul>
-          <a class="btn ghost" href="/kontakt">Snakk med oss</a>
+          <a class="btn ghost" href="/kontakt" data-cta="cta_mote">Snakk med oss</a>
         </div>
       </div>
       <ul class="measures">
@@ -263,7 +281,7 @@ __SITE_HEADER__
           <li><div><b>Før pilotslutt</b><span>Vi tar kontakt i god tid før perioden ender. Ingenting starter å løpe automatisk – dere velger selv om dere fortsetter, med 50&nbsp;% rabatt første år.</span></div></li>
         </ol>
       </div>
-      <form class="pilot-form" method="post" action="/api/pilot-interesse">
+      <form class="pilot-form" method="post" action="/api/pilot-interesse" data-cta="pilot_skjema">
         <label>Navn
           <input name="navn" required autocomplete="name" maxlength="200" />
         </label>
@@ -282,24 +300,26 @@ __SITE_HEADER__
     </div>
   </section>
 
+__SITE_TEAM__
+
   <nav class="sticky-cta" aria-label="Hurtigvalg">
-    <a class="p" href="#pilot">Bli pilot</a>
-    <a class="g" href="/eksempelrapport">Se rapport</a>
+    <a class="p" href="#pilot" data-cta="cta_pilot">Bli pilot</a>
+    <a class="g" href="/eksempelrapport" data-cta="cta_rapport">Se rapport</a>
   </nav>
 
 </main>
 __SITE_FOOTER__
 
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "DocrAI",
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "iOS, Android, Web",
-  "description": "Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner.",
-  "inLanguage": "nb"
-}
+{ "@context":"https://schema.org","@type":"SoftwareApplication","name":"DocrAI","url":"/om",
+  "applicationCategory":"BusinessApplication","operatingSystem":"iOS, Android, Web","inLanguage":"nb",
+  "description":"Gjør befaringsvideo, tale og foto om til et utkast til skaderapport med foreslått årsak og akutt/gradvis-vurdering. Takstpersonen kontrollerer og godkjenner.",
+  "audience":{"@type":"Audience","audienceType":"Takstpersoner og skadeutredere"},
+  "offers":{"@type":"Offer","name":"Pilot","price":"0","priceCurrency":"NOK","description":"Gratis pilot i 3 måneder, uten bindingstid."},
+  "publisher":{"@type":"Organization","name":"DocrAI"} }
+</script>
+<script type="application/ld+json">
+{ "@context":"https://schema.org","@type":"WebSite","name":"DocrAI","url":"/om","inLanguage":"nb" }
 </script>
 <script>
   try { navigator.sendBeacon('/api/besok', new Blob([JSON.stringify({ sti: '/om', kilde: new URLSearchParams(location.search).get('k') || undefined })], { type: 'application/json' })); } catch (e) {}

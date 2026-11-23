@@ -3,16 +3,22 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#E8F5F8" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#091517" media="(prefers-color-scheme: dark)" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title>Personvern – DocrAI</title>
-<meta name="description" content="Slik behandler DocrAI personopplysninger i dag: cookiefrie nettsider, lokal lagring i appen, AI-behandling hos Google uten EU/EØS-avtale ennå, og dine rettigheter." />
+<meta name="description" content="Slik behandler DocrAI personopplysninger: cookiefrie nettsider, lokal lagring i appen, AI hos Google uten EU/EØS-avtale ennå, og dine rettigheter." />
 <link rel="canonical" href="/personvern" />
 <meta property="og:title" content="Personvern – DocrAI" />
-<meta property="og:description" content="Slik behandler DocrAI personopplysninger i dag: cookiefrie nettsider, lokal lagring i appen, AI-behandling hos Google uten EU/EØS-avtale ennå, og dine rettigheter." />
+<meta property="og:description" content="Slik behandler DocrAI personopplysninger: cookiefrie nettsider, lokal lagring i appen, AI hos Google uten EU/EØS-avtale ennå, og dine rettigheter." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="/og-bilde.png" />
 <meta property="og:locale" content="nb_NO" />
+<meta property="og:site_name" content="DocrAI" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="DocrAI – fra befaring til skaderapport du godkjenner" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="preload" href="/fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="/site.css" />
@@ -46,14 +52,14 @@ __SITE_HEADER__
 <main class="page">
   <nav class="crumb" aria-label="Brødsmulesti"><a href="/om">DocrAI</a> <span aria-hidden="true">›</span> Personvern</nav>
   <h1>Personvernerklæring</h1>
-  <p class="datestamp">Sist oppdatert: september 2026. DocrAI er i pilotfase med ekte skadesaker – denne
+  <p class="datestamp">Sist oppdatert: november 2026. DocrAI er i pilotfase med ekte skadesaker – denne
   erklæringen beskriver dagens faktiske behandling, ikke en planlagt.</p>
 
   <div class="card">
     <h2 style="margin:0;">Kort versjon</h2>
     <ul>
       <li><b>Nettsidene bruker ingen cookies</b> og har ingen tredjeparts sporing – derfor ser du heller ikke noe samtykkebanner.</li>
-      <li><b>IP-adressen din skrives aldri til vår database.</b> Den holdes kortvarig i serverens minne for misbruksvern (typisk 15–30 minutter, senest til neste omstart), og finnes i driftsleverandørens tekniske tilgangslogger. Besøkstelling registrerer kun hvilken side som ble åpnet, tidspunkt og eventuell kampanjekode i lenken du klikket.</li>
+      <li><b>IP-adressen din skrives aldri til vår database.</b> Den holdes kortvarig i serverens minne for misbruksvern (typisk 15–30 minutter, senest til neste omstart), og finnes i driftsleverandørens tekniske tilgangslogger. Besøks- og klikktelling registrerer kun hvilken side som ble åpnet eller hvilken handlingsknapp som ble trykket, tidspunkt og eventuell kampanjekode i lenken du klikket.</li>
       <li><b>Appdata tilhører takstpersonen.</b> Befaringsmedia lagres lokalt på enheten først og synkroniseres bak personlig tilgangskode.</li>
       <li><b>AI-prosessering og rapportdokument skjer hos Google</b> (Gemini og Google Docs/Drive). Databehandleravtale og EU/EØS-region er ikke på plass ennå – vi påstår ikke noe annet, og oppdaterer denne siden når det er gjort.</li>
     </ul>
@@ -64,12 +70,18 @@ __SITE_HEADER__
   kun stien (f.eks. «/om») og eventuelt kampanjekoden fra lenken du klikket, slik den står i
   lenken. Ingen IP-adresse i statistikken, ingen enhetsidentifikator, ingen fingeravtrykk –
   tallene kan ikke knyttes til deg. Dette er et bevisst valg i stedet for Google Analytics.</p>
+  <p><b>Klikk på handlingsknapper:</b> trykker du på en av handlingsknappene (for eksempel «Bli pilot»,
+  «Book et møte» eller «Send e-post»), teller vi klikket på samme måte: knappens navn, siden du var
+  på og eventuell kampanjekode. Kampanjekoden bæres videre i lenkene på siden – ikke i en cookie og
+  ikke i nettleserens lagring – og forsvinner når du lukker fanen. Tellingen sendes til vårt eget
+  API, ikke til en tredjepart; fra forsiden på docrai.io går den til API-verten vår.</p>
   <p><b>Demoen (/demo):</b> adressen du søker på sendes til åpne offentlige kilder (Kartverket/
   Geonorge og Meteorologisk institutt) for å hente kart- og bygningsdata. Søket lagres ikke i
   vår database og maskeres i vår tekniske serverlogg; misbruksbegrensningen som teller antall
   oppslag holder tellingen i minnet – den skrives aldri til disk.</p>
   <p><b>Pilotinteresse-skjemaet:</b> sender du inn navn, e-post og eventuell melding, lagrer vi
-  det for å kontakte deg om piloten – det er hele formålet. Grunnlaget er ditt samtykke (GDPR
+  det for å kontakte deg om piloten – det er hele formålet. Kom du via en kampanjelenke, lagres
+  kampanjekoden sammen med henvendelsen, slik at vi ser hvilken kanal den kom fra. Grunnlaget er ditt samtykke (GDPR
   art. 6 nr. 1 a), og du kan når som helst be oss slette det med en e-post (slettingen gjøres
   manuelt).</p>
 
@@ -118,7 +130,7 @@ __SITE_HEADER__
   <h2>Lagringstid</h2>
   <ul>
     <li>Pilotinteresse: slettes når piloten er fulltegnet eller på forespørsel.</li>
-    <li>Besøksstatistikk: kun sti og kampanjekilde, uten persontilknytning. Ryddes ikke automatisk i pilotfasen; slettes manuelt når tallene er oppsummert.</li>
+    <li>Besøks- og klikkstatistikk: kun sti, knappenavn og kampanjekilde, uten persontilknytning. Ryddes ikke automatisk i pilotfasen; slettes manuelt når tallene er oppsummert.</li>
     <li>Befaringsdata: styres av takstpersonen. Sletting i appen sletter prosjektet og all media (video, lyd, foto) på serveren, og delingslenker slutter å virke så snart slettingen har nådd serveren. Selve delingsraden, loggen over rapportgenereringer, feil-/handlingsloggen, kostnadsbokføringen per rapport og Google-dokumentet med bilder slettes ikke automatisk ennå – de slettes på forespørsel inntil slettekaskaden er bygget.</li>
   </ul>
 

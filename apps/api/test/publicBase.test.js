@@ -126,4 +126,21 @@ assert.strictEqual(redactQuery("/om"), "/om");
 assert.strictEqual(redactQuery("/x?nyparam=1"), "/x?nyparam=[redacted]", "allowliste: ukjent parameter maskeres");
 assert.strictEqual(redactQuery("/x?%E0%A4%A=1"), "/x?%E0%A4%A=[redacted]", "ugyldig koding krasjer ikke og maskeres");
 
+// ── kampanjekilde og klikktelling (routes/publikum.js) ───────────────────────
+const { normalizeKilde, hendelseFra } = require("../src/routes/publikum");
+assert.strictEqual(normalizeKilde("gads_123_456"), "gads_123_456");
+assert.strictEqual(normalizeKilde(" li_host26 "), "li_host26", "trimmes");
+assert.strictEqual(normalizeKilde(""), null);
+assert.strictEqual(normalizeKilde(undefined), null);
+assert.strictEqual(normalizeKilde("a".repeat(81)), null, "for lang kode forkastes, ikke avkortes");
+assert.strictEqual(normalizeKilde("ola@firma.no"), null, "e-post i lenken lagres aldri som kilde");
+assert.strictEqual(normalizeKilde("<script>"), null);
+assert.strictEqual(normalizeKilde("to ord"), null);
+assert.deepStrictEqual(hendelseFra({ navn: "cta_pilot", sti: "/om", kilde: "gads_1" }), { navn: "cta_pilot", sti: "/om", kilde: "gads_1" });
+assert.deepStrictEqual(hendelseFra({ navn: "cta_mote", sti: "/" }), { navn: "cta_mote", sti: "/", kilde: null }, "forsiden på docrai.io");
+assert.strictEqual(hendelseFra({ navn: "ukjent", sti: "/om" }), null, "bare forhåndsgodkjente knappenavn");
+assert.strictEqual(hendelseFra({ navn: "cta_pilot", sti: "/share/abc" }), null, "bare offentlige salgssider");
+assert.strictEqual(hendelseFra(undefined), null);
+assert.strictEqual(hendelseFra("cta_pilot"), null, "ren tekst som ikke er JSON-objekt");
+
 console.log("publicBase: all tests passed");
