@@ -299,7 +299,7 @@ app.get("/kontakt", (req, res) => {
     if (err) return sendNotFound(req, res);
     const booking = (process.env.BOOKING_URL || "").trim().replace(/"/g, "%22");
     const mailto =
-      "mailto:fdalen.97@gmail.com?subject=" +
+      "mailto:hei@docrai.io?subject=" +
       encodeURIComponent("Introduksjonsmøte om DocrAI (15 min)") +
       "&body=" +
       encodeURIComponent("Hei!\n\nJeg vil gjerne ta et kort introduksjonsmøte om DocrAI. Tidspunkter som passer for meg:\n\n1.\n2.\n");

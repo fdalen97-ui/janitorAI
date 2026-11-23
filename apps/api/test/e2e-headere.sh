@@ -249,6 +249,9 @@ for p in /om /kontakt; do
 done
 check "/kontakt: bookingkortet har ankeret kontaktseksjonen lenker til" "1" "$($CURL "$A/kontakt" | grep -c '<div class="card" id="book">')"
 check "/om: tre måter å komme i gang på" "1|3" "$($CURL "$A/om" | grep -c 'Tre måter å komme i gang på')|$($CURL "$A/om" | grep -c '<li class="way')"
+# Kontaktadressen er felles innboks på eget domene; ingen privat adresse på salgsflatene.
+check "kontaktadresse: hei@docrai.io på /kontakt, ingen gmail-adresse på noen offentlig side" "yes|0" \
+  "$([ "$($CURL "$A/kontakt" | grep -c 'mailto:hei@docrai.io')" -ge 1 ] && echo yes || echo no)|$( { for p in /om /demo /eksempelrapport /faq /kontakt /personvern /vilkar /takk /kundereisen; do $CURL "$A$p"; done; } | grep -ci '@gmail\.com')"
 # Sporing uten cookies: eget skript fra egen vert, og ingen kjent sporingskode.
 check "site.js: offentlig, javascript, fem minutters cache" "200|text/javascript; charset=utf-8|public, max-age=300" "$(status "$A/site.js")|$(header content-type "$A/site.js")|$(header cache-control "$A/site.js")"
 check "site.js: ingen cookie og ingen nettleserlagring" "0" "$($CURL "$A/site.js" | grep -v '^ *//' | grep -ci 'document\.cookie\|localStorage\|sessionStorage\|indexedDB')"
